@@ -20,3 +20,36 @@ export enum PLAN_DURATION {
     YEARLY = "yearly"
 }
 
+export enum PAYMENT_METHOD {
+    RAZORPAY = "razorpay",
+    STRIPE = "stripe",
+    PHONEPE = "phonepe"
+}
+
+export enum PAYMENT_STATUS {
+    SUCCESS = "success",
+    FAILED = "failed",
+    PENDING = "pending"
+}
+
+export enum KYC_STATUS {
+    PENDING = "pending",
+    APPROVED = "approved",
+    REJECTED = "rejected"
+}
+
+export enum KYC_DOCUMENT_TYPE {
+    AADHAAR = "aadhaar",
+    PAN = "pan",
+    GST = "gst"
+}
+
+export enum SETTING_SCOPE {
+    ADMIN = "admin",
+    STORE = "store"
+}
+
+export enum SETTING_CURRENCY {
+    INR = "INR",
+    USD = "USD"
+}

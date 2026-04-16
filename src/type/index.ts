@@ -2,3 +2,6 @@ export * from "./common";
 export * from "./user";
 export * from "./plan";
 export * from "./auth";
+export * from "./payment";
+export * from "./store";
+export * from "./setting";

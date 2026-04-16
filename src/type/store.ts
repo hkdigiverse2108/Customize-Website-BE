@@ -1,0 +1,107 @@
+import { Document, Types } from "mongoose";
+import { KYC_DOCUMENT_TYPE, KYC_STATUS } from "../common";
+
+export interface IStoreKycDocument {
+  type: KYC_DOCUMENT_TYPE;
+  documentUrl: string;
+  verified: boolean;
+}
+
+export interface IStoreAddress {
+  country: string;
+  state: string;
+  city: string;
+  pincode: string;
+  addressLine1: string;
+  addressLine2: string;
+  landmark: string;
+}
+
+export interface IStoreType {
+  name: string;
+  slug: string;
+  description: string;
+  logo: string | null;
+  banner: string | null;
+  userId: Types.ObjectId | string;
+  subdomain: string;
+  customDomain: string | null;
+  domainVerified: boolean;
+  isActive: boolean;
+  isPublished: boolean;
+  isBlocked: boolean;
+  businessName: string;
+  businessType: string;
+  gstNumber: string;
+  panNumber: string;
+  kycStatus: KYC_STATUS;
+  kycDocuments: IStoreKycDocument[];
+  address: IStoreAddress;
+  email: string;
+  phone: string;
+  totalProducts: number;
+  totalOrders: number;
+  totalRevenue: number;
+  isDeleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ICreateStorePayload {
+  name: string;
+  slug: string;
+  description?: string;
+  logo?: string | null;
+  banner?: string | null;
+  userId: Types.ObjectId | string;
+  subdomain: string;
+  customDomain?: string | null;
+  domainVerified?: boolean;
+  isActive?: boolean;
+  isPublished?: boolean;
+  isBlocked?: boolean;
+  businessName: string;
+  businessType: string;
+  gstNumber?: string;
+  panNumber?: string;
+  kycStatus?: KYC_STATUS;
+  kycDocuments?: IStoreKycDocument[];
+  address: IStoreAddress;
+  email: string;
+  phone: string;
+  totalProducts?: number;
+  totalOrders?: number;
+  totalRevenue?: number;
+}
+
+export interface IUpdateStorePayload extends Partial<ICreateStorePayload> {}
+
+export interface IStore extends Document {
+  name: string;
+  slug: string;
+  description: string;
+  logo: string | null;
+  banner: string | null;
+  userId: Types.ObjectId | string;
+  subdomain: string;
+  customDomain: string | null;
+  domainVerified: boolean;
+  isActive: boolean;
+  isPublished: boolean;
+  isBlocked: boolean;
+  businessName: string;
+  businessType: string;
+  gstNumber: string;
+  panNumber: string;
+  kycStatus: KYC_STATUS;
+  kycDocuments: IStoreKycDocument[];
+  address: IStoreAddress;
+  email: string;
+  phone: string;
+  totalProducts: number;
+  totalOrders: number;
+  totalRevenue: number;
+  isDeleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
