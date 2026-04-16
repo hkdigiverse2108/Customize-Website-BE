@@ -3,11 +3,7 @@ import { KYC_DOCUMENT_TYPE, KYC_STATUS } from "../../common";
 import { IStore } from "../../type";
 
 const storeKycDocumentSchema = new Schema(
-  {
-    type: { type: String, enum: Object.values(KYC_DOCUMENT_TYPE), required: true },
-    documentUrl: { type: String, required: true, trim: true },
-    verified: { type: Boolean, default: false },
-  },
+  {type: { type: String, enum: Object.values(KYC_DOCUMENT_TYPE), required: true },documentUrl: { type: String, required: true, trim: true },verified: { type: Boolean, default: false },},
   { _id: false }
 );
 

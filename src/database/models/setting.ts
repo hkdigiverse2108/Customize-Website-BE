@@ -38,31 +38,10 @@ settingSchema.pre("validate", function () {
   const hasUserId = !!this.userId;
   const hasStoreId = !!this.storeId;
 
-  if (hasUserId === hasStoreId) {
-    throw new Error("Exactly one of userId or storeId is required.");
-  }
+  if (hasUserId === hasStoreId) {throw new Error("Exactly one of userId or storeId is required.");}
 });
 
-settingSchema.index(
-  { storeId: 1 },
-  {
-    unique: true,
-    partialFilterExpression: {
-      isDeleted: false,
-      storeId: { $exists: true, $type: "objectId" },
-    },
-  }
-);
-
-settingSchema.index(
-  { userId: 1 },
-  {
-    unique: true,
-    partialFilterExpression: {
-      isDeleted: false,
-      userId: { $exists: true, $type: "objectId" },
-    },
-  }
-);
+settingSchema.index({ storeId: 1 },{unique: true,partialFilterExpression: {  isDeleted: false,  storeId: { $exists: true, $type: "objectId" },},});
+settingSchema.index({ userId: 1 },{unique: true,partialFilterExpression: {  isDeleted: false,  userId: { $exists: true, $type: "objectId" },},});
 
 export const settingModel = model<ISetting>("setting", settingSchema);

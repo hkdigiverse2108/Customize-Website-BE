@@ -8,11 +8,7 @@ const subdomainRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 
 export const kycDocumentSchema = Joi.object({
-  type: Joi.string()
-    .trim()
-    .lowercase()
-    .valid(...Object.values(KYC_DOCUMENT_TYPE))
-    .required(),
+  type: Joi.string().trim().lowercase().valid(...Object.values(KYC_DOCUMENT_TYPE)).required(),
   documentUrl: Joi.string().trim().uri().required(),
   verified: Joi.boolean().optional(),
 });
@@ -44,11 +40,7 @@ export const createStoreSchema = Joi.object({
   businessType: Joi.string().trim().required(),
   gstNumber: Joi.string().trim().allow("").optional(),
   panNumber: Joi.string().trim().uppercase().pattern(panRegex).allow("").optional(),
-  kycStatus: Joi.string()
-    .trim()
-    .lowercase()
-    .valid(...Object.values(KYC_STATUS))
-    .optional(),
+  kycStatus: Joi.string().trim().lowercase().valid(...Object.values(KYC_STATUS)).optional(),
   kycDocuments: Joi.array().items(kycDocumentSchema).optional(),
   address: addressSchema.required(),
   email: Joi.string().trim().email().lowercase().required(),
@@ -75,11 +67,7 @@ export const updateStoreSchema = Joi.object({
   businessType: Joi.string().trim().optional(),
   gstNumber: Joi.string().trim().allow("").optional(),
   panNumber: Joi.string().trim().uppercase().pattern(panRegex).allow("").optional(),
-  kycStatus: Joi.string()
-    .trim()
-    .lowercase()
-    .valid(...Object.values(KYC_STATUS))
-    .optional(),
+  kycStatus: Joi.string().trim().lowercase().valid(...Object.values(KYC_STATUS)).optional(),
   kycDocuments: Joi.array().items(kycDocumentSchema).optional(),
   address: addressSchema.optional(),
   email: Joi.string().trim().email().lowercase().optional(),
@@ -100,11 +88,7 @@ export const getAllStoresQuerySchema = Joi.object({
   activeFilter: Joi.boolean().optional(),
   isPublishedFilter: Joi.boolean().optional(),
   isBlockedFilter: Joi.boolean().optional(),
-  kycStatusFilter: Joi.string()
-    .trim()
-    .lowercase()
-    .valid(...Object.values(KYC_STATUS))
-    .optional(),
+  kycStatusFilter: Joi.string().trim().lowercase().valid(...Object.values(KYC_STATUS)).optional(),
   userId: objectId().optional(),
   sortFilter: Joi.string().valid("nameAsc", "nameDesc", "newest", "oldest").optional(),
   startDateFilter: Joi.date().optional(),
