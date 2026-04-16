@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { PAYMENT_METHOD, SETTING_CURRENCY } from "../../common";
+import { PAYMENT_METHOD } from "../../common";
 import { ISetting } from "../../type";
 
 const settingSchema = new Schema<ISetting>(
@@ -14,7 +14,7 @@ const settingSchema = new Schema<ISetting>(
     metaTitle: { type: String, default: "", trim: true },
     metaDescription: { type: String, default: "", trim: true },
     metaKeywords: { type: [String], default: [] },
-    currency: { type: String, enum: Object.values(SETTING_CURRENCY), default: SETTING_CURRENCY.INR },
+    currency: { type: String, default: "INR", trim: true },
     timezone: { type: String, default: "Asia/Kolkata", trim: true },
     contactEmail: { type: String, default: "", trim: true, lowercase: true },
     contactPhone: { type: String, default: "", trim: true },

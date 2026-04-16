@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { PAYMENT_METHOD, SETTING_CURRENCY } from "../common";
+import { PAYMENT_METHOD } from "../common";
 import { objectId } from "./common";
 
 export const upsertStoreSettingSchema = Joi.object({
@@ -18,11 +18,7 @@ export const upsertStoreSettingSchema = Joi.object({
   metaTitle: Joi.string().trim().allow("").optional(),
   metaDescription: Joi.string().trim().allow("").optional(),
   metaKeywords: Joi.array().items(Joi.string().trim().min(1)).optional(),
-  currency: Joi.string()
-    .trim()
-    .uppercase()
-    .valid(...Object.values(SETTING_CURRENCY))
-    .optional(),
+  currency: Joi.string().trim().uppercase().optional(),
   timezone: Joi.string().trim().allow("").optional(),
   contactEmail: Joi.string().trim().email().lowercase().allow("").optional(),
   contactPhone: Joi.string().trim().allow("").optional(),

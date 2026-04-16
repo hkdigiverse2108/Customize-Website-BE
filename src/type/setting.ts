@@ -1,5 +1,5 @@
 import { Document, Types } from "mongoose";
-import { PAYMENT_METHOD, SETTING_CURRENCY } from "../common";
+import { PAYMENT_METHOD } from "../common";
 
 export interface IThemeConfig {
   colors?: Record<string, any>;
@@ -19,7 +19,7 @@ export interface ISettingType {
   metaTitle: string;
   metaDescription: string;
   metaKeywords: string[];
-  currency: SETTING_CURRENCY;
+  currency: string;
   timezone: string;
   contactEmail: string;
   contactPhone: string;
@@ -49,7 +49,7 @@ export interface IUpsertStoreSettingPayload {
   metaTitle?: string;
   metaDescription?: string;
   metaKeywords?: string[];
-  currency?: SETTING_CURRENCY;
+  currency?: string;
   timezone?: string;
   contactEmail?: string;
   contactPhone?: string;
@@ -88,7 +88,7 @@ export interface ISetting extends Document {
   metaTitle: string;
   metaDescription: string;
   metaKeywords: string[];
-  currency: SETTING_CURRENCY;
+  currency: string;
   timezone: string;
   contactEmail: string;
   contactPhone: string;

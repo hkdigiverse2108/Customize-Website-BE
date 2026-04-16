@@ -43,13 +43,3 @@ export enum KYC_DOCUMENT_TYPE {
     PAN = "pan",
     GST = "gst"
 }
-
-export enum SETTING_SCOPE {
-    ADMIN = "admin",
-    STORE = "store"
-}
-
-export enum SETTING_CURRENCY {
-    INR = "INR",
-    USD = "USD"
-}
