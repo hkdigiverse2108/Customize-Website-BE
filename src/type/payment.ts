@@ -3,10 +3,13 @@ import { PAYMENT_METHOD, PAYMENT_STATUS } from "../common";
 
 export interface IPaymentType {
   userId: Types.ObjectId | string;
+  planId: Types.ObjectId | string;
   amount: number;
   currency: string;
   paymentMethod: PAYMENT_METHOD;
   transactionId: string;
+  providerOrderId: string;
+  providerResponse?: any;
   status: PAYMENT_STATUS;
   paidAt: Date | null;
   createdAt: Date;
@@ -15,10 +18,13 @@ export interface IPaymentType {
 
 export interface ICreatePaymentPayload {
   userId: Types.ObjectId | string;
+  planId: Types.ObjectId | string;
   amount: number;
   currency: string;
   paymentMethod: PAYMENT_METHOD;
   transactionId: string;
+  providerOrderId?: string;
+  providerResponse?: any;
   status?: PAYMENT_STATUS;
   paidAt?: Date | null;
 }
@@ -27,10 +33,13 @@ export interface IUpdatePaymentPayload extends Partial<ICreatePaymentPayload> {}
 
 export interface IPayment extends Document {
   userId: Types.ObjectId | string;
+  planId: Types.ObjectId | string;
   amount: number;
   currency: string;
   paymentMethod: PAYMENT_METHOD;
   transactionId: string;
+  providerOrderId: string;
+  providerResponse?: any;
   status: PAYMENT_STATUS;
   paidAt: Date | null;
   createdAt: Date;

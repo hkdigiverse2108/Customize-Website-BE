@@ -1,7 +1,7 @@
 {
   "item": [
     {
-      "id": "ce698eea-d5c8-4f0a-981b-2dfbbd797ab8",
+      "id": "b010f7c3-6a6b-42e7-acf5-d91987f09b36",
       "name": "UPLOAD",
       "description": {
         "content": "Routes for upload",
@@ -9,7 +9,7 @@
       },
       "item": [
         {
-          "id": "7053d3b3-cc09-4c2f-8ba2-c1a2c7ccc40c",
+          "id": "558dfa87-7264-4aa1-8a04-dab2a11417b0",
           "name": "Create Item",
           "request": {
             "description": {
@@ -33,7 +33,7 @@
           "event": []
         },
         {
-          "id": "fd516f02-5940-433d-8617-dd444fb2236d",
+          "id": "59251c87-5eaa-4e8c-98ea-e4fe2729dc94",
           "name": "Delete Image",
           "request": {
             "description": {
@@ -72,7 +72,7 @@
           "event": []
         },
         {
-          "id": "77adb3cb-6aeb-41fa-b865-550f95f27048",
+          "id": "a23237e9-57ad-4279-9c06-cd0d120be0db",
           "name": "Get Images",
           "request": {
             "description": {
@@ -97,7 +97,7 @@
           "event": []
         },
         {
-          "id": "701cc896-276d-4210-acad-067f4f32ba24",
+          "id": "9e152fbd-1768-44ef-906d-5ce87912477c",
           "name": "Get Pdfs",
           "request": {
             "description": {
@@ -125,7 +125,7 @@
       "event": []
     },
     {
-      "id": "bff04a20-7c04-49a8-a3d5-fc146b8f2fa9",
+      "id": "2a53c461-30c3-4992-aa70-d6cdc2d90952",
       "name": "PLAN",
       "description": {
         "content": "Routes for plan",
@@ -133,7 +133,7 @@
       },
       "item": [
         {
-          "id": "45c35764-f1e0-4f96-a64d-41d229a467a7",
+          "id": "c26562b2-6738-41ff-b8b4-6bee225010a0",
           "name": "Create Plan",
           "request": {
             "description": {
@@ -166,7 +166,7 @@
           "event": []
         },
         {
-          "id": "28bdf6c1-0828-4e27-9da5-057d443acb84",
+          "id": "a7b0a145-dfba-4e36-ab02-d154597e3cd1",
           "name": "Plan Id",
           "request": {
             "description": {
@@ -199,7 +199,7 @@
           "event": []
         },
         {
-          "id": "c4eed85e-e5ba-417a-aacd-b0d9866d0922",
+          "id": "14cb0ece-fd16-47af-9e79-27e9c13cc591",
           "name": "Plan Id",
           "request": {
             "description": {
@@ -243,7 +243,7 @@
           "event": []
         },
         {
-          "id": "dacf147b-94af-47c8-a16c-cb8296a4f5ba",
+          "id": "1d902ac2-3c41-4cfd-8dcc-6fbea41fdb58",
           "name": "Get Item",
           "request": {
             "description": {
@@ -267,7 +267,7 @@
           "event": []
         },
         {
-          "id": "d9d8df63-90cb-4f26-8474-ff02a3940310",
+          "id": "7b84a086-3b12-4aee-bb7c-87b007517c03",
           "name": "Plan Id",
           "request": {
             "description": {
@@ -315,7 +315,7 @@
       }
     },
     {
-      "id": "46b47108-6907-464b-a9e7-83794f8d05ee",
+      "id": "5fa7c524-a770-4df8-8eba-2cc27b6ed95b",
       "name": "AUTH",
       "description": {
         "content": "Routes for auth",
@@ -323,7 +323,7 @@
       },
       "item": [
         {
-          "id": "572b143f-9720-48cf-84ff-174fd38c9fee",
+          "id": "b4ed77c3-f308-470f-9b6b-4164231e26bc",
           "name": "Signup",
           "request": {
             "description": {
@@ -357,7 +357,7 @@
           "event": []
         },
         {
-          "id": "ddde9eb2-3db4-4c50-a339-ef7146ba7de8",
+          "id": "79471997-227f-469b-873e-a0d53e98f006",
           "name": "Login",
           "request": {
             "description": {
@@ -391,7 +391,7 @@
           "event": []
         },
         {
-          "id": "c044015a-3792-440f-900f-b90b9be9f3af",
+          "id": "bacdb570-9335-4fb7-999b-7f2ef2e55939",
           "name": "Verify Login Otp",
           "request": {
             "description": {
@@ -425,7 +425,7 @@
           "event": []
         },
         {
-          "id": "31386d85-6b4a-4f68-913c-b5602ab79282",
+          "id": "8d660b05-9229-4c9f-8a3a-f4063b955e4d",
           "name": "Forgot Password",
           "request": {
             "description": {
@@ -459,7 +459,7 @@
           "event": []
         },
         {
-          "id": "be879f56-2b7a-4207-8319-650a4d99dd81",
+          "id": "e28e0525-701a-4a2f-a33d-d69ad4aa7c04",
           "name": "Reset Password",
           "request": {
             "description": {
@@ -493,7 +493,7 @@
           "event": []
         },
         {
-          "id": "0d2a4b53-fa68-4b36-8cd4-c6822528be3c",
+          "id": "d9c99332-8b18-45ad-b47d-81e3b46315d2",
           "name": "Change Password",
           "request": {
             "description": {
@@ -527,7 +527,7 @@
           "event": []
         },
         {
-          "id": "ca508071-13f6-41c3-867f-0301fbe6ee65",
+          "id": "a2ee28e6-8eae-4ded-9fb5-ad3d0436890f",
           "name": "Create Logout",
           "request": {
             "description": {
@@ -565,7 +565,7 @@
       }
     },
     {
-      "id": "2ab2cefd-2034-42a3-b7fe-49aee199dfab",
+      "id": "a8f90239-be35-4a90-8a33-4bf868e9f040",
       "name": "USER",
       "description": {
         "content": "Routes for user",
@@ -573,7 +573,7 @@
       },
       "item": [
         {
-          "id": "bfd2145e-60d2-407c-a4ad-87873cecfed9",
+          "id": "85248038-e868-4de5-b897-08cfc69b8c88",
           "name": "Get All Users Query",
           "request": {
             "description": {
@@ -626,7 +626,7 @@
           "event": []
         },
         {
-          "id": "f08cfe84-51c3-40ab-af31-2d3aa82dc56b",
+          "id": "47c82306-e888-4d65-992b-5231e93786bf",
           "name": "User Id",
           "request": {
             "description": {
@@ -661,7 +661,7 @@
           "event": []
         },
         {
-          "id": "3583307f-4531-4501-8f07-5937f97c0729",
+          "id": "f71838ab-8eef-4a2a-827b-78fd3e3c5782",
           "name": "User Id",
           "request": {
             "description": {
@@ -718,7 +718,7 @@
       }
     },
     {
-      "id": "c4b633bb-7c39-4ab4-bd38-c2d6926b2719",
+      "id": "88b991d3-d85e-4afc-a24f-ecd269f39390",
       "name": "STORE",
       "description": {
         "content": "Routes for store",
@@ -726,7 +726,7 @@
       },
       "item": [
         {
-          "id": "1732988a-f50f-45fc-9713-9c82ff97988c",
+          "id": "0d06819d-7712-4ba5-a4be-889c7b9c72f8",
           "name": "Create Store",
           "request": {
             "description": {
@@ -759,7 +759,7 @@
           "event": []
         },
         {
-          "id": "ad286786-fbaa-4822-b540-7cfefcdd85dd",
+          "id": "458fd9b9-ac99-43b0-ae45-c323ee8cfe4b",
           "name": "Store Id",
           "request": {
             "description": {
@@ -792,7 +792,7 @@
           "event": []
         },
         {
-          "id": "0c3f9544-e594-4914-8640-f73fd481af9d",
+          "id": "b20c35b8-c738-4989-b011-8ee5e815d31f",
           "name": "Store Id",
           "request": {
             "description": {
@@ -836,7 +836,7 @@
           "event": []
         },
         {
-          "id": "ce437525-ee56-488b-859e-a1613195384b",
+          "id": "3a050a7e-700c-4ae3-a3eb-418dba372c4c",
           "name": "Get All Stores Query",
           "request": {
             "description": {
@@ -905,7 +905,7 @@
           "event": []
         },
         {
-          "id": "e479199c-fb4c-4345-b634-e4592c94ff6b",
+          "id": "938cc614-374a-4e53-b509-3e6055166f13",
           "name": "Store Id",
           "request": {
             "description": {
@@ -953,7 +953,7 @@
       }
     },
     {
-      "id": "cc64ebd0-c31a-4690-b601-cff9974d9978",
+      "id": "1b6a7429-7858-4e37-80d8-f71ce72c0a3a",
       "name": "SETTING",
       "description": {
         "content": "Routes for setting",
@@ -961,7 +961,7 @@
       },
       "item": [
         {
-          "id": "bd5d044c-9986-4922-b42c-39c8b2813c18",
+          "id": "8b2ecd82-c2df-4229-b77c-72cd0c973004",
           "name": "Get Item",
           "request": {
             "description": {
@@ -985,7 +985,7 @@
           "event": []
         },
         {
-          "id": "fd3204c1-9fb0-418e-94b7-501c9f276e53",
+          "id": "bbb97ac7-0cb1-45bd-a485-6a6ada00e9e5",
           "name": "Create Item",
           "request": {
             "description": {
@@ -995,6 +995,152 @@
             "url": {
               "path": [
                 "setting"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "POST",
+            "body": {}
+          },
+          "response": [],
+          "event": []
+        }
+      ],
+      "event": [],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "TOKEN",
+            "value": "{{TOKEN}}",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "id": "585ffc50-584d-4942-988e-3fe1bd77a4b9",
+      "name": "PHONEPE",
+      "description": {
+        "content": "Routes for phonePe",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "00a86bc7-e6ee-4fe1-96c6-58cc2480a298",
+          "name": "Create Phone Pe Payment",
+          "request": {
+            "description": {
+              "content": "Controller: createPhonePeSubscriptionPayment\nSchema: createPhonePePaymentSchema",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "phonepe",
+                "phonepe",
+                "create"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "POST",
+            "body": {}
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "ed890a48-bbe9-420c-aca0-7a98859dc503",
+          "name": "Create Callback",
+          "request": {
+            "description": {
+              "content": "Controller: phonePeCallback",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "phonepe",
+                "phonepe",
+                "callback"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "POST",
+            "body": {}
+          },
+          "response": [],
+          "event": []
+        }
+      ],
+      "event": [],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "TOKEN",
+            "value": "{{TOKEN}}",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "id": "5cb6f15b-fb27-45f4-97a9-fe588ff6b9ab",
+      "name": "RAZORPAY",
+      "description": {
+        "content": "Routes for razorpay",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "c4a2dcdd-0ad0-4f13-858b-9c1093be8cbd",
+          "name": "Create Razorpay Payment",
+          "request": {
+            "description": {
+              "content": "Controller: createRazorpaySubscriptionPayment\nSchema: createRazorpayPaymentSchema",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "razorpay",
+                "razorpay",
+                "create"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "POST",
+            "body": {}
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "d60f622a-86b7-4a69-ab0b-dcf51d45fe8c",
+          "name": "Razorpay Payment Verify",
+          "request": {
+            "description": {
+              "content": "Controller: verifyRazorpaySubscriptionPayment\nSchema: razorpayPaymentVerifySchema",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "razorpay",
+                "razorpay",
+                "verify"
               ],
               "host": [
                 "{{base_url}}"
@@ -1041,7 +1187,7 @@
     }
   ],
   "info": {
-    "_postman_id": "704ee9ca-dfb6-46f4-8e08-aee5d3db8d04",
+    "_postman_id": "91da1aac-5ddb-4e72-8e1c-d9037955d969",
     "name": "HKDigiverse API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": {
