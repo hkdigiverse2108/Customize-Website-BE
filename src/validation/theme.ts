@@ -105,9 +105,3 @@ export const getAllThemesQuerySchema = Joi.object({
   startDateFilter: Joi.date().optional(),
   endDateFilter: Joi.date().optional(),
 });
-
-export const customizeThemeSchema = Joi.object({
-  storeId: objectId().required(),
-  themeId: objectId().required(),
-  themeConfig: Joi.object().unknown(true).optional(),
-});

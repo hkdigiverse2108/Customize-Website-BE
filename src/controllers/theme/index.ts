@@ -1,8 +1,8 @@
 import { ACCOUNT_TYPE, getPaginationState, HTTP_STATUS, resolveSortAndFilter } from "../../common";
-import { settingModel, storeModel, themeModel } from "../../database";
+import { themeModel } from "../../database";
 import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData } from "../../helper";
 import { apiResponse } from "../../type";
-import { createThemeSchema, customizeThemeSchema, getAllThemesQuerySchema, themeIdSchema, updateThemeSchema } from "../../validation";
+import { createThemeSchema, getAllThemesQuerySchema, themeIdSchema, updateThemeSchema } from "../../validation";
 
 
 export const createTheme = async (req, res) => {
@@ -123,72 +123,6 @@ export const getThemeById = async (req, res) => {
     if (!theme) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Theme"), {}, {}));
 
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Theme"), theme, {}));
-  } catch (error) {
-    console.error(error);
-    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
-  }
-};
-
-export const customizeTheme = async (req, res) => {
-  reqInfo(req);
-  try {
-    const { error, value } = customizeThemeSchema.validate(req.body);
-    if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
-
-    const loggedInUser = req.headers.user as any;
-
-    const existingStore = await getFirstMatch(
-      storeModel,
-      { _id: value.storeId, userId: loggedInUser?._id, isDeleted: { $ne: true } },
-      {},
-      {}
-    );
-    if (!existingStore) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Store"), {}, {}));
-
-    const existingTheme = await getFirstMatch(
-      themeModel,
-      { _id: value.themeId, isDeleted: { $ne: true }, isActive: true },
-      {},
-      {}
-    );
-    if (!existingTheme) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Theme"), {}, {}));
-
-    const updatePayload: any = { themeId: String(value.themeId) };
-    if (value.themeConfig !== undefined) updatePayload.themeConfig = value.themeConfig;
-
-    const existingSetting = await getFirstMatch(settingModel, { storeId: value.storeId, isDeleted: { $ne: true } }, {}, {});
-
-    if (existingSetting) {
-      const updatedSetting = await updateData(
-        settingModel,
-        { _id: existingSetting._id, isDeleted: { $ne: true } },
-        updatePayload,
-        { runValidators: true }
-      );
-      return res.status(HTTP_STATUS.OK).json(
-        apiResponse(
-          HTTP_STATUS.OK,
-          responseMessage.updateDataSuccess("Store theme"),
-          { setting: updatedSetting, theme: existingTheme },
-          {}
-        )
-      );
-    }
-
-    const createdSetting = await new settingModel({
-      userId: null,
-      storeId: value.storeId,
-      ...updatePayload,
-    }).save();
-
-    return res.status(HTTP_STATUS.CREATED).json(
-      apiResponse(
-        HTTP_STATUS.CREATED,
-        responseMessage.addDataSuccess("Store theme"),
-        { setting: createdSetting, theme: existingTheme },
-        {}
-      )
-    );
   } catch (error) {
     console.error(error);
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));

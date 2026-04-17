@@ -4,3 +4,6 @@ export * from "./payment";
 export * from "./store";
 export * from "./setting";
 export * from "./theme";
+export * from "./page";
+export * from "./component";
+export * from "./siteSnapshot";

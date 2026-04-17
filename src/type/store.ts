@@ -17,12 +17,20 @@ export interface IStoreAddress {
   landmark: string;
 }
 
+export interface IStoreThemeConfig {
+  colors: Record<string, any>;
+  fonts: Record<string, any>;
+  spacing: Record<string, any>;
+}
+
 export interface IStoreType {
   name: string;
   slug: string;
   description: string;
   logo: string | null;
   banner: string | null;
+  themeIds: (Types.ObjectId | string)[];
+  themeConfig: IStoreThemeConfig;
   userId: Types.ObjectId | string;
   subdomain: string;
   customDomain: string | null;
@@ -53,6 +61,8 @@ export interface ICreateStorePayload {
   description?: string;
   logo?: string | null;
   banner?: string | null;
+  themeIds?: (Types.ObjectId | string)[];
+  themeConfig?: Partial<IStoreThemeConfig>;
   userId: Types.ObjectId | string;
   subdomain: string;
   customDomain?: string | null;
@@ -82,6 +92,8 @@ export interface IStore extends Document {
   description: string;
   logo: string | null;
   banner: string | null;
+  themeIds: (Types.ObjectId | string)[];
+  themeConfig: IStoreThemeConfig;
   userId: Types.ObjectId | string;
   subdomain: string;
   customDomain: string | null;

@@ -8,6 +8,9 @@ import { settingRouter } from "./setting";
 import { phonePeRouter } from "./phonepe";
 import{razorpayRouter} from "./razorpay";
 import { themeRouter } from "./theme";
+import { pageRouter } from "./page";
+import { componentRouter } from "./component";
+import { siteRouter } from "./site";
 const router = Router();
 
 router.use("/upload", uploadRouter);
@@ -19,6 +22,9 @@ router.use("/setting", settingRouter);
 router.use("/phonepe", phonePeRouter);
 router.use("/razorpay", razorpayRouter);
 router.use("/theme", themeRouter);
+router.use("/page", pageRouter);
+router.use("/component", componentRouter);
+router.use("/site", siteRouter);
 
 
 export { router };

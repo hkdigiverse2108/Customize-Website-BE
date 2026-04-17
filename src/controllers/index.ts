@@ -6,3 +6,6 @@ export * as storeController from "./store";
 export * as settingController from "./setting";
 export * as paymentController from "./razorpay";
 export * as themeController from "./theme";
+export * as pageController from "./page";
+export * as componentController from "./component";
+export * as siteController from "./site";
