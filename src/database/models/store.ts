@@ -3,7 +3,7 @@ import { KYC_DOCUMENT_TYPE, KYC_STATUS } from "../../common";
 import { IStore } from "../../type";
 
 const storeKycDocumentSchema = new Schema(
-  {type: { type: String, enum: Object.values(KYC_DOCUMENT_TYPE), required: true },documentUrl: { type: String, required: true, trim: true },verified: { type: Boolean, default: false },},
+  { type: { type: String, enum: Object.values(KYC_DOCUMENT_TYPE), required: true }, documentUrl: { type: String, required: true, trim: true }, verified: { type: Boolean, default: false }, },
   { _id: false }
 );
 
@@ -53,8 +53,8 @@ const storeSchema = new Schema<IStore>(
 
 storeSchema.index({ slug: 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });
 storeSchema.index({ subdomain: 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });
-storeSchema.index({ panNumber: 1 },{unique: true,partialFilterExpression: {  isDeleted: false,  panNumber: { $exists: true, $type: "string", $nin: [""] },},});
-storeSchema.index({ customDomain: 1 },{unique: true,partialFilterExpression: {  isDeleted: false,  customDomain: { $exists: true, $type: "string", $nin: [""] },},});
+storeSchema.index({ panNumber: 1 }, { unique: true, partialFilterExpression: { isDeleted: false, panNumber: { $exists: true, $type: "string", $nin: [""] }, }, });
+storeSchema.index({ customDomain: 1 }, { unique: true, partialFilterExpression: { isDeleted: false, customDomain: { $exists: true, $type: "string", $nin: [""] }, }, });
 storeSchema.index({ userId: 1, createdAt: -1 });
 
 export const storeModel = model<IStore>("store", storeSchema);
