@@ -6,12 +6,18 @@ export interface ISignupPayload {
   lastName: string;
   email: string;
   password: string;
+  role?: ACCOUNT_TYPE;
   subscription?: IUserSubscriptionType;
 }
 
 export interface ILoginPayload {
   email: string;
   password: string;
+}
+
+export interface IGoogleSignupPayload {
+  idToken?: string;
+  credential?: string;
 }
 
 export interface IForgotPasswordPayload {

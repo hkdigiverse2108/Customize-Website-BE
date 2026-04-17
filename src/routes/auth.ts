@@ -5,6 +5,7 @@ import { requireAuth } from "../middleware";
 const router = Router();
 
 router.post("/signup", authController.signup);
+router.post("/google-signup", authController.googleSignup);
 router.post("/login", authController.login);
 router.post("/verify-otp", authController.verifyOtp);
 router.post("/forgot-password", authController.forgotPassword);

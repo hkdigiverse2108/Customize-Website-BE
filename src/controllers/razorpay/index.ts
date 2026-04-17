@@ -1,12 +1,11 @@
 import crypto from "crypto";
-import { HTTP_STATUS, PAYMENT_METHOD, PAYMENT_STATUS, PLAN_DURATION, SUBSCRIPTION_STATUS } from "../../common";
-import { paymentModel, planModel, settingModel, userModel } from "../../database";
+import { HTTP_STATUS, PAYMENT_FOR, PAYMENT_METHOD, PAYMENT_STATUS, PLAN_DURATION, SUBSCRIPTION_STATUS } from "../../common";
+import { paymentModel, planModel, settingModel, themeModel, userModel } from "../../database";
 import { getFirstMatch, reqInfo, responseMessage, updateData } from "../../helper";
 import { apiResponse } from "../../type";
 import { createRazorpayPaymentSchema, razorpayPaymentVerifySchema } from "../../validation";
 export { createPhonePeSubscriptionPayment, phonePeCallback } from "../phonePe";
 
-const normalize = (v?: unknown) => (v == null ? undefined : String(v).trim() || undefined);
 const generateReceipt = () => `rzp_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 
 const getRazorpaySdk = () => {
@@ -30,9 +29,9 @@ const resolveRazorpaySetting = async () =>
   );
 
 const getConfig = (o?: any) => {
-  const keyId = normalize(o?.keyId);
-  const keySecret = normalize(o?.keySecret);
-  if (!keyId || !keySecret) throw new Error("Missing Razorpay credentials");
+  const keyId = o?.keyId;
+  const keySecret = o?.keySecret;
+  if (typeof keyId !== "string" || typeof keySecret !== "string" || !keyId || !keySecret) throw new Error("Missing Razorpay credentials");
   return { keyId, keySecret };
 };
 
@@ -72,6 +71,56 @@ const applySubscriptionForPayment = async (existingPayment: any) => {
   );
 };
 
+const resolvePaymentContext = async (value: any, res: any) => {
+  if (value?.planId) {
+    const existingPlan: any = await getFirstMatch(planModel, { _id: value.planId, isActive: true, isDeleted: { $ne: true } }, {}, {});
+    if (!existingPlan) {
+      return {
+        errorResponse: res
+          .status(HTTP_STATUS.NOT_FOUND)
+          .json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Plan"), {}, {})),
+      };
+    }
+
+    const amount = Number(existingPlan?.price || 0);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return {
+        errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Plan amount is invalid", {}, {})),
+      };
+    }
+
+    return {
+      paymentFor: PAYMENT_FOR.PLAN_SUBSCRIPTION,
+      amount,
+      plan: existingPlan,
+      theme: null,
+    };
+  }
+
+  const existingTheme: any = await getFirstMatch(themeModel, { _id: value.themeId, isActive: true, isDeleted: { $ne: true } }, {}, {});
+  if (!existingTheme) {
+    return {
+      errorResponse: res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Theme"), {}, {})),
+    };
+  }
+
+  const amount = Number(existingTheme?.price || 0);
+  if (existingTheme?.isPremium !== true || !Number.isFinite(amount) || amount <= 0) {
+    return {
+      errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Theme payment is not required", {}, {})),
+    };
+  }
+
+  return {
+    paymentFor: PAYMENT_FOR.THEME_PURCHASE,
+    amount,
+    plan: null,
+    theme: existingTheme,
+  };
+};
+
 export const createRazorpayOrder = async ({
   amount,
   currency,
@@ -106,13 +155,8 @@ export const createRazorpaySubscriptionPayment = async (req, res) => {
     if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error.details[0].message, {}, {}));
 
     const loggedInUser = req.headers.user as any;
-    const existingPlan: any = await getFirstMatch(planModel, { _id: value.planId, isActive: true, isDeleted: { $ne: true } }, {}, {});
-    if (!existingPlan) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Plan"), {}, {}));
-
-    const planAmount = Number(existingPlan?.price || 0);
-    if (!Number.isFinite(planAmount) || planAmount <= 0) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Plan amount is invalid", {}, {}));
-    }
+    const paymentContext = await resolvePaymentContext(value, res);
+    if (paymentContext?.errorResponse) return paymentContext.errorResponse;
 
     const setting = await resolveRazorpaySetting();
     if (!setting) {
@@ -124,12 +168,14 @@ export const createRazorpaySubscriptionPayment = async (req, res) => {
     const { keyId, keySecret } = getConfig({ keyId: setting.razorpayApiKey, keySecret: setting.razorpayApiSecret });
     const currency = value.currency || "INR";
     const receipt = value.receipt || generateReceipt();
-    const order = await createRazorpayOrder({ amount: planAmount, currency, receipt, keyId, keySecret });
+    const order = await createRazorpayOrder({ amount: paymentContext.amount, currency, receipt, keyId, keySecret });
 
     await new paymentModel({
       userId: loggedInUser?._id,
-      planId: existingPlan?._id,
-      amount: planAmount,
+      planId: paymentContext.plan?._id || null,
+      themeId: paymentContext.theme?._id || null,
+      paymentFor: paymentContext.paymentFor,
+      amount: paymentContext.amount,
       currency,
       paymentMethod: PAYMENT_METHOD.RAZORPAY,
       transactionId: receipt,
@@ -146,9 +192,11 @@ export const createRazorpaySubscriptionPayment = async (req, res) => {
           order,
           keyId,
           receipt,
-          amount: planAmount,
+          amount: paymentContext.amount,
           currency,
-          planId: existingPlan?._id,
+          paymentFor: paymentContext.paymentFor,
+          planId: paymentContext.plan?._id || null,
+          themeId: paymentContext.theme?._id || null,
         },
         {}
       )
@@ -169,23 +217,17 @@ export const verifyRazorpaySubscriptionPayment = async (req, res) => {
     const paymentId = value.razorpay_payment_id || value.razorpayPaymentId;
     const signature = value.razorpay_signature || value.razorpaySignature;
     if (!orderId || !paymentId || !signature) {
-      return res
-        .status(HTTP_STATUS.BAD_REQUEST)
-        .json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.customMessage("Payment verification data missing"), {}, {}));
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.customMessage("Payment verification data missing"), {}, {}));
     }
 
     const setting = await resolveRazorpaySetting();
     if (!setting) {
-      return res
-        .status(HTTP_STATUS.BAD_REQUEST)
-        .json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Razorpay configuration missing. Please configure it in setting.", {}, {}));
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Razorpay configuration missing. Please configure it in setting.", {}, {}));
     }
 
     const config = { keyId: setting.razorpayApiKey, keySecret: setting.razorpayApiSecret };
     if (!verifySignature(orderId, paymentId, signature, config)) {
-      return res
-        .status(HTTP_STATUS.BAD_REQUEST)
-        .json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.customMessage("Invalid Razorpay signature"), { verified: false }, {}));
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.customMessage("Invalid Razorpay signature"), { verified: false }, {}));
     }
 
     const loggedInUser = req.headers.user as any;
@@ -199,7 +241,8 @@ export const verifyRazorpaySubscriptionPayment = async (req, res) => {
     const existingPayment: any = await getFirstMatch(paymentModel, criteria, {}, {});
     if (!existingPayment) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Payment not found", {}, {}));
 
-    const shouldUpdateSubscription = existingPayment?.status !== PAYMENT_STATUS.SUCCESS;
+    const isPlanPayment = existingPayment?.paymentFor === PAYMENT_FOR.PLAN_SUBSCRIPTION || !!existingPayment?.planId;
+    const shouldUpdateSubscription = isPlanPayment && existingPayment?.status !== PAYMENT_STATUS.SUCCESS;
     const updatedPayment = await updateData(
       paymentModel,
       { _id: existingPayment._id },
@@ -216,9 +259,7 @@ export const verifyRazorpaySubscriptionPayment = async (req, res) => {
 
     if (shouldUpdateSubscription) await applySubscriptionForPayment(existingPayment);
 
-    return res.status(HTTP_STATUS.OK).json(
-      apiResponse(HTTP_STATUS.OK, responseMessage.customMessage("Payment verified"), { verified: true, payment: updatedPayment }, {})
-    );
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.customMessage("Payment verified"), { verified: true, payment: updatedPayment }, {}));
   } catch (error) {
     console.log(error);
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, {}));

@@ -1,6 +1,7 @@
 export enum ACCOUNT_TYPE {
     ADMIN = "admin",
-    STORE_OWNER = "store_owner"
+    VENDOR = "vendor",
+    USER = "user"
 }
 
 export enum SUBSCRIPTION_TYPE {
@@ -30,6 +31,11 @@ export enum PAYMENT_STATUS {
     SUCCESS = "success",
     FAILED = "failed",
     PENDING = "pending"
+}
+
+export enum PAYMENT_FOR {
+    PLAN_SUBSCRIPTION = "plan_subscription",
+    THEME_PURCHASE = "theme_purchase"
 }
 
 export enum KYC_STATUS {

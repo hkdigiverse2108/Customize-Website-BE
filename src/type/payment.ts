@@ -1,9 +1,11 @@
 import { Document, Types } from "mongoose";
-import { PAYMENT_METHOD, PAYMENT_STATUS } from "../common";
+import { PAYMENT_FOR, PAYMENT_METHOD, PAYMENT_STATUS } from "../common";
 
 export interface IPaymentType {
   userId: Types.ObjectId | string;
-  planId: Types.ObjectId | string;
+  planId: Types.ObjectId | string | null;
+  themeId: Types.ObjectId | string | null;
+  paymentFor: PAYMENT_FOR;
   amount: number;
   currency: string;
   paymentMethod: PAYMENT_METHOD;
@@ -18,7 +20,9 @@ export interface IPaymentType {
 
 export interface ICreatePaymentPayload {
   userId: Types.ObjectId | string;
-  planId: Types.ObjectId | string;
+  planId?: Types.ObjectId | string | null;
+  themeId?: Types.ObjectId | string | null;
+  paymentFor?: PAYMENT_FOR;
   amount: number;
   currency: string;
   paymentMethod: PAYMENT_METHOD;
@@ -33,7 +37,9 @@ export interface IUpdatePaymentPayload extends Partial<ICreatePaymentPayload> {}
 
 export interface IPayment extends Document {
   userId: Types.ObjectId | string;
-  planId: Types.ObjectId | string;
+  planId: Types.ObjectId | string | null;
+  themeId: Types.ObjectId | string | null;
+  paymentFor: PAYMENT_FOR;
   amount: number;
   currency: string;
   paymentMethod: PAYMENT_METHOD;

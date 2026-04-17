@@ -1,6 +1,6 @@
 import axios from "axios";
-import { HTTP_STATUS, PAYMENT_METHOD, PAYMENT_STATUS, PLAN_DURATION, SUBSCRIPTION_STATUS } from "../../common";
-import { paymentModel, planModel, settingModel, userModel } from "../../database";
+import { HTTP_STATUS, PAYMENT_FOR, PAYMENT_METHOD, PAYMENT_STATUS, PLAN_DURATION, SUBSCRIPTION_STATUS } from "../../common";
+import { paymentModel, planModel, settingModel, themeModel, userModel } from "../../database";
 import { getFirstMatch, reqInfo, responseMessage, updateData } from "../../helper";
 import { apiResponse } from "../../type";
 import { createPhonePePaymentSchema } from "../../validation";
@@ -47,8 +47,7 @@ const extractPaymentUrl = (responseData: any) => {
 };
 
 const mapPaymentStateToStatus = (state: string = "") => {
-  const normalizedState = String(state).toUpperCase();
-  if (normalizedState === "COMPLETED" || normalizedState === "SUCCESS") return PAYMENT_STATUS.SUCCESS;
+  if (state === "COMPLETED" || state === "SUCCESS" || state === "completed" || state === "success") return PAYMENT_STATUS.SUCCESS;
   return PAYMENT_STATUS.FAILED;
 };
 
@@ -59,6 +58,58 @@ const resolveSubscriptionEndDate = (duration: PLAN_DURATION, startDate: Date) =>
   return nextDate;
 };
 
+const resolvePaymentContext = async (value: any, res: any) => {
+  if (value?.planId) {
+    const existingPlan: any = await getFirstMatch(planModel, { _id: value.planId, isActive: true, isDeleted: { $ne: true } }, {}, {});
+    if (!existingPlan) {
+      return {
+        errorResponse: res
+          .status(HTTP_STATUS.NOT_FOUND)
+          .json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Plan"), {}, {})),
+      };
+    }
+
+    const amount = Number(existingPlan?.price || 0);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return {
+        errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Plan amount is invalid", {}, {})),
+      };
+    }
+
+    return {
+      paymentFor: PAYMENT_FOR.PLAN_SUBSCRIPTION,
+      amount,
+      plan: existingPlan,
+      theme: null,
+      message: `Subscription payment for plan ${existingPlan?.name}`,
+    };
+  }
+
+  const existingTheme: any = await getFirstMatch(themeModel, { _id: value.themeId, isActive: true, isDeleted: { $ne: true } }, {}, {});
+  if (!existingTheme) {
+    return {
+      errorResponse: res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Theme"), {}, {})),
+    };
+  }
+
+  const amount = Number(existingTheme?.price || 0);
+  if (existingTheme?.isPremium !== true || !Number.isFinite(amount) || amount <= 0) {
+    return {
+      errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Theme payment is not required", {}, {})),
+    };
+  }
+
+  return {
+    paymentFor: PAYMENT_FOR.THEME_PURCHASE,
+    amount,
+    plan: null,
+    theme: existingTheme,
+    message: `Theme purchase payment for theme ${existingTheme?.name}`,
+  };
+};
+
 export const createPhonePeSubscriptionPayment = async (req, res) => {
   reqInfo(req);
   try {
@@ -66,13 +117,8 @@ export const createPhonePeSubscriptionPayment = async (req, res) => {
     if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
 
     const loggedInUser = req.headers.user as any;
-    const existingPlan: any = await getFirstMatch(planModel, { _id: value.planId, isActive: true, isDeleted: { $ne: true } }, {}, {});
-    if (!existingPlan) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Plan"), {}, {}));
-
-    const planAmount = Number(existingPlan?.price || 0);
-    if (!Number.isFinite(planAmount) || planAmount <= 0) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Plan amount is invalid", {}, {}));
-    }
+    const paymentContext = await resolvePaymentContext(value, res);
+    if (paymentContext?.errorResponse) return paymentContext.errorResponse;
 
     const setting = await resolvePhonePeSetting();
     if (!setting) {
@@ -85,14 +131,14 @@ export const createPhonePeSubscriptionPayment = async (req, res) => {
     const merchantOrderId = generateMerchantOrderId();
     const paymentPayload = {
       merchantOrderId,
-      amount: Math.round(planAmount * 100),
+      amount: Math.round(paymentContext.amount * 100),
       expireAfter: 500,
       metaInfo: {
         udf1: merchantOrderId,
       },
       paymentFlow: {
         type: "PG_CHECKOUT",
-        message: `Subscription payment for plan ${existingPlan?.name}`,
+        message: paymentContext.message,
         merchantUrls: {
           redirectUrl: value.redirectUrl,
         },
@@ -113,8 +159,10 @@ export const createPhonePeSubscriptionPayment = async (req, res) => {
     const providerOrderId = paymentResponse?.data?.orderId || paymentResponse?.data?.data?.orderId || "";
     await new paymentModel({
       userId: loggedInUser?._id,
-      planId: existingPlan?._id,
-      amount: planAmount,
+      planId: paymentContext.plan?._id || null,
+      themeId: paymentContext.theme?._id || null,
+      paymentFor: paymentContext.paymentFor,
+      amount: paymentContext.amount,
       currency: value.currency || "INR",
       paymentMethod: PAYMENT_METHOD.PHONEPE,
       transactionId: merchantOrderId,
@@ -131,9 +179,11 @@ export const createPhonePeSubscriptionPayment = async (req, res) => {
           merchantOrderId,
           providerOrderId,
           paymentUrl,
-          amount: planAmount,
+          amount: paymentContext.amount,
           currency: value.currency || "INR",
-          planId: existingPlan?._id,
+          paymentFor: paymentContext.paymentFor,
+          planId: paymentContext.plan?._id || null,
+          themeId: paymentContext.theme?._id || null,
         },
         {}
       )
@@ -168,7 +218,8 @@ export const phonePeCallback = async (req, res) => {
     if (!existingPayment) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Payment not found", {}, {}));
 
     const paymentStatus = mapPaymentStateToStatus(state);
-    const shouldUpdateSubscription = paymentStatus === PAYMENT_STATUS.SUCCESS && existingPayment?.status !== PAYMENT_STATUS.SUCCESS;
+    const isPlanPayment = existingPayment?.paymentFor === PAYMENT_FOR.PLAN_SUBSCRIPTION || !!existingPayment?.planId;
+    const shouldUpdateSubscription = paymentStatus === PAYMENT_STATUS.SUCCESS && isPlanPayment && existingPayment?.status !== PAYMENT_STATUS.SUCCESS;
     const paymentUpdatePayload: any = {
       status: paymentStatus,
       providerResponse: req.body,
@@ -206,4 +257,3 @@ export const phonePeCallback = async (req, res) => {
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, "Callback processing failed", {}, error));
   }
 };
-

@@ -19,7 +19,7 @@ const userSchema = new Schema<IUser>({
   lastName: { type: String, trim: true, },
   email: { type: String, trim: true, },
   password: { type: String, },
-  role: { type: String, enum: Object.values(ACCOUNT_TYPE), default: ACCOUNT_TYPE.STORE_OWNER, },
+  role: { type: String, enum: Object.values(ACCOUNT_TYPE), default: ACCOUNT_TYPE.VENDOR, },
   subscription: { type: subscriptionSchema, default: () => ({ planId: null, type: SUBSCRIPTION_TYPE.FREE, status: SUBSCRIPTION_STATUS.ACTIVE, startDate: new Date(), endDate: null, autoRenew: false, }), },
   otp: { type: Number, default: null },
   otpExpireTime: { type: Date, default: null },

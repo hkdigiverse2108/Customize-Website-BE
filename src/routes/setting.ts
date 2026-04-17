@@ -5,7 +5,7 @@ import { allowRoles, requireAuth } from "../middleware";
 
 const router = Router();
 
-router.get("/", requireAuth, allowRoles(ACCOUNT_TYPE.ADMIN, ACCOUNT_TYPE.STORE_OWNER), settingController.getSetting);
-router.post("/", requireAuth, allowRoles(ACCOUNT_TYPE.ADMIN, ACCOUNT_TYPE.STORE_OWNER), settingController.upsertSetting);
+router.get("/", requireAuth, allowRoles(ACCOUNT_TYPE.ADMIN, ACCOUNT_TYPE.VENDOR), settingController.getSetting);
+router.post("/", requireAuth, allowRoles(ACCOUNT_TYPE.ADMIN, ACCOUNT_TYPE.VENDOR), settingController.upsertSetting);
 
 export { router as settingRouter };

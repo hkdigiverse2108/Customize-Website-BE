@@ -21,7 +21,7 @@ export const getAdminSetting = async (req, res) => {
 export const getSetting = async (req, res) => {
   const loggedInUser = req.headers.user as any;
   if (loggedInUser?.role === ACCOUNT_TYPE.ADMIN) return getAdminSetting(req, res);
-  if (loggedInUser?.role === ACCOUNT_TYPE.STORE_OWNER) return getStoreSetting(req, res);
+  if (loggedInUser?.role === ACCOUNT_TYPE.VENDOR) return getStoreSetting(req, res);
   return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
 };
 
@@ -36,8 +36,7 @@ export const upsertStoreSetting = async (req, res) => {
     if (!existingStore) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Store"), {}, {}));
 
     const { storeId, ...payloadWithoutStoreId } = value;
-    const normalizedPayload = normalizeSettingPayload(payloadWithoutStoreId);
-    const settingPayload = { ...normalizedPayload,userId: null,storeId,};
+    const settingPayload = { ...payloadWithoutStoreId, userId: null, storeId };
 
     const existingSetting = await getFirstMatch(settingModel, { storeId, isDeleted: { $ne: true } }, {}, {});
 
@@ -64,8 +63,7 @@ export const upsertAdminSetting = async (req, res) => {
     if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
 
     const loggedInUser = req.headers.user as any;
-    const normalizedPayload = normalizeSettingPayload(value);
-    const settingPayload = {...normalizedPayload,userId: loggedInUser?._id,storeId: null,};
+    const settingPayload = { ...value, userId: loggedInUser?._id, storeId: null };
 
     const existingAdminSetting = await findAdminSettingForUser(loggedInUser?._id);
 
@@ -86,19 +84,8 @@ export const upsertAdminSetting = async (req, res) => {
 export const upsertSetting = async (req, res) => {
   const loggedInUser = req.headers.user as any;
   if (loggedInUser?.role === ACCOUNT_TYPE.ADMIN) return upsertAdminSetting(req, res);
-  if (loggedInUser?.role === ACCOUNT_TYPE.STORE_OWNER) return upsertStoreSetting(req, res);
+  if (loggedInUser?.role === ACCOUNT_TYPE.VENDOR) return upsertStoreSetting(req, res);
   return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
-};
-
-const normalizeSettingPayload = (payload: any = {}) => {
-  const normalizedPayload: any = { ...payload };
-
-  if (normalizedPayload.razorpayApiKey === undefined && normalizedPayload.razorpayKey !== undefined) {
-    normalizedPayload.razorpayApiKey = normalizedPayload.razorpayKey;
-  }
-
-  delete normalizedPayload.razorpayKey;
-  return normalizedPayload;
 };
 
 const handleDuplicateKeyError = (error: any, res) => {
@@ -110,7 +97,7 @@ const handleDuplicateKeyError = (error: any, res) => {
 
 const getStoreCriteria = (loggedInUser: any, storeId: string) => {
   const criteria: any = { _id: storeId, isDeleted: { $ne: true } };
-  if (loggedInUser?.role === ACCOUNT_TYPE.STORE_OWNER) criteria.userId = loggedInUser?._id;
+  if (loggedInUser?.role === ACCOUNT_TYPE.VENDOR) criteria.userId = loggedInUser?._id;
   return criteria;
 };
 

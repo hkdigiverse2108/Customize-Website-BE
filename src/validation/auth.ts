@@ -38,6 +38,7 @@ export const signupSchema = Joi.object({
   lastName: Joi.string().trim().min(2).max(100).required(),
   email: Joi.string().trim().email().lowercase().required(),
   password: Joi.string().min(8).required(),
+  role: Joi.string().valid(ACCOUNT_TYPE.VENDOR).optional(),
   subscription: subscriptionSchema.optional(),
 });
 
@@ -45,6 +46,11 @@ export const loginSchema = Joi.object({
   email: Joi.string().trim().email().lowercase().required(),
   password: Joi.string().min(8).required(),
 });
+
+export const googleSignupSchema = Joi.object({
+  idToken: Joi.string().trim().optional(),
+  credential: Joi.string().trim().optional(),
+}).or("idToken", "credential");
 
 export const verifyLoginOtpSchema = Joi.object({
   email: Joi.string().trim().email().lowercase().required(),

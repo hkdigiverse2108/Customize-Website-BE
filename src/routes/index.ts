@@ -7,6 +7,7 @@ import { storeRouter } from "./store";
 import { settingRouter } from "./setting";
 import { phonePeRouter } from "./phonepe";
 import{razorpayRouter} from "./razorpay";
+import { themeRouter } from "./theme";
 const router = Router();
 
 router.use("/upload", uploadRouter);
@@ -17,6 +18,7 @@ router.use("/store", storeRouter);
 router.use("/setting", settingRouter);
 router.use("/phonepe", phonePeRouter);
 router.use("/razorpay", razorpayRouter);
+router.use("/theme", themeRouter);
 
 
 export { router };

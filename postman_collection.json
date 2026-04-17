@@ -1,7 +1,7 @@
 {
   "item": [
     {
-      "id": "b010f7c3-6a6b-42e7-acf5-d91987f09b36",
+      "id": "172ceb92-b362-447d-aa4e-162128c0731d",
       "name": "UPLOAD",
       "description": {
         "content": "Routes for upload",
@@ -9,7 +9,7 @@
       },
       "item": [
         {
-          "id": "558dfa87-7264-4aa1-8a04-dab2a11417b0",
+          "id": "ab0b4168-162e-4ad6-8f74-33ac7b8bce22",
           "name": "Create Item",
           "request": {
             "description": {
@@ -33,7 +33,7 @@
           "event": []
         },
         {
-          "id": "59251c87-5eaa-4e8c-98ea-e4fe2729dc94",
+          "id": "5cc854a4-c52a-46f8-a842-b42b464b7a3f",
           "name": "Delete Image",
           "request": {
             "description": {
@@ -72,7 +72,7 @@
           "event": []
         },
         {
-          "id": "a23237e9-57ad-4279-9c06-cd0d120be0db",
+          "id": "211ec0bb-3222-42aa-975a-c53d2cb20bb6",
           "name": "Get Images",
           "request": {
             "description": {
@@ -97,7 +97,7 @@
           "event": []
         },
         {
-          "id": "9e152fbd-1768-44ef-906d-5ce87912477c",
+          "id": "f4e252e0-456b-4320-8b47-5539b386eafd",
           "name": "Get Pdfs",
           "request": {
             "description": {
@@ -125,7 +125,7 @@
       "event": []
     },
     {
-      "id": "2a53c461-30c3-4992-aa70-d6cdc2d90952",
+      "id": "04810705-d847-4bf6-af28-9d097d5475eb",
       "name": "PLAN",
       "description": {
         "content": "Routes for plan",
@@ -133,7 +133,7 @@
       },
       "item": [
         {
-          "id": "c26562b2-6738-41ff-b8b4-6bee225010a0",
+          "id": "d511d03b-6686-4f56-98b6-93b96bf24193",
           "name": "Create Plan",
           "request": {
             "description": {
@@ -166,7 +166,7 @@
           "event": []
         },
         {
-          "id": "a7b0a145-dfba-4e36-ab02-d154597e3cd1",
+          "id": "6aa2f312-9834-4f0a-a759-9abf5432ed55",
           "name": "Plan Id",
           "request": {
             "description": {
@@ -199,7 +199,7 @@
           "event": []
         },
         {
-          "id": "14cb0ece-fd16-47af-9e79-27e9c13cc591",
+          "id": "84d3bed4-bcd5-4452-bdf6-56a53ee33c3b",
           "name": "Plan Id",
           "request": {
             "description": {
@@ -243,7 +243,7 @@
           "event": []
         },
         {
-          "id": "1d902ac2-3c41-4cfd-8dcc-6fbea41fdb58",
+          "id": "bbc48827-f0f6-43dd-94bd-705b052b3c69",
           "name": "Get Item",
           "request": {
             "description": {
@@ -267,7 +267,7 @@
           "event": []
         },
         {
-          "id": "7b84a086-3b12-4aee-bb7c-87b007517c03",
+          "id": "fdcb1061-6a17-4ab5-9b0a-bc3cdbd71938",
           "name": "Plan Id",
           "request": {
             "description": {
@@ -315,7 +315,7 @@
       }
     },
     {
-      "id": "5fa7c524-a770-4df8-8eba-2cc27b6ed95b",
+      "id": "965d9949-b240-4038-9b85-03fd08921753",
       "name": "AUTH",
       "description": {
         "content": "Routes for auth",
@@ -323,11 +323,11 @@
       },
       "item": [
         {
-          "id": "b4ed77c3-f308-470f-9b6b-4164231e26bc",
+          "id": "2a6716a1-fcd6-44d1-8982-2db400c868e6",
           "name": "Signup",
           "request": {
             "description": {
-              "content": "Controller: signup\nSchema: signupSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| firstName | string | Required |\n| lastName | string | Required |\n| email | string | Required |\n| password | string | Required |\n| subscription | object | Optional |\n| subscription.planId | string | Optional |\n| subscription.type | string | Required |\n| subscription.status | string | Required |\n| subscription.startDate | date | Required |\n| subscription.endDate | date | Optional |\n| subscription.autoRenew | boolean | Required |\n",
+              "content": "Controller: signup\nSchema: signupSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| firstName | string | Required |\n| lastName | string | Required |\n| email | string | Required |\n| password | string | Required |\n| role | string | Optional |\n| subscription | object | Optional |\n| subscription.planId | string | Optional |\n| subscription.type | string | Required |\n| subscription.status | string | Required |\n| subscription.startDate | date | Required |\n| subscription.endDate | date | Optional |\n| subscription.autoRenew | boolean | Required |\n",
               "type": "text/markdown"
             },
             "url": {
@@ -350,14 +350,48 @@
             "method": "POST",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"sample_firstName\",\n  \"lastName\": \"sample_lastName\",\n  \"email\": \"test@example.com\",\n  \"password\": \"Password123!\",\n  \"subscription\": {\n    \"planId\": \"sample_planId\",\n    \"type\": \"sample_type\",\n    \"status\": \"sample_status\",\n    \"startDate\": \"\",\n    \"endDate\": \"\",\n    \"autoRenew\": true\n  },\n  \"name\": \"sample_name\",\n  \"countryCode\": \"sample_countryCode\",\n  \"contact\": {\n    \"countryCode\": \"sample_countryCode\",\n    \"phoneNo\": \"sample_string\"\n  }\n}"
+              "raw": "{\n  \"firstName\": \"sample_firstName\",\n  \"lastName\": \"sample_lastName\",\n  \"email\": \"test@example.com\",\n  \"password\": \"Password123!\",\n  \"role\": \"sample_role\",\n  \"subscription\": {\n    \"planId\": \"sample_planId\",\n    \"type\": \"sample_type\",\n    \"status\": \"sample_status\",\n    \"startDate\": \"\",\n    \"endDate\": \"\",\n    \"autoRenew\": true\n  },\n  \"name\": \"sample_name\",\n  \"countryCode\": \"sample_countryCode\",\n  \"contact\": {\n    \"countryCode\": \"sample_countryCode\",\n    \"phoneNo\": \"sample_string\"\n  }\n}"
             }
           },
           "response": [],
           "event": []
         },
         {
-          "id": "79471997-227f-469b-873e-a0d53e98f006",
+          "id": "b8a7bec0-5044-466d-bfd4-d6e370673f71",
+          "name": "Google Signup",
+          "request": {
+            "description": {
+              "content": "Controller: googleSignup\nSchema: googleSignupSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| idToken | string | Optional |\n| credential | string | Optional |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "auth",
+                "google-signup"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idToken\": \"sample_idToken\",\n  \"credential\": \"sample_credential\"\n}"
+            }
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "13776d2b-26dc-41d2-83df-b0b6240c118a",
           "name": "Login",
           "request": {
             "description": {
@@ -391,7 +425,7 @@
           "event": []
         },
         {
-          "id": "bacdb570-9335-4fb7-999b-7f2ef2e55939",
+          "id": "7ba70634-6e61-4c9f-b0fb-4fe5d67cbfc1",
           "name": "Verify Login Otp",
           "request": {
             "description": {
@@ -425,7 +459,7 @@
           "event": []
         },
         {
-          "id": "8d660b05-9229-4c9f-8a3a-f4063b955e4d",
+          "id": "873fe61b-1f7a-431a-8e0f-13d1499231fd",
           "name": "Forgot Password",
           "request": {
             "description": {
@@ -459,7 +493,7 @@
           "event": []
         },
         {
-          "id": "e28e0525-701a-4a2f-a33d-d69ad4aa7c04",
+          "id": "c8422556-15ab-4aaa-97f3-44f4d48f9a3d",
           "name": "Reset Password",
           "request": {
             "description": {
@@ -493,7 +527,7 @@
           "event": []
         },
         {
-          "id": "d9c99332-8b18-45ad-b47d-81e3b46315d2",
+          "id": "8dc918a7-50db-45e5-aa5a-ab1c58c38cf4",
           "name": "Change Password",
           "request": {
             "description": {
@@ -527,7 +561,7 @@
           "event": []
         },
         {
-          "id": "a2ee28e6-8eae-4ded-9fb5-ad3d0436890f",
+          "id": "a962e38f-996f-4b05-8644-7fa6719ebbfe",
           "name": "Create Logout",
           "request": {
             "description": {
@@ -565,7 +599,7 @@
       }
     },
     {
-      "id": "a8f90239-be35-4a90-8a33-4bf868e9f040",
+      "id": "35bc14c7-b7b7-4a1b-aa56-4ef6ed855a7d",
       "name": "USER",
       "description": {
         "content": "Routes for user",
@@ -573,7 +607,7 @@
       },
       "item": [
         {
-          "id": "85248038-e868-4de5-b897-08cfc69b8c88",
+          "id": "95c2cca0-bdf7-461f-8c3e-4112436630d6",
           "name": "Get All Users Query",
           "request": {
             "description": {
@@ -626,7 +660,7 @@
           "event": []
         },
         {
-          "id": "47c82306-e888-4d65-992b-5231e93786bf",
+          "id": "c3a5d4ea-c6cd-438d-b09d-1eb97c491707",
           "name": "User Id",
           "request": {
             "description": {
@@ -661,7 +695,7 @@
           "event": []
         },
         {
-          "id": "f71838ab-8eef-4a2a-827b-78fd3e3c5782",
+          "id": "9c44c2aa-6f36-4450-b7ce-e82f28067b6c",
           "name": "User Id",
           "request": {
             "description": {
@@ -718,7 +752,7 @@
       }
     },
     {
-      "id": "88b991d3-d85e-4afc-a24f-ecd269f39390",
+      "id": "4ee1d54b-5f6f-4f08-bb14-691b1934ece3",
       "name": "STORE",
       "description": {
         "content": "Routes for store",
@@ -726,7 +760,7 @@
       },
       "item": [
         {
-          "id": "0d06819d-7712-4ba5-a4be-889c7b9c72f8",
+          "id": "56d852f7-8993-4633-893a-d17334b3ae79",
           "name": "Create Store",
           "request": {
             "description": {
@@ -759,7 +793,7 @@
           "event": []
         },
         {
-          "id": "458fd9b9-ac99-43b0-ae45-c323ee8cfe4b",
+          "id": "bd2a389c-e4ee-4793-aac8-db2c0e5df764",
           "name": "Store Id",
           "request": {
             "description": {
@@ -792,7 +826,7 @@
           "event": []
         },
         {
-          "id": "b20c35b8-c738-4989-b011-8ee5e815d31f",
+          "id": "61579cfc-3a25-46fc-8e7a-e111c8aee4a3",
           "name": "Store Id",
           "request": {
             "description": {
@@ -836,7 +870,7 @@
           "event": []
         },
         {
-          "id": "3a050a7e-700c-4ae3-a3eb-418dba372c4c",
+          "id": "3696c3e0-8cc7-471c-9e5e-0875caa3daf0",
           "name": "Get All Stores Query",
           "request": {
             "description": {
@@ -905,7 +939,7 @@
           "event": []
         },
         {
-          "id": "938cc614-374a-4e53-b509-3e6055166f13",
+          "id": "3510ff08-221b-4a0e-b037-adf4031883f2",
           "name": "Store Id",
           "request": {
             "description": {
@@ -953,7 +987,7 @@
       }
     },
     {
-      "id": "1b6a7429-7858-4e37-80d8-f71ce72c0a3a",
+      "id": "6b1f6b81-3068-4082-b33e-d9d2372ec30e",
       "name": "SETTING",
       "description": {
         "content": "Routes for setting",
@@ -961,7 +995,7 @@
       },
       "item": [
         {
-          "id": "8b2ecd82-c2df-4229-b77c-72cd0c973004",
+          "id": "e66585bb-656f-4c8a-8b5c-2abeacc13ab7",
           "name": "Get Item",
           "request": {
             "description": {
@@ -985,7 +1019,7 @@
           "event": []
         },
         {
-          "id": "bbb97ac7-0cb1-45bd-a485-6a6ada00e9e5",
+          "id": "97f41de4-c041-49a6-af1b-90fde3337e82",
           "name": "Create Item",
           "request": {
             "description": {
@@ -1022,7 +1056,7 @@
       }
     },
     {
-      "id": "585ffc50-584d-4942-988e-3fe1bd77a4b9",
+      "id": "574ba21c-d08d-4e37-a9ff-5ee7f3709d37",
       "name": "PHONEPE",
       "description": {
         "content": "Routes for phonePe",
@@ -1030,7 +1064,7 @@
       },
       "item": [
         {
-          "id": "00a86bc7-e6ee-4fe1-96c6-58cc2480a298",
+          "id": "d2642346-536b-441e-be01-c38552cc12ee",
           "name": "Create Phone Pe Payment",
           "request": {
             "description": {
@@ -1056,7 +1090,7 @@
           "event": []
         },
         {
-          "id": "ed890a48-bbe9-420c-aca0-7a98859dc503",
+          "id": "f4414036-76da-4c46-841e-57f0aab588f7",
           "name": "Create Callback",
           "request": {
             "description": {
@@ -1095,7 +1129,7 @@
       }
     },
     {
-      "id": "5cb6f15b-fb27-45f4-97a9-fe588ff6b9ab",
+      "id": "a243643d-6780-4fa8-94aa-affa7b3370e4",
       "name": "RAZORPAY",
       "description": {
         "content": "Routes for razorpay",
@@ -1103,7 +1137,7 @@
       },
       "item": [
         {
-          "id": "c4a2dcdd-0ad0-4f13-858b-9c1093be8cbd",
+          "id": "1ac9a599-494d-4125-b518-2ee1329112b0",
           "name": "Create Razorpay Payment",
           "request": {
             "description": {
@@ -1129,7 +1163,7 @@
           "event": []
         },
         {
-          "id": "d60f622a-86b7-4a69-ab0b-dcf51d45fe8c",
+          "id": "8f1cc352-14f4-47c0-8dfa-dd55adeacd5d",
           "name": "Razorpay Payment Verify",
           "request": {
             "description": {
@@ -1149,6 +1183,245 @@
               "variable": []
             },
             "method": "POST",
+            "body": {}
+          },
+          "response": [],
+          "event": []
+        }
+      ],
+      "event": [],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "TOKEN",
+            "value": "{{TOKEN}}",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "id": "5fb3a8e5-92d3-4b0c-836b-22d4ffc3200a",
+      "name": "THEME",
+      "description": {
+        "content": "Routes for theme",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "cec15e5e-a1e9-42c6-be4a-35f17188ebc9",
+          "name": "Create Theme",
+          "request": {
+            "description": {
+              "content": "Controller: createTheme\nSchema: createThemeSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| name | string | Required |\n| slug | string | Required |\n| description | string | Optional |\n| previewImage | string | Optional |\n| demoUrl | string | Optional |\n| category | string | Optional |\n| tags | array | Optional |\n| isPremium | boolean | Optional |\n| price | number | Optional |\n| layoutJSON | object | Optional |\n| supportedComponents | array | Optional |\n| defaultConfig | object | Optional |\n| defaultConfig.colors | object | Optional |\n| defaultConfig.fonts | object | Optional |\n| defaultConfig.spacing | object | Optional |\n| defaultConfig.buttons | object | Optional |\n| supportedPages | array | Optional |\n| isResponsive | boolean | Optional |\n| breakpoints | object | Optional |\n| breakpoints.mobile | number | Optional |\n| breakpoints.tablet | number | Optional |\n| breakpoints.desktop | number | Optional |\n| seoFriendly | boolean | Optional |\n| performanceScore | number | Optional |\n| lazyLoadEnabled | boolean | Optional |\n| version | string | Optional |\n| changelog | array | Optional |\n| changelog[].version | string | Optional |\n| changelog[].changes | string | Optional |\n| changelog[].date | date | Optional |\n| createdBy | string | Optional |\n| authorName | string | Optional |\n| isActive | boolean | Optional |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "theme"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"sample_name\",\n  \"slug\": \"sample_slug\",\n  \"description\": \"sample_description\",\n  \"previewImage\": \"sample_previewImage\",\n  \"demoUrl\": \"sample_demoUrl\",\n  \"category\": \"sample_category\",\n  \"tags\": [\n    \"sample_string\"\n  ],\n  \"isPremium\": true,\n  \"price\": 123,\n  \"layoutJSON\": {},\n  \"supportedComponents\": [\n    \"sample_string\"\n  ],\n  \"defaultConfig\": {\n    \"colors\": {},\n    \"fonts\": {},\n    \"spacing\": {},\n    \"buttons\": {}\n  },\n  \"supportedPages\": [\n    \"sample_string\"\n  ],\n  \"isResponsive\": true,\n  \"breakpoints\": {\n    \"mobile\": 123,\n    \"tablet\": 123,\n    \"desktop\": 123\n  },\n  \"seoFriendly\": true,\n  \"performanceScore\": 123,\n  \"lazyLoadEnabled\": true,\n  \"version\": \"sample_version\",\n  \"changelog\": [\n    {\n      \"version\": \"sample_version\",\n      \"changes\": \"sample_changes\",\n      \"date\": \"\"\n    }\n  ],\n  \"createdBy\": \"sample_createdBy\",\n  \"authorName\": \"sample_authorName\",\n  \"isActive\": true\n}"
+            }
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "adde0deb-9681-4a21-9ffd-274d82fb933e",
+          "name": "Theme Id",
+          "request": {
+            "description": {
+              "content": "Controller: updateTheme\nSchema: themeIdSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| id | string | Required |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "theme"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"sample_id\"\n}"
+            }
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "7daf222c-d120-4614-8129-3ea8d4bbb084",
+          "name": "Theme Id",
+          "request": {
+            "description": {
+              "content": "Controller: deleteTheme\nSchema: themeIdSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| id | string | Required |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "theme",
+                ":id"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "type": "any",
+                  "key": "id"
+                },
+                {
+                  "type": "any",
+                  "value": "sample_id",
+                  "key": "id"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "DELETE",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"sample_id\"\n}"
+            }
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "dc111f98-ef05-4d5b-919d-611ff9f02dee",
+          "name": "Get All Themes Query",
+          "request": {
+            "description": {
+              "content": "Controller: getThemes\nSchema: getAllThemesQuerySchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| page | number | Optional |\n| limit | number | Optional |\n| search | string | Optional |\n| activeFilter | boolean | Optional |\n| isPremiumFilter | boolean | Optional |\n| category | string | Optional |\n| tag | string | Optional |\n| supportedPage | string | Optional |\n| createdBy | string | Optional |\n| sortFilter | string | Optional |\n| startDateFilter | date | Optional |\n| endDateFilter | date | Optional |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "theme"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "sample_search"
+                },
+                {
+                  "key": "activeFilter",
+                  "value": "true"
+                },
+                {
+                  "key": "isPremiumFilter",
+                  "value": "true"
+                },
+                {
+                  "key": "category",
+                  "value": "sample_category"
+                },
+                {
+                  "key": "tag",
+                  "value": "sample_tag"
+                },
+                {
+                  "key": "supportedPage",
+                  "value": "sample_supportedPage"
+                },
+                {
+                  "key": "createdBy",
+                  "value": "sample_createdBy"
+                },
+                {
+                  "key": "sortFilter",
+                  "value": "sample_sortFilter"
+                },
+                {
+                  "key": "startDateFilter",
+                  "value": ""
+                },
+                {
+                  "key": "endDateFilter",
+                  "value": ""
+                }
+              ],
+              "variable": []
+            },
+            "method": "GET",
+            "body": {}
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "c71b91e0-6fda-4d9b-81b6-1994d9837cc7",
+          "name": "Theme Id",
+          "request": {
+            "description": {
+              "content": "Controller: getThemeById\nSchema: themeIdSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| id | string | Required |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "theme",
+                ":id"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "type": "any",
+                  "key": "id"
+                },
+                {
+                  "type": "any",
+                  "value": "sample_id",
+                  "key": "id"
+                }
+              ]
+            },
+            "method": "GET",
             "body": {}
           },
           "response": [],
@@ -1187,7 +1460,7 @@
     }
   ],
   "info": {
-    "_postman_id": "91da1aac-5ddb-4e72-8e1c-d9037955d969",
+    "_postman_id": "5924e5c2-882a-4c3f-97bc-e592df7329be",
     "name": "HKDigiverse API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": {

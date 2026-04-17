@@ -4,24 +4,6 @@ import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage
 import { apiResponse } from "../../type";
 import { createStoreSchema, getAllStoresQuerySchema, storeIdSchema, updateStoreSchema } from "../../validation";
 
-const normalizeStorePayload = (payload: any = {}) => {
-  const normalizedPayload: any = { ...payload };
-
-  if (typeof normalizedPayload.name === "string") normalizedPayload.name = normalizedPayload.name.trim();
-  if (typeof normalizedPayload.slug === "string") normalizedPayload.slug = normalizedPayload.slug.trim().toLowerCase();
-  if (typeof normalizedPayload.subdomain === "string") normalizedPayload.subdomain = normalizedPayload.subdomain.trim().toLowerCase();
-  if (typeof normalizedPayload.customDomain === "string") {
-    normalizedPayload.customDomain = normalizedPayload.customDomain.trim().toLowerCase();
-    if (!normalizedPayload.customDomain) normalizedPayload.customDomain = null;
-  }
-  if (normalizedPayload.customDomain === "") normalizedPayload.customDomain = null;
-  if (typeof normalizedPayload.panNumber === "string") normalizedPayload.panNumber = normalizedPayload.panNumber.trim().toUpperCase();
-  if (typeof normalizedPayload.email === "string") normalizedPayload.email = normalizedPayload.email.trim().toLowerCase();
-  if (typeof normalizedPayload.phone === "string") normalizedPayload.phone = normalizedPayload.phone.trim();
-
-  return normalizedPayload;
-};
-
 const getDuplicateFieldFromError = (error: any) => {
   const keyPattern = error?.keyPattern || {};
   const keyValue = error?.keyValue || {};
@@ -44,8 +26,8 @@ export const createStore = async (req, res) => {
     if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
 
     const loggedInUser = req.headers.user as any;
-    const isStoreOwner = loggedInUser?.role === ACCOUNT_TYPE.STORE_OWNER;
-    const payload: any = normalizeStorePayload({ ...value });
+    const isStoreOwner = loggedInUser?.role === ACCOUNT_TYPE.VENDOR;
+    const payload: any = { ...value };
 
     if (isStoreOwner) payload.userId = loggedInUser?._id;
     if (!payload?.userId) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "userId is required", {}, {}));
@@ -93,25 +75,25 @@ export const updateStore = async (req, res) => {
     if (bodyError) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, bodyError?.details[0]?.message, {}, {}));
 
     const loggedInUser = req.headers.user as any;
-    const isStoreOwner = loggedInUser?.role === ACCOUNT_TYPE.STORE_OWNER;
+    const isStoreOwner = loggedInUser?.role === ACCOUNT_TYPE.VENDOR;
     const criteria: any = { _id: idValue.id, isDeleted: { $ne: true } };
     if (isStoreOwner) criteria.userId = loggedInUser?._id;
 
     const existingStore: any = await getFirstMatch(storeModel, criteria, {}, {});
     if (!existingStore) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Store"), {}, {}));
 
-    const normalizedPayload: any = normalizeStorePayload(bodyValue);
-    if (isStoreOwner) delete normalizedPayload.userId;
+    const payload: any = { ...bodyValue };
+    if (isStoreOwner) delete payload.userId;
 
-    if (normalizedPayload?.userId && String(normalizedPayload.userId) !== String(existingStore.userId)) {
-      const userExists = await getFirstMatch(userModel, { _id: normalizedPayload.userId, isDeleted: { $ne: true } }, {}, {});
+    if (payload?.userId && String(payload.userId) !== String(existingStore.userId)) {
+      const userExists = await getFirstMatch(userModel, { _id: payload.userId, isDeleted: { $ne: true } }, {}, {});
       if (!userExists) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.getDataNotFound("User"), {}, {}));
     }
 
-    const nextSlug = normalizedPayload?.slug || existingStore.slug;
-    const nextSubdomain = normalizedPayload?.subdomain || existingStore.subdomain;
-    const nextCustomDomain = normalizedPayload.customDomain !== undefined ? normalizedPayload.customDomain : existingStore.customDomain;
-    const nextPanNumber = normalizedPayload.panNumber !== undefined ? normalizedPayload.panNumber : existingStore.panNumber;
+    const nextSlug = payload?.slug || existingStore.slug;
+    const nextSubdomain = payload?.subdomain || existingStore.subdomain;
+    const nextCustomDomain = payload.customDomain !== undefined ? payload.customDomain : existingStore.customDomain;
+    const nextPanNumber = payload.panNumber !== undefined ? payload.panNumber : existingStore.panNumber;
 
     const duplicateSlug = await checkStoreFieldDuplicate("slug", nextSlug, idValue.id);
     if (duplicateSlug) return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
@@ -129,7 +111,7 @@ export const updateStore = async (req, res) => {
       if (duplicatePanNumber) return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("pan number"), {}, {}));
     }
 
-    const updatedStore = await updateData(storeModel, criteria, normalizedPayload, {});
+    const updatedStore = await updateData(storeModel, criteria, payload, {});
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.updateDataSuccess("Store"), updatedStore, {}));
   } catch (error) {
     if (error?.code === 11000) {
@@ -150,7 +132,7 @@ export const deleteStore = async (req, res) => {
 
     const loggedInUser = req.headers.user as any;
     const criteria: any = { _id: value.id, isDeleted: { $ne: true } };
-    if (loggedInUser?.role === ACCOUNT_TYPE.STORE_OWNER) criteria.userId = loggedInUser?._id;
+    if (loggedInUser?.role === ACCOUNT_TYPE.VENDOR) criteria.userId = loggedInUser?._id;
 
     const deletedStore = await deleteData(storeModel, criteria, { isActive: false, isPublished: false }, {});
     if (!deletedStore) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Store"), {}, {}));
@@ -180,7 +162,7 @@ export const getStores = async (req, res) => {
     if (value?.userId) criteria.userId = value.userId;
 
     const loggedInUser = req.headers.user as any;
-    if (loggedInUser?.role === ACCOUNT_TYPE.STORE_OWNER) criteria.userId = loggedInUser?._id;
+    if (loggedInUser?.role === ACCOUNT_TYPE.VENDOR) criteria.userId = loggedInUser?._id;
 
     const stores = await getData(storeModel, criteria, {}, options);
     const totalCount = await countData(storeModel, criteria);
@@ -201,7 +183,7 @@ export const getStoreById = async (req, res) => {
 
     const loggedInUser = req.headers.user as any;
     const criteria: any = { _id: value.id, isDeleted: { $ne: true } };
-    if (loggedInUser?.role === ACCOUNT_TYPE.STORE_OWNER) criteria.userId = loggedInUser?._id;
+    if (loggedInUser?.role === ACCOUNT_TYPE.VENDOR) criteria.userId = loggedInUser?._id;
 
     const store = await getFirstMatch(storeModel, criteria, {}, {});
     if (!store) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Store"), {}, {}));

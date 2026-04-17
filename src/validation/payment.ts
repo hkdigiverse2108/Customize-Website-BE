@@ -1,17 +1,34 @@
 import Joi from "joi";
 import { objectId } from "./common";
 
+const validatePurchaseReference = (value, helpers) => {
+  const hasPlanId = !!value?.planId;
+  const hasThemeId = !!value?.themeId;
+  if (hasPlanId === hasThemeId) return helpers.error("any.invalid");
+  return value;
+};
+
 export const createPhonePePaymentSchema = Joi.object({
-  planId: objectId().required(),
+  planId: objectId().optional(),
+  themeId: objectId().optional(),
   redirectUrl: Joi.string().trim().uri().required(),
   currency: Joi.string().trim().uppercase().optional(),
-});
+})
+  .custom(validatePurchaseReference)
+  .messages({
+    "any.invalid": "Exactly one of planId or themeId is required",
+  });
 
 export const createRazorpayPaymentSchema = Joi.object({
-  planId: objectId().required(),
+  planId: objectId().optional(),
+  themeId: objectId().optional(),
   currency: Joi.string().trim().uppercase().optional(),
   receipt: Joi.string().trim().max(80).optional(),
-});
+})
+  .custom(validatePurchaseReference)
+  .messages({
+    "any.invalid": "Exactly one of planId or themeId is required",
+  });
 
 export const razorpayPaymentVerifySchema = Joi.object({
   razorpay_order_id: Joi.string().trim().optional(),

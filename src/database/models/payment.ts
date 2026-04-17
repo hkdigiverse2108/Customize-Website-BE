@@ -1,11 +1,13 @@
 import { Schema, model } from "mongoose";
-import { PAYMENT_METHOD, PAYMENT_STATUS } from "../../common";
+import { PAYMENT_FOR, PAYMENT_METHOD, PAYMENT_STATUS } from "../../common";
 import { IPayment } from "../../type";
 
 const paymentSchema = new Schema<IPayment>(
   {
     userId: { type: Schema.Types.ObjectId, ref: "user", required: true },
-    planId: { type: Schema.Types.ObjectId, ref: "plan", required: true },
+    planId: { type: Schema.Types.ObjectId, ref: "plan", default: null },
+    themeId: { type: Schema.Types.ObjectId, ref: "theme", default: null },
+    paymentFor: { type: String, enum: Object.values(PAYMENT_FOR), required: true, default: PAYMENT_FOR.PLAN_SUBSCRIPTION },
     amount: { type: Number, required: true, min: 0 },
     currency: { type: String, required: true, trim: true, uppercase: true },
     paymentMethod: { type: String, enum: Object.values(PAYMENT_METHOD), required: true },
@@ -18,8 +20,18 @@ const paymentSchema = new Schema<IPayment>(
   { timestamps: true, versionKey: false }
 );
 
+paymentSchema.pre("validate", function () {
+  const hasPlanId = !!this.planId;
+  const hasThemeId = !!this.themeId;
+
+  if (hasPlanId === hasThemeId) throw new Error("Exactly one of planId or themeId is required.");
+  if (hasPlanId) this.paymentFor = PAYMENT_FOR.PLAN_SUBSCRIPTION;
+  if (hasThemeId) this.paymentFor = PAYMENT_FOR.THEME_PURCHASE;
+});
+
 paymentSchema.index({ transactionId: 1 }, { unique: true });
 paymentSchema.index({ userId: 1, createdAt: -1 });
-paymentSchema.index({ planId: 1, createdAt: -1 });
+paymentSchema.index({ planId: 1, createdAt: -1 }, { partialFilterExpression: { planId: { $exists: true, $type: "objectId" } } });
+paymentSchema.index({ themeId: 1, createdAt: -1 }, { partialFilterExpression: { themeId: { $exists: true, $type: "objectId" } } });
 
 export const paymentModel = model<IPayment>("payment", paymentSchema);

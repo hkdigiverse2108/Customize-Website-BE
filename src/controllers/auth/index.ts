@@ -1,8 +1,47 @@
+import axios from "axios";
 import { ACCOUNT_TYPE, compareHash, generateHash, generateOtpCode, generateToken, HTTP_STATUS, otpValidityMinutes, sanitizeUser, tokenExpireIn } from "../../common";
 import { userModel } from "../../database";
 import { forgotPasswordOtpMail, loginOtpMail, reqInfo, responseMessage } from "../../helper";
 import { apiResponse } from "../../type";
-import { resetPasswordSchema, forgotPasswordSchema, changePasswordSchema, loginSchema, signupSchema, verifyLoginOtpSchema } from "../../validation";
+import { resetPasswordSchema, forgotPasswordSchema, changePasswordSchema, googleSignupSchema, loginSchema, signupSchema, verifyLoginOtpSchema } from "../../validation";
+
+
+const resolveGoogleClientId = () => process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_WEB_CLIENT_ID || "";
+
+const verifyGoogleIdToken = async (idToken: string) => {
+  try {
+    const response = await axios.get(process.env.GOOGLE_TOKENINFO_URL, { params: { id_token: idToken } });
+    const payload = response?.data || {};
+
+    const email = String(payload?.email || "").trim().toLowerCase();
+    const firstName = String(payload?.given_name || "").trim();
+    const lastName = String(payload?.family_name || "").trim();
+    const fullName = String(payload?.name || "").trim();
+    const emailVerified = payload?.email_verified === true || String(payload?.email_verified || "").toLowerCase() === "true";
+    const audience = String(payload?.aud || "").trim();
+    const subject = String(payload?.sub || "").trim();
+
+    if (!email || !subject || !emailVerified) throw new Error("INVALID_GOOGLE_TOKEN");
+
+    const googleClientId = resolveGoogleClientId();
+    if (!googleClientId) throw new Error("GOOGLE_CLIENT_ID_MISSING");
+    if (audience !== googleClientId) throw new Error("GOOGLE_AUDIENCE_MISMATCH");
+
+    const splitName = fullName ? fullName.split(" ") : [];
+    const fallbackFirstName = splitName[0] || "Google";
+    const fallbackLastName = splitName.slice(1).join(" ") || "User";
+
+    return {
+      email,
+      firstName: firstName || fallbackFirstName,
+      lastName: lastName || fallbackLastName,
+    };
+  } catch (error) {
+    if (error?.message === "INVALID_GOOGLE_TOKEN" || error?.message === "GOOGLE_CLIENT_ID_MISSING" || error?.message === "GOOGLE_AUDIENCE_MISMATCH") throw error;
+    if (axios.isAxiosError(error) && error?.response?.status === 400) throw new Error("INVALID_GOOGLE_TOKEN");
+    throw error;
+  }
+};
 
 export const signup = async (req, res) => {
   reqInfo(req);
@@ -22,7 +61,7 @@ export const signup = async (req, res) => {
       lastName: value.lastName,
       email,
       password: hashPassword,
-      role: ACCOUNT_TYPE.STORE_OWNER,
+      role: value.role || ACCOUNT_TYPE.VENDOR,
     };
 
     if (value.subscription) userPayload.subscription = value.subscription;
@@ -33,6 +72,66 @@ export const signup = async (req, res) => {
 
     return res.status(HTTP_STATUS.CREATED).json(apiResponse(HTTP_STATUS.CREATED, responseMessage.signupSuccess, { user: userData, token }, {}));
   } catch (error) {
+    console.error(error);
+    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
+  }
+};
+
+export const googleSignup = async (req, res) => {
+  reqInfo(req);
+
+  try {
+    const { error, value } = googleSignupSchema.validate(req.body);
+    if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
+
+    const googleToken = value.idToken || value.credential;
+    const googleProfile = await verifyGoogleIdToken(googleToken);
+    const existingUser: any = await userModel.findOne({ email: googleProfile.email, isDeleted: { $ne: true } });
+
+    if (existingUser) {
+      if (existingUser?.isActive === false) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accountBlock, {}, {}));
+
+      let shouldSave = false;
+      if (!existingUser.firstName && googleProfile.firstName) {
+        existingUser.firstName = googleProfile.firstName;
+        shouldSave = true;
+      }
+
+      if (!existingUser.lastName && googleProfile.lastName) {
+        existingUser.lastName = googleProfile.lastName;
+        shouldSave = true;
+      }
+
+      if (shouldSave) await existingUser.save();
+
+      const token = await generateToken({ _id: String(existingUser._id), email: existingUser.email, role: existingUser.role }, { expiresIn: tokenExpireIn });
+      const userData = sanitizeUser(existingUser.toObject());
+      return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.loginSuccess, { user: userData, token }, {}));
+    }
+
+    const createdUser = await new userModel({
+      firstName: googleProfile.firstName,
+      lastName: googleProfile.lastName,
+      email: googleProfile.email,
+      role: ACCOUNT_TYPE.VENDOR,
+    }).save();
+
+    const userData = sanitizeUser(createdUser.toObject());
+    const token = await generateToken({ _id: String(createdUser._id), email: createdUser.email, role: createdUser.role }, { expiresIn: tokenExpireIn });
+    return res.status(HTTP_STATUS.CREATED).json(apiResponse(HTTP_STATUS.CREATED, responseMessage.signupSuccess, { user: userData, token }, {}));
+  } catch (error) {
+    if (error?.message === "GOOGLE_CLIENT_ID_MISSING") {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "GOOGLE_CLIENT_ID is not configured on server", {}, {}));
+    }
+
+    if (error?.message === "GOOGLE_AUDIENCE_MISMATCH") {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Google token audience mismatch", {}, {}));
+    }
+
+    if (error?.message === "INVALID_GOOGLE_TOKEN") {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Invalid Google token", {}, {}));
+    }
+
     console.error(error);
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }
@@ -49,6 +148,9 @@ export const login = async (req, res) => {
     const existingUser: any = await userModel.findOne({ email, isDeleted: { $ne: true } });
     if (!existingUser) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.invalidEmail, {}, {}));
     if (existingUser?.isActive === false) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accountBlock, {}, {}));
+    if (!existingUser?.password) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "This account uses Google sign-in. Please continue with Google.", {}, {}));
+    }
 
     const passwordMatched = await compareHash(value.password, existingUser.password);
     if (!passwordMatched) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.invalidPassword, {}, {}));
@@ -145,8 +247,10 @@ export const  resetPassword = async (req, res) => {
       return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.expireOTP, {}, {}));
     }
 
-    const isSamePassword = await compareHash(value.password, existingUser.password);
-    if (isSamePassword) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.passwordSameError, {}, {}));
+    if (existingUser?.password) {
+      const isSamePassword = await compareHash(value.password, existingUser.password);
+      if (isSamePassword) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.passwordSameError, {}, {}));
+    }
 
     existingUser.password = await generateHash(value.password);
     existingUser.otp = null;
@@ -172,6 +276,9 @@ export const changePassword = async (req, res) => {
 
     const existingUser: any = await userModel.findOne({ _id: authUser._id, isDeleted: { $ne: true } });
     if (!existingUser) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.invalidToken, {}, {}));
+    if (!existingUser?.password) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "This account uses Google sign-in. Set password using forgot-password flow first.", {}, {}));
+    }
 
     const oldPasswordMatched = await compareHash(value.oldPassword, existingUser.password);
     if (!oldPasswordMatched) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.invalidPassword, {}, {}));

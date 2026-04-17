@@ -5,3 +5,4 @@ export * from "./auth";
 export * from "./payment";
 export * from "./store";
 export * from "./setting";
+export * from "./theme";

@@ -3,3 +3,4 @@ export * from "./plan";
 export * from "./payment";
 export * from "./store";
 export * from "./setting";
+export * from "./theme";
