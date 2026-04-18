@@ -9,3 +9,5 @@ export * as themeController from "./theme";
 export * as pageController from "./page";
 export * as componentController from "./component";
 export * as siteController from "./site";
+export * as categoryController from "./category";
+export * as collectionController from "./collection";

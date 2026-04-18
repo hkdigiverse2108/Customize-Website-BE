@@ -49,3 +49,8 @@ export enum KYC_DOCUMENT_TYPE {
     PAN = "pan",
     GST = "gst"
 }
+
+export const collectionTypes = {
+  MANUAL: "manual",
+  SMART: "smart",
+};

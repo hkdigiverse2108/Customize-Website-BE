@@ -8,3 +8,5 @@ export * from "./payment";
 export * from "./theme";
 export * from "./page";
 export * from "./component";
+export * from "./category";
+export * from "./collection";

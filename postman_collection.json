@@ -1,7 +1,7 @@
 {
   "item": [
     {
-      "id": "172ceb92-b362-447d-aa4e-162128c0731d",
+      "id": "cb03818b-a631-4209-8d7a-042589baf86c",
       "name": "UPLOAD",
       "description": {
         "content": "Routes for upload",
@@ -9,7 +9,7 @@
       },
       "item": [
         {
-          "id": "ab0b4168-162e-4ad6-8f74-33ac7b8bce22",
+          "id": "192030cc-08b2-4bf6-b899-a63e33f7054f",
           "name": "Create Item",
           "request": {
             "description": {
@@ -33,7 +33,7 @@
           "event": []
         },
         {
-          "id": "5cc854a4-c52a-46f8-a842-b42b464b7a3f",
+          "id": "31183b8b-9087-439a-a4fa-04b7e1c2ce89",
           "name": "Delete Image",
           "request": {
             "description": {
@@ -72,7 +72,7 @@
           "event": []
         },
         {
-          "id": "211ec0bb-3222-42aa-975a-c53d2cb20bb6",
+          "id": "1a71076f-917c-42e8-afb7-3f6b47253431",
           "name": "Get Images",
           "request": {
             "description": {
@@ -97,7 +97,7 @@
           "event": []
         },
         {
-          "id": "f4e252e0-456b-4320-8b47-5539b386eafd",
+          "id": "cfc058d3-01fc-496d-bdda-b1d9b8b34ce8",
           "name": "Get Pdfs",
           "request": {
             "description": {
@@ -125,7 +125,7 @@
       "event": []
     },
     {
-      "id": "04810705-d847-4bf6-af28-9d097d5475eb",
+      "id": "9cb66e2d-c8de-4bcc-ab76-f22d7b3f622d",
       "name": "PLAN",
       "description": {
         "content": "Routes for plan",
@@ -133,7 +133,7 @@
       },
       "item": [
         {
-          "id": "d511d03b-6686-4f56-98b6-93b96bf24193",
+          "id": "f622e899-e789-4fd6-a925-781efe0829fc",
           "name": "Create Plan",
           "request": {
             "description": {
@@ -166,7 +166,7 @@
           "event": []
         },
         {
-          "id": "6aa2f312-9834-4f0a-a759-9abf5432ed55",
+          "id": "4c67642d-21cf-4618-b878-9c3abee19305",
           "name": "Plan Id",
           "request": {
             "description": {
@@ -199,7 +199,7 @@
           "event": []
         },
         {
-          "id": "84d3bed4-bcd5-4452-bdf6-56a53ee33c3b",
+          "id": "a5a4bc2a-32dc-4a9a-9923-bae6bbe03efb",
           "name": "Plan Id",
           "request": {
             "description": {
@@ -243,7 +243,7 @@
           "event": []
         },
         {
-          "id": "bbc48827-f0f6-43dd-94bd-705b052b3c69",
+          "id": "535a8d73-f9f5-4f1e-9e4a-d4dabd56bad4",
           "name": "Get Item",
           "request": {
             "description": {
@@ -267,7 +267,7 @@
           "event": []
         },
         {
-          "id": "fdcb1061-6a17-4ab5-9b0a-bc3cdbd71938",
+          "id": "81ac4a7e-1d03-45fe-96ee-03fc9478a1c9",
           "name": "Plan Id",
           "request": {
             "description": {
@@ -315,7 +315,7 @@
       }
     },
     {
-      "id": "965d9949-b240-4038-9b85-03fd08921753",
+      "id": "f7fa6b48-8ed6-4831-bbdc-41007ba5ffb1",
       "name": "AUTH",
       "description": {
         "content": "Routes for auth",
@@ -323,7 +323,7 @@
       },
       "item": [
         {
-          "id": "2a6716a1-fcd6-44d1-8982-2db400c868e6",
+          "id": "3b01aed0-a05b-4be3-a232-1b1a2be18a4c",
           "name": "Signup",
           "request": {
             "description": {
@@ -357,7 +357,7 @@
           "event": []
         },
         {
-          "id": "b8a7bec0-5044-466d-bfd4-d6e370673f71",
+          "id": "9f11a4ff-553e-40e3-be21-59a3a82bceb1",
           "name": "Google Signup",
           "request": {
             "description": {
@@ -391,7 +391,7 @@
           "event": []
         },
         {
-          "id": "13776d2b-26dc-41d2-83df-b0b6240c118a",
+          "id": "5367d561-984b-4c2c-8123-5e8e1b1b4999",
           "name": "Login",
           "request": {
             "description": {
@@ -425,7 +425,7 @@
           "event": []
         },
         {
-          "id": "7ba70634-6e61-4c9f-b0fb-4fe5d67cbfc1",
+          "id": "1b6c320f-8ed9-4744-b529-f78ad4b9fd3c",
           "name": "Verify Login Otp",
           "request": {
             "description": {
@@ -459,7 +459,7 @@
           "event": []
         },
         {
-          "id": "873fe61b-1f7a-431a-8e0f-13d1499231fd",
+          "id": "66f3f274-2e32-49cc-a967-64412007ade4",
           "name": "Forgot Password",
           "request": {
             "description": {
@@ -493,7 +493,7 @@
           "event": []
         },
         {
-          "id": "c8422556-15ab-4aaa-97f3-44f4d48f9a3d",
+          "id": "c303183e-354b-458d-a1c4-1744086334e2",
           "name": "Reset Password",
           "request": {
             "description": {
@@ -527,7 +527,7 @@
           "event": []
         },
         {
-          "id": "8dc918a7-50db-45e5-aa5a-ab1c58c38cf4",
+          "id": "17d93806-3a50-479b-8876-a00c52a485a1",
           "name": "Change Password",
           "request": {
             "description": {
@@ -561,7 +561,7 @@
           "event": []
         },
         {
-          "id": "a962e38f-996f-4b05-8644-7fa6719ebbfe",
+          "id": "9312a195-289d-447b-a60d-0affe57b1a49",
           "name": "Create Logout",
           "request": {
             "description": {
@@ -599,7 +599,7 @@
       }
     },
     {
-      "id": "35bc14c7-b7b7-4a1b-aa56-4ef6ed855a7d",
+      "id": "5772c82c-3e7e-455a-8d9b-a9d3fe019794",
       "name": "USER",
       "description": {
         "content": "Routes for user",
@@ -607,7 +607,7 @@
       },
       "item": [
         {
-          "id": "95c2cca0-bdf7-461f-8c3e-4112436630d6",
+          "id": "d8a6db0e-66b9-4702-a366-ac1352e8ff5b",
           "name": "Get All Users Query",
           "request": {
             "description": {
@@ -660,7 +660,7 @@
           "event": []
         },
         {
-          "id": "c3a5d4ea-c6cd-438d-b09d-1eb97c491707",
+          "id": "a1835e60-3924-41f3-b13b-5c6f154306f2",
           "name": "User Id",
           "request": {
             "description": {
@@ -695,7 +695,7 @@
           "event": []
         },
         {
-          "id": "9c44c2aa-6f36-4450-b7ce-e82f28067b6c",
+          "id": "ab2b0f52-19a5-4910-81b8-e828de3154f0",
           "name": "User Id",
           "request": {
             "description": {
@@ -752,7 +752,7 @@
       }
     },
     {
-      "id": "4ee1d54b-5f6f-4f08-bb14-691b1934ece3",
+      "id": "c14ee585-914d-41c1-8678-585b94e6eaa0",
       "name": "STORE",
       "description": {
         "content": "Routes for store",
@@ -760,11 +760,11 @@
       },
       "item": [
         {
-          "id": "56d852f7-8993-4633-893a-d17334b3ae79",
+          "id": "6c1b7aad-9c62-4bd1-88fd-e0c996cbc63b",
           "name": "Create Store",
           "request": {
             "description": {
-              "content": "Controller: createStore\nSchema: createStoreSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| name | string | Required |\n| slug | string | Required |\n| description | string | Optional |\n| logo | string | Optional |\n| banner | string | Optional |\n| userId | string | Optional |\n| subdomain | string | Required |\n| customDomain | string | Optional |\n| domainVerified | boolean | Optional |\n| isActive | boolean | Optional |\n| isPublished | boolean | Optional |\n| isBlocked | boolean | Optional |\n| businessName | string | Required |\n| businessType | string | Required |\n| gstNumber | string | Optional |\n| panNumber | string | Optional |\n| kycStatus | string | Optional |\n| kycDocuments | array | Optional |\n| kycDocuments[].type | string | Required |\n| kycDocuments[].documentUrl | string | Required |\n| kycDocuments[].verified | boolean | Optional |\n| address | object | Required |\n| address.country | string | Required |\n| address.state | string | Required |\n| address.city | string | Required |\n| address.pincode | string | Required |\n| address.addressLine1 | string | Required |\n| address.addressLine2 | string | Optional |\n| address.landmark | string | Optional |\n| email | string | Required |\n| phone | string | Required |\n| totalProducts | number | Optional |\n| totalOrders | number | Optional |\n| totalRevenue | number | Optional |\n",
+              "content": "Controller: createStore\nSchema: createStoreSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| name | string | Required |\n| slug | string | Required |\n| description | string | Optional |\n| logo | string | Optional |\n| banner | string | Optional |\n| themeIds | array | Optional |\n| themeConfig | object | Optional |\n| themeConfig.colors | object | Optional |\n| themeConfig.fonts | object | Optional |\n| themeConfig.spacing | object | Optional |\n| userId | string | Optional |\n| subdomain | string | Required |\n| customDomain | string | Optional |\n| domainVerified | boolean | Optional |\n| isActive | boolean | Optional |\n| isPublished | boolean | Optional |\n| isBlocked | boolean | Optional |\n| businessName | string | Required |\n| businessType | string | Required |\n| gstNumber | string | Optional |\n| panNumber | string | Optional |\n| kycStatus | string | Optional |\n| kycDocuments | array | Optional |\n| kycDocuments[].type | string | Required |\n| kycDocuments[].documentUrl | string | Required |\n| kycDocuments[].verified | boolean | Optional |\n| address | object | Required |\n| address.country | string | Required |\n| address.state | string | Required |\n| address.city | string | Required |\n| address.pincode | string | Required |\n| address.addressLine1 | string | Required |\n| address.addressLine2 | string | Optional |\n| address.landmark | string | Optional |\n| email | string | Required |\n| phone | string | Required |\n| totalProducts | number | Optional |\n| totalOrders | number | Optional |\n| totalRevenue | number | Optional |\n",
               "type": "text/markdown"
             },
             "url": {
@@ -786,14 +786,14 @@
             "method": "POST",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"sample_name\",\n  \"slug\": \"sample_slug\",\n  \"description\": \"sample_description\",\n  \"logo\": \"sample_logo\",\n  \"banner\": \"sample_banner\",\n  \"userId\": \"sample_userId\",\n  \"subdomain\": \"sample_subdomain\",\n  \"customDomain\": \"sample_customDomain\",\n  \"domainVerified\": true,\n  \"isActive\": true,\n  \"isPublished\": true,\n  \"isBlocked\": true,\n  \"businessName\": \"sample_businessName\",\n  \"businessType\": \"sample_businessType\",\n  \"gstNumber\": \"sample_gstNumber\",\n  \"panNumber\": \"sample_panNumber\",\n  \"kycStatus\": \"sample_kycStatus\",\n  \"kycDocuments\": [\n    {\n      \"type\": \"sample_type\",\n      \"documentUrl\": \"sample_documentUrl\",\n      \"verified\": true\n    }\n  ],\n  \"address\": {\n    \"country\": \"sample_country\",\n    \"state\": \"sample_state\",\n    \"city\": \"sample_city\",\n    \"pincode\": \"sample_pincode\",\n    \"addressLine1\": \"sample_addressLine1\",\n    \"addressLine2\": \"sample_addressLine2\",\n    \"landmark\": \"sample_landmark\"\n  },\n  \"email\": \"test@example.com\",\n  \"phone\": \"sample_phone\",\n  \"totalProducts\": 123,\n  \"totalOrders\": 123,\n  \"totalRevenue\": 123\n}"
+              "raw": "{\n  \"name\": \"sample_name\",\n  \"slug\": \"sample_slug\",\n  \"description\": \"sample_description\",\n  \"logo\": \"sample_logo\",\n  \"banner\": \"sample_banner\",\n  \"themeIds\": [\n    \"sample_string\"\n  ],\n  \"themeConfig\": {\n    \"colors\": {},\n    \"fonts\": {},\n    \"spacing\": {}\n  },\n  \"userId\": \"sample_userId\",\n  \"subdomain\": \"sample_subdomain\",\n  \"customDomain\": \"sample_customDomain\",\n  \"domainVerified\": true,\n  \"isActive\": true,\n  \"isPublished\": true,\n  \"isBlocked\": true,\n  \"businessName\": \"sample_businessName\",\n  \"businessType\": \"sample_businessType\",\n  \"gstNumber\": \"sample_gstNumber\",\n  \"panNumber\": \"sample_panNumber\",\n  \"kycStatus\": \"sample_kycStatus\",\n  \"kycDocuments\": [\n    {\n      \"type\": \"sample_type\",\n      \"documentUrl\": \"sample_documentUrl\",\n      \"verified\": true\n    }\n  ],\n  \"address\": {\n    \"country\": \"sample_country\",\n    \"state\": \"sample_state\",\n    \"city\": \"sample_city\",\n    \"pincode\": \"sample_pincode\",\n    \"addressLine1\": \"sample_addressLine1\",\n    \"addressLine2\": \"sample_addressLine2\",\n    \"landmark\": \"sample_landmark\"\n  },\n  \"email\": \"test@example.com\",\n  \"phone\": \"sample_phone\",\n  \"totalProducts\": 123,\n  \"totalOrders\": 123,\n  \"totalRevenue\": 123\n}"
             }
           },
           "response": [],
           "event": []
         },
         {
-          "id": "bd2a389c-e4ee-4793-aac8-db2c0e5df764",
+          "id": "06b8562a-b928-46c7-a3af-be8dbfd0527e",
           "name": "Store Id",
           "request": {
             "description": {
@@ -826,7 +826,7 @@
           "event": []
         },
         {
-          "id": "61579cfc-3a25-46fc-8e7a-e111c8aee4a3",
+          "id": "cb6e6864-cdab-44e0-9094-9576e44b2a0a",
           "name": "Store Id",
           "request": {
             "description": {
@@ -870,7 +870,7 @@
           "event": []
         },
         {
-          "id": "3696c3e0-8cc7-471c-9e5e-0875caa3daf0",
+          "id": "53589851-725c-454d-b718-7e7137db5d23",
           "name": "Get All Stores Query",
           "request": {
             "description": {
@@ -939,7 +939,7 @@
           "event": []
         },
         {
-          "id": "3510ff08-221b-4a0e-b037-adf4031883f2",
+          "id": "ec79b6b1-ae6a-4667-8773-245b4c74eef8",
           "name": "Store Id",
           "request": {
             "description": {
@@ -987,7 +987,7 @@
       }
     },
     {
-      "id": "6b1f6b81-3068-4082-b33e-d9d2372ec30e",
+      "id": "386a07ac-9102-4a2c-a01a-f8651843f63e",
       "name": "SETTING",
       "description": {
         "content": "Routes for setting",
@@ -995,7 +995,7 @@
       },
       "item": [
         {
-          "id": "e66585bb-656f-4c8a-8b5c-2abeacc13ab7",
+          "id": "71484d04-980e-4323-bfa2-16227a21f886",
           "name": "Get Item",
           "request": {
             "description": {
@@ -1019,7 +1019,7 @@
           "event": []
         },
         {
-          "id": "97f41de4-c041-49a6-af1b-90fde3337e82",
+          "id": "0ad039ab-00c2-49f6-8d6d-9c0b57d79b14",
           "name": "Create Item",
           "request": {
             "description": {
@@ -1056,7 +1056,7 @@
       }
     },
     {
-      "id": "574ba21c-d08d-4e37-a9ff-5ee7f3709d37",
+      "id": "9d1ad459-6891-46e0-8abe-d8c4ff5b4790",
       "name": "PHONEPE",
       "description": {
         "content": "Routes for phonePe",
@@ -1064,7 +1064,7 @@
       },
       "item": [
         {
-          "id": "d2642346-536b-441e-be01-c38552cc12ee",
+          "id": "237a8863-6aac-4c14-a4fc-5658bb27888a",
           "name": "Create Phone Pe Payment",
           "request": {
             "description": {
@@ -1090,7 +1090,7 @@
           "event": []
         },
         {
-          "id": "f4414036-76da-4c46-841e-57f0aab588f7",
+          "id": "338d1423-74f2-4b73-9db5-ee44c6312e0a",
           "name": "Create Callback",
           "request": {
             "description": {
@@ -1129,7 +1129,7 @@
       }
     },
     {
-      "id": "a243643d-6780-4fa8-94aa-affa7b3370e4",
+      "id": "cad194ed-a91e-46e4-84d2-749e55bb92b6",
       "name": "RAZORPAY",
       "description": {
         "content": "Routes for razorpay",
@@ -1137,7 +1137,7 @@
       },
       "item": [
         {
-          "id": "1ac9a599-494d-4125-b518-2ee1329112b0",
+          "id": "c2a4d78b-47de-4dd3-b36d-2405b45f6884",
           "name": "Create Razorpay Payment",
           "request": {
             "description": {
@@ -1163,7 +1163,7 @@
           "event": []
         },
         {
-          "id": "8f1cc352-14f4-47c0-8dfa-dd55adeacd5d",
+          "id": "2769e73a-53d1-43e3-a1d2-05b101fc29c5",
           "name": "Razorpay Payment Verify",
           "request": {
             "description": {
@@ -1202,7 +1202,7 @@
       }
     },
     {
-      "id": "5fb3a8e5-92d3-4b0c-836b-22d4ffc3200a",
+      "id": "c71d8f8f-6e58-4c84-8b7a-d52d8dc5b9d4",
       "name": "THEME",
       "description": {
         "content": "Routes for theme",
@@ -1210,7 +1210,7 @@
       },
       "item": [
         {
-          "id": "cec15e5e-a1e9-42c6-be4a-35f17188ebc9",
+          "id": "de71c3b2-880a-44cd-893b-0d029a0155f4",
           "name": "Create Theme",
           "request": {
             "description": {
@@ -1243,7 +1243,7 @@
           "event": []
         },
         {
-          "id": "adde0deb-9681-4a21-9ffd-274d82fb933e",
+          "id": "cf6acadf-dc7d-4186-ad53-4b64fa2911c5",
           "name": "Theme Id",
           "request": {
             "description": {
@@ -1276,7 +1276,7 @@
           "event": []
         },
         {
-          "id": "7daf222c-d120-4614-8129-3ea8d4bbb084",
+          "id": "53ede721-33a7-4ead-86c8-24e92254bf2a",
           "name": "Theme Id",
           "request": {
             "description": {
@@ -1320,7 +1320,7 @@
           "event": []
         },
         {
-          "id": "dc111f98-ef05-4d5b-919d-611ff9f02dee",
+          "id": "5f457d14-2a66-44d8-984e-67bd4e581f7b",
           "name": "Get All Themes Query",
           "request": {
             "description": {
@@ -1393,7 +1393,7 @@
           "event": []
         },
         {
-          "id": "c71b91e0-6fda-4d9b-81b6-1994d9837cc7",
+          "id": "df75a9cf-8a23-4c8c-8872-bd013431cee8",
           "name": "Theme Id",
           "request": {
             "description": {
@@ -1439,6 +1439,1022 @@
           }
         ]
       }
+    },
+    {
+      "id": "d71507c3-0d45-4062-a379-9b97f93f3f05",
+      "name": "PAGE",
+      "description": {
+        "content": "Routes for page",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "040be58f-973e-493f-bde9-18e952d45cee",
+          "name": "Create Page",
+          "request": {
+            "description": {
+              "content": "Controller: createPage\nSchema: createPageSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| storeId | string | Required |\n| title | string | Required |\n| slug | string | Required |\n| description | string | Optional |\n| type | string | Optional |\n| layoutJSON | object | Required |\n| metaTitle | string | Optional |\n| metaDescription | string | Optional |\n| metaKeywords | array | Optional |\n| isPublished | boolean | Optional |\n| isHomePage | boolean | Optional |\n| version | number | Optional |\n| isDraft | boolean | Optional |\n| visibility | string | Optional |\n| password | string | Optional |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "page"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storeId\": \"sample_storeId\",\n  \"title\": \"sample_title\",\n  \"slug\": \"sample_slug\",\n  \"description\": \"sample_description\",\n  \"type\": \"sample_type\",\n  \"layoutJSON\": {},\n  \"metaTitle\": \"sample_metaTitle\",\n  \"metaDescription\": \"sample_metaDescription\",\n  \"metaKeywords\": [\n    \"sample_string\"\n  ],\n  \"isPublished\": true,\n  \"isHomePage\": true,\n  \"version\": 123,\n  \"isDraft\": true,\n  \"visibility\": \"sample_visibility\",\n  \"password\": \"Password123!\"\n}"
+            }
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "4612cbe8-42fa-40a2-bb5a-bdd0af605b5b",
+          "name": "Page Id",
+          "request": {
+            "description": {
+              "content": "Controller: updatePage\nSchema: pageIdSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| id | string | Required |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "page"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"sample_id\"\n}"
+            }
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "db270e43-9eb2-45cf-9200-47a9a100e267",
+          "name": "Page Id",
+          "request": {
+            "description": {
+              "content": "Controller: deletePage\nSchema: pageIdSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| id | string | Required |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "page",
+                ":id"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "type": "any",
+                  "key": "id"
+                },
+                {
+                  "type": "any",
+                  "value": "sample_id",
+                  "key": "id"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "DELETE",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"sample_id\"\n}"
+            }
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "60a17cd1-1e93-4db7-b5e4-be9b566c4922",
+          "name": "Get All Pages Query",
+          "request": {
+            "description": {
+              "content": "Controller: getPages\nSchema: getAllPagesQuerySchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| page | number | Optional |\n| limit | number | Optional |\n| search | string | Optional |\n| activeFilter | boolean | Optional |\n| sortFilter | string | Optional |\n| startDateFilter | date | Optional |\n| endDateFilter | date | Optional |\n| storeId | string | Optional |\n| type | string | Optional |\n| isPublishedFilter | boolean | Optional |\n| isDraftFilter | boolean | Optional |\n| visibility | string | Optional |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "page"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "sample_search"
+                },
+                {
+                  "key": "activeFilter",
+                  "value": "true"
+                },
+                {
+                  "key": "sortFilter",
+                  "value": "sample_sortFilter"
+                },
+                {
+                  "key": "startDateFilter",
+                  "value": ""
+                },
+                {
+                  "key": "endDateFilter",
+                  "value": ""
+                },
+                {
+                  "key": "storeId",
+                  "value": "sample_storeId"
+                },
+                {
+                  "key": "type",
+                  "value": "sample_type"
+                },
+                {
+                  "key": "isPublishedFilter",
+                  "value": "true"
+                },
+                {
+                  "key": "isDraftFilter",
+                  "value": "true"
+                },
+                {
+                  "key": "visibility",
+                  "value": "sample_visibility"
+                }
+              ],
+              "variable": []
+            },
+            "method": "GET",
+            "body": {}
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "3700adc9-ff10-47a2-bbbe-f6a8b7825f8e",
+          "name": "Page Id",
+          "request": {
+            "description": {
+              "content": "Controller: getPageById\nSchema: pageIdSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| id | string | Required |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "page",
+                ":id"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "type": "any",
+                  "key": "id"
+                },
+                {
+                  "type": "any",
+                  "value": "sample_id",
+                  "key": "id"
+                }
+              ]
+            },
+            "method": "GET",
+            "body": {}
+          },
+          "response": [],
+          "event": []
+        }
+      ],
+      "event": [],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "TOKEN",
+            "value": "{{TOKEN}}",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fa108514-10e5-45e4-afe7-851aed904614",
+      "name": "COMPONENT",
+      "description": {
+        "content": "Routes for component",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "7bd5b10a-8d1e-4585-ade8-2ba3d14e7104",
+          "name": "Create Component",
+          "request": {
+            "description": {
+              "content": "Controller: createComponent\nSchema: createComponentSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| storeId | string | Optional |\n| sourceComponentId | string | Optional |\n| name | string | Required |\n| type | string | Required |\n| category | string | Optional |\n| label | string | Optional |\n| icon | string | Optional |\n| previewImage | string | Optional |\n| configJSON | object | Optional |\n| defaultConfig | object | Optional |\n| configSchema | object | Optional |\n| isReusable | boolean | Optional |\n| isGlobal | boolean | Optional |\n| supportedPages | array | Optional |\n| supportedThemes | array | Optional |\n| version | string | Optional |\n| isDeprecated | boolean | Optional |\n| isActive | boolean | Optional |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "component"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storeId\": \"sample_storeId\",\n  \"sourceComponentId\": \"sample_sourceComponentId\",\n  \"name\": \"sample_name\",\n  \"type\": \"sample_type\",\n  \"category\": \"sample_category\",\n  \"label\": \"sample_label\",\n  \"icon\": \"sample_icon\",\n  \"previewImage\": \"sample_previewImage\",\n  \"configJSON\": {},\n  \"defaultConfig\": {},\n  \"configSchema\": {},\n  \"isReusable\": true,\n  \"isGlobal\": true,\n  \"supportedPages\": [\n    \"sample_string\"\n  ],\n  \"supportedThemes\": [\n    \"sample_string\"\n  ],\n  \"version\": \"sample_version\",\n  \"isDeprecated\": true,\n  \"isActive\": true\n}"
+            }
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "b55c507b-6667-42f5-8e7a-5b080f0431ff",
+          "name": "Component Id",
+          "request": {
+            "description": {
+              "content": "Controller: updateComponent\nSchema: componentIdSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| id | string | Required |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "component"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"sample_id\"\n}"
+            }
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "0e80d9cc-8a07-485e-888b-e0edc3c8c32c",
+          "name": "Customize Component",
+          "request": {
+            "description": {
+              "content": "Controller: customizeComponent\nSchema: customizeComponentSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| storeId | string | Required |\n| componentId | string | Required |\n| name | string | Optional |\n| label | string | Optional |\n| icon | string | Optional |\n| previewImage | string | Optional |\n| configJSON | object | Optional |\n| defaultConfig | object | Optional |\n| configSchema | object | Optional |\n| supportedPages | array | Optional |\n| supportedThemes | array | Optional |\n| version | string | Optional |\n| isReusable | boolean | Optional |\n| isDeprecated | boolean | Optional |\n| isActive | boolean | Optional |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "component",
+                "customize"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storeId\": \"sample_storeId\",\n  \"componentId\": \"sample_componentId\",\n  \"name\": \"sample_name\",\n  \"label\": \"sample_label\",\n  \"icon\": \"sample_icon\",\n  \"previewImage\": \"sample_previewImage\",\n  \"configJSON\": {},\n  \"defaultConfig\": {},\n  \"configSchema\": {},\n  \"supportedPages\": [\n    \"sample_string\"\n  ],\n  \"supportedThemes\": [\n    \"sample_string\"\n  ],\n  \"version\": \"sample_version\",\n  \"isReusable\": true,\n  \"isDeprecated\": true,\n  \"isActive\": true\n}"
+            }
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "90317121-246b-41ee-9175-c1ac1fe04452",
+          "name": "Component Id",
+          "request": {
+            "description": {
+              "content": "Controller: deleteComponent\nSchema: componentIdSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| id | string | Required |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "component",
+                ":id"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "type": "any",
+                  "key": "id"
+                },
+                {
+                  "type": "any",
+                  "value": "sample_id",
+                  "key": "id"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "DELETE",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"sample_id\"\n}"
+            }
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "81ea901c-f417-4d85-90cb-600e65f84a5b",
+          "name": "Get All Components Query",
+          "request": {
+            "description": {
+              "content": "Controller: getComponents\nSchema: getAllComponentsQuerySchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| page | number | Optional |\n| limit | number | Optional |\n| search | string | Optional |\n| activeFilter | boolean | Optional |\n| reusableFilter | boolean | Optional |\n| globalFilter | boolean | Optional |\n| deprecatedFilter | boolean | Optional |\n| type | string | Optional |\n| category | string | Optional |\n| supportedPage | string | Optional |\n| storeId | string | Optional |\n| themeId | string | Optional |\n| sortFilter | string | Optional |\n| startDateFilter | date | Optional |\n| endDateFilter | date | Optional |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "component"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "sample_search"
+                },
+                {
+                  "key": "activeFilter",
+                  "value": "true"
+                },
+                {
+                  "key": "reusableFilter",
+                  "value": "true"
+                },
+                {
+                  "key": "globalFilter",
+                  "value": "true"
+                },
+                {
+                  "key": "deprecatedFilter",
+                  "value": "true"
+                },
+                {
+                  "key": "type",
+                  "value": "sample_type"
+                },
+                {
+                  "key": "category",
+                  "value": "sample_category"
+                },
+                {
+                  "key": "supportedPage",
+                  "value": "sample_supportedPage"
+                },
+                {
+                  "key": "storeId",
+                  "value": "sample_storeId"
+                },
+                {
+                  "key": "themeId",
+                  "value": "sample_themeId"
+                },
+                {
+                  "key": "sortFilter",
+                  "value": "sample_sortFilter"
+                },
+                {
+                  "key": "startDateFilter",
+                  "value": ""
+                },
+                {
+                  "key": "endDateFilter",
+                  "value": ""
+                }
+              ],
+              "variable": []
+            },
+            "method": "GET",
+            "body": {}
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "bdc5e087-aa2d-45e3-80af-27701d5b25bf",
+          "name": "Component Id",
+          "request": {
+            "description": {
+              "content": "Controller: getComponentById\nSchema: componentIdSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| id | string | Required |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "component",
+                ":id"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "type": "any",
+                  "key": "id"
+                },
+                {
+                  "type": "any",
+                  "value": "sample_id",
+                  "key": "id"
+                }
+              ]
+            },
+            "method": "GET",
+            "body": {}
+          },
+          "response": [],
+          "event": []
+        }
+      ],
+      "event": [],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "TOKEN",
+            "value": "{{TOKEN}}",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "id": "30ac87e5-82de-44bc-8d30-cca1498061f8",
+      "name": "CATEGORY",
+      "description": {
+        "content": "Routes for category",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "81b11271-e1bb-46fc-9b49-e57780daf279",
+          "name": "Create Category",
+          "request": {
+            "description": {
+              "content": "Controller: createCategory\nSchema: createCategorySchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| name | string | Required |\n| description | string | Optional |\n| isActive | boolean | Optional |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "category"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"sample_name\",\n  \"description\": \"sample_description\",\n  \"isActive\": true\n}"
+            }
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "de4eba8d-8b5f-46ec-8239-309ab9bdaa12",
+          "name": "Category Id",
+          "request": {
+            "description": {
+              "content": "Controller: updateCategory\nSchema: categoryIdSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| id | string | Required |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "category"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"sample_id\"\n}"
+            }
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "89451b1c-3e09-4b5a-9ea6-8a49168d00dc",
+          "name": "Category Id",
+          "request": {
+            "description": {
+              "content": "Controller: deleteCategory\nSchema: categoryIdSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| id | string | Required |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "category",
+                ":id"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "type": "any",
+                  "key": "id"
+                },
+                {
+                  "type": "any",
+                  "value": "sample_id",
+                  "key": "id"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "DELETE",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"sample_id\"\n}"
+            }
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "4e659565-2b5b-4829-8730-55ae2d31d3c2",
+          "name": "Get All Categories Query",
+          "request": {
+            "description": {
+              "content": "Controller: getCategories\nSchema: getAllCategoriesQuerySchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| page | number | Optional |\n| limit | number | Optional |\n| search | string | Optional |\n| activeFilter | boolean | Optional |\n| sortFilter | string | Optional |\n| startDateFilter | date | Optional |\n| endDateFilter | date | Optional |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "category"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "sample_search"
+                },
+                {
+                  "key": "activeFilter",
+                  "value": "true"
+                },
+                {
+                  "key": "sortFilter",
+                  "value": "sample_sortFilter"
+                },
+                {
+                  "key": "startDateFilter",
+                  "value": ""
+                },
+                {
+                  "key": "endDateFilter",
+                  "value": ""
+                }
+              ],
+              "variable": []
+            },
+            "method": "GET",
+            "body": {}
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "20c018c2-f600-4b18-80e0-21414dfdf998",
+          "name": "Category Id",
+          "request": {
+            "description": {
+              "content": "Controller: getCategoryById\nSchema: categoryIdSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| id | string | Required |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "category",
+                ":id"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "type": "any",
+                  "key": "id"
+                },
+                {
+                  "type": "any",
+                  "value": "sample_id",
+                  "key": "id"
+                }
+              ]
+            },
+            "method": "GET",
+            "body": {}
+          },
+          "response": [],
+          "event": []
+        }
+      ],
+      "event": [],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "TOKEN",
+            "value": "{{TOKEN}}",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b085d0f1-d611-416e-b747-7bc50e095624",
+      "name": "COLLECTION",
+      "description": {
+        "content": "Routes for collection",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "cb3c3545-4183-4f38-a2f0-9d2bc20c6895",
+          "name": "Create Collection",
+          "request": {
+            "description": {
+              "content": "Controller: createCollection\nSchema: createCollectionSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| storeId | string | Required |\n| title | string | Required |\n| handle | string | Optional |\n| type | string | Optional |\n| status | string | Optional |\n| isPublished | boolean | Optional |\n| publishedAt | date | Optional |\n| description | string | Optional |\n| productIds | array | Optional |\n| rules | array | Optional |\n| rules[].field | string | Required |\n| rules[].operator | string | Required |\n| rules[].value | any | Required |\n| ruleCondition | string | Optional |\n| sortOrder | string | Optional |\n| image | object | Optional |\n| image.url | string | Optional |\n| image.alt | string | Optional |\n| seo | object | Optional |\n| seo.title | string | Optional |\n| seo.description | string | Optional |\n| tags | array | Optional |\n| isActive | boolean | Optional |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "collection"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storeId\": \"sample_storeId\",\n  \"title\": \"sample_title\",\n  \"handle\": \"sample_handle\",\n  \"type\": \"sample_type\",\n  \"status\": \"sample_status\",\n  \"isPublished\": true,\n  \"publishedAt\": \"\",\n  \"description\": \"sample_description\",\n  \"productIds\": [\n    \"sample_string\"\n  ],\n  \"rules\": [\n    {\n      \"field\": \"sample_field\",\n      \"operator\": \"sample_operator\",\n      \"value\": \"sample_any\"\n    }\n  ],\n  \"ruleCondition\": \"sample_ruleCondition\",\n  \"sortOrder\": \"sample_sortOrder\",\n  \"image\": {\n    \"url\": \"sample_url\",\n    \"alt\": \"sample_alt\"\n  },\n  \"seo\": {\n    \"title\": \"sample_title\",\n    \"description\": \"sample_description\"\n  },\n  \"tags\": [\n    \"sample_string\"\n  ],\n  \"isActive\": true\n}"
+            }
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "b246604d-941c-4f86-b481-6b74f257012f",
+          "name": "Update Collection",
+          "request": {
+            "description": {
+              "content": "Controller: updateCollection\nSchema: updateCollectionSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| storeId | string | Optional |\n| title | string | Optional |\n| handle | string | Optional |\n| type | string | Optional |\n| status | string | Optional |\n| isPublished | boolean | Optional |\n| publishedAt | date | Optional |\n| description | string | Optional |\n| productIds | array | Optional |\n| rules | array | Optional |\n| rules[].field | string | Required |\n| rules[].operator | string | Required |\n| rules[].value | any | Required |\n| ruleCondition | string | Optional |\n| sortOrder | string | Optional |\n| image | object | Optional |\n| image.url | string | Optional |\n| image.alt | string | Optional |\n| seo | object | Optional |\n| seo.title | string | Optional |\n| seo.description | string | Optional |\n| tags | array | Optional |\n| isActive | boolean | Optional |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "collection"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storeId\": \"sample_storeId\",\n  \"title\": \"sample_title\",\n  \"handle\": \"sample_handle\",\n  \"type\": \"sample_type\",\n  \"status\": \"sample_status\",\n  \"isPublished\": true,\n  \"publishedAt\": \"\",\n  \"description\": \"sample_description\",\n  \"productIds\": [\n    \"sample_string\"\n  ],\n  \"rules\": [\n    {\n      \"field\": \"sample_field\",\n      \"operator\": \"sample_operator\",\n      \"value\": \"sample_any\"\n    }\n  ],\n  \"ruleCondition\": \"sample_ruleCondition\",\n  \"sortOrder\": \"sample_sortOrder\",\n  \"image\": {\n    \"url\": \"sample_url\",\n    \"alt\": \"sample_alt\"\n  },\n  \"seo\": {\n    \"title\": \"sample_title\",\n    \"description\": \"sample_description\"\n  },\n  \"tags\": [\n    \"sample_string\"\n  ],\n  \"isActive\": true\n}"
+            }
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "b8fa9c76-4f90-4aac-9948-2bf722a70691",
+          "name": "Delete :id",
+          "request": {
+            "description": {
+              "content": "Controller: deleteCollection",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "collection",
+                ":id"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "type": "any",
+                  "key": "id"
+                },
+                {
+                  "type": "any",
+                  "value": "sample_id",
+                  "key": "id"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "body": {}
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "bf7bfac8-2bba-47b6-8897-de7ea4d88394",
+          "name": "Get Item",
+          "request": {
+            "description": {
+              "content": "Controller: getCollections",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "collection"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "GET",
+            "body": {}
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "3b22cf57-a5fb-455f-9bb9-cd63619f377d",
+          "name": "Get :id",
+          "request": {
+            "description": {
+              "content": "Controller: getCollectionById",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "collection",
+                ":id"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "type": "any",
+                  "key": "id"
+                },
+                {
+                  "type": "any",
+                  "value": "sample_id",
+                  "key": "id"
+                }
+              ]
+            },
+            "method": "GET",
+            "body": {}
+          },
+          "response": [],
+          "event": []
+        }
+      ],
+      "event": [],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "TOKEN",
+            "value": "{{TOKEN}}",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "id": "93b00375-7f50-4fb1-86dc-7c63a104ac68",
+      "name": "SITE",
+      "description": {
+        "content": "Routes for site",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "2da823ae-3889-4c6d-ab8b-c5cec969a475",
+          "name": "Get :storeSlug",
+          "request": {
+            "description": {
+              "content": "Controller: getPublishedSite",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "site",
+                ":storeSlug"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "type": "any",
+                  "key": "storeSlug"
+                },
+                {
+                  "type": "any",
+                  "value": "sample_storeSlug",
+                  "key": "storeSlug"
+                }
+              ]
+            },
+            "method": "GET",
+            "body": {}
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "2bfa567c-a73d-4325-ad57-a835cdc17c70",
+          "name": "Get :pageSlug",
+          "request": {
+            "description": {
+              "content": "Controller: getPublishedSitePage",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "site",
+                ":storeSlug",
+                "page",
+                ":pageSlug"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "type": "any",
+                  "key": "storeSlug"
+                },
+                {
+                  "type": "any",
+                  "key": "pageSlug"
+                },
+                {
+                  "type": "any",
+                  "value": "sample_storeSlug",
+                  "key": "storeSlug"
+                },
+                {
+                  "type": "any",
+                  "value": "sample_pageSlug",
+                  "key": "pageSlug"
+                }
+              ]
+            },
+            "method": "GET",
+            "body": {}
+          },
+          "response": [],
+          "event": []
+        }
+      ],
+      "event": []
     }
   ],
   "event": [],
@@ -1460,7 +2476,7 @@
     }
   ],
   "info": {
-    "_postman_id": "5924e5c2-882a-4c3f-97bc-e592df7329be",
+    "_postman_id": "32d3047f-cda8-4c7c-8e98-f8ae09a5c5db",
     "name": "HKDigiverse API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": {

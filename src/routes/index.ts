@@ -11,6 +11,8 @@ import { themeRouter } from "./theme";
 import { pageRouter } from "./page";
 import { componentRouter } from "./component";
 import { siteRouter } from "./site";
+import { categoryRouter } from "./category";
+import { collectionRouter } from "./collection";
 const router = Router();
 
 router.use("/upload", uploadRouter);
@@ -24,6 +26,8 @@ router.use("/razorpay", razorpayRouter);
 router.use("/theme", themeRouter);
 router.use("/page", pageRouter);
 router.use("/component", componentRouter);
+router.use("/category", categoryRouter);
+router.use("/collection", collectionRouter);
 router.use("/site", siteRouter);
 
 
