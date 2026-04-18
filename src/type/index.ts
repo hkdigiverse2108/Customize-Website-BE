@@ -11,3 +11,4 @@ export * from "./component";
 export * from "./siteSnapshot";
 export * from "./category";
 export * from "./collection";
+export * from "./product";

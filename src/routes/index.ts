@@ -13,6 +13,7 @@ import { componentRouter } from "./component";
 import { siteRouter } from "./site";
 import { categoryRouter } from "./category";
 import { collectionRouter } from "./collection";
+import { productRouter } from "./product";
 const router = Router();
 
 router.use("/upload", uploadRouter);
@@ -28,6 +29,7 @@ router.use("/page", pageRouter);
 router.use("/component", componentRouter);
 router.use("/category", categoryRouter);
 router.use("/collection", collectionRouter);
+router.use("/product", productRouter);
 router.use("/site", siteRouter);
 
 

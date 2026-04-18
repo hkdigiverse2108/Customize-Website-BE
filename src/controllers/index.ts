@@ -11,3 +11,4 @@ export * as componentController from "./component";
 export * as siteController from "./site";
 export * as categoryController from "./category";
 export * as collectionController from "./collection";
+export * as productController from "./product";
