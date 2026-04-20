@@ -14,14 +14,17 @@ export interface IComponentType {
   icon: string;
   previewImage: string;
   configJSON: Record<string, any>;
+  draftConfigJSON: Record<string, any> | null;
   defaultConfig: Record<string, any>;
   configSchema: Record<string, any>;
   isReusable: boolean;
   isGlobal: boolean;
+  isPublished: boolean;
   supportedPages: COMPONENT_SUPPORTED_PAGE[];
   supportedThemes: (Types.ObjectId | string)[];
   version: string;
   isDeprecated: boolean;
+  isReadOnly: boolean;
   isActive: boolean;
   isDeleted: boolean;
   createdAt: Date;
@@ -38,14 +41,17 @@ export interface ICreateComponentPayload {
   icon?: string;
   previewImage?: string;
   configJSON?: Record<string, any>;
+  draftConfigJSON?: Record<string, any> | null;
   defaultConfig?: Record<string, any>;
   configSchema?: Record<string, any>;
   isReusable?: boolean;
   isGlobal?: boolean;
+  isPublished?: boolean;
   supportedPages?: COMPONENT_SUPPORTED_PAGE[];
   supportedThemes?: (Types.ObjectId | string)[];
   version?: string;
   isDeprecated?: boolean;
+  isReadOnly?: boolean;
   isActive?: boolean;
 }
 
@@ -61,14 +67,17 @@ export interface IComponent extends Document {
   icon: string;
   previewImage: string;
   configJSON: Record<string, any>;
+  draftConfigJSON: Record<string, any> | null;
   defaultConfig: Record<string, any>;
   configSchema: Record<string, any>;
   isReusable: boolean;
   isGlobal: boolean;
+  isPublished: boolean;
   supportedPages: COMPONENT_SUPPORTED_PAGE[];
   supportedThemes: (Types.ObjectId | string)[];
   version: string;
   isDeprecated: boolean;
+  isReadOnly: boolean;
   isActive: boolean;
   isDeleted: boolean;
   createdAt: Date;

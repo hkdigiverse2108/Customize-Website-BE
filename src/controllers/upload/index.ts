@@ -1,6 +1,6 @@
 import path from "path";
-import {  HTTP_STATUS } from "../../common";
-import { reqInfo, responseMessage } from "../../helper";
+import { HTTP_STATUS } from "../../common";
+import { reqInfo, responseMessage, validate } from "../../helper";
 import { deleteImageSchema } from "../../validation";
 import url from "url";
 import fs from "fs";
@@ -18,75 +18,71 @@ export const uploadFile = async (req, res) => {
 
     const uploadedImages = [];
     const uploadedPdfs = [];
+
     if (hasImage) {
       req.files.images.forEach((file) => {
-        const cleanPath = file.path.replace(/\\/g, "/");
-        const imageUrl = `${backendUrl ? `${backendUrl}/` : ""}${cleanPath}`;
-        uploadedImages.push(imageUrl);
+        uploadedImages.push(`${backendUrl ? `${backendUrl}/` : ""}${file.path.replace(/\\/g, "/")}`);
       });
     }
 
     if (hasPdf) {
       req.files.pdf.forEach((file) => {
-        const cleanPath = file.path.replace(/\\/g, "/");
-        const pdfUrl = `${backendUrl ? `${backendUrl}/` : ""}${cleanPath}`;
-        uploadedPdfs.push(pdfUrl);
+        uploadedPdfs.push(`${backendUrl ? `${backendUrl}/` : ""}${file.path.replace(/\\/g, "/")}`);
       });
     }
 
     return res.status(HTTP_STATUS.CREATED).json(apiResponse(HTTP_STATUS.CREATED, responseMessage?.fileUploadSuccess, { images: uploadedImages, pdfs: uploadedPdfs }, {}));
   } catch (error) {
     console.error(error);
-    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, {}));
+    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }
 };
 
 export const deleteUploadedFile = async (req, res) => {
   reqInfo(req);
   try {
-    const { error, value } = deleteImageSchema.validate(req.body);
-    if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
+    const value = validate(deleteImageSchema, req.body, res);
+    if (!value) return;
 
-    const { fileUrl } = value;
-
-    const parsedUrl = url.parse(fileUrl);
+    const parsedUrl = url.parse(value.fileUrl);
     const pathParts = (parsedUrl.pathname || "").split("/").filter(Boolean);
+    const type = pathParts.find((p) => ["images", "pdfs"].includes(p));
 
-    const allowedTypes = ["images", "pdfs"];
-    const type = pathParts.find((p) => allowedTypes.includes(p));
-
-    if (!type) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage?.unsupportedFileType, {}, {}));
+    if (!type) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Unsupported file type", {}, {}));
 
     const filePath = path.join(process.cwd(), parsedUrl.pathname.replace(/^\//, ""));
-
-    if (!fs.existsSync(filePath)) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage?.getDataNotFound(type), {}, {}));
+    if (!fs.existsSync(filePath)) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "File not found", {}, {}));
 
     fs.unlinkSync(filePath);
-    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage?.deleteDataSuccess(type), {}, {}));
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "File deleted", {}, {}));
   } catch (error) {
     console.error(error);
-    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, {}));
+    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }
 };
 
 export const getAllImages = async (req, res) => {
   reqInfo(req);
   try {
-    const images = fs.readdirSync("public/images").map((file) => `${process.env.BACKEND_URL}/public/images/${file}`);
-    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage?.getDataSuccess("Images"), images, {}));
+    const dir = "public/images";
+    if (!fs.existsSync(dir)) return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Images", [], {}));
+    const images = fs.readdirSync(dir).map((file) => `${process.env.BACKEND_URL}/public/images/${file}`);
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Images", images, {}));
   } catch (error) {
     console.error(error);
-    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, {}));
+    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }
 };
 
 export const getAllPdfs = async (req, res) => {
   reqInfo(req);
   try {
-    const pdfs = fs.readdirSync("public/pdfs").map((file) => `${process.env.BACKEND_URL}/public/pdfs/${file}`);
-    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage?.getDataSuccess("PDFs"), pdfs, {}));
+    const dir = "public/pdfs";
+    if (!fs.existsSync(dir)) return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "PDFs", [], {}));
+    const pdfs = fs.readdirSync(dir).map((file) => `${process.env.BACKEND_URL}/public/pdfs/${file}`);
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "PDFs", pdfs, {}));
   } catch (error) {
     console.error(error);
-    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, {}));
+    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }
 };

@@ -1,27 +1,28 @@
 import { ACCOUNT_TYPE, getPaginationState, HTTP_STATUS, resolveSortAndFilter } from "../../common";
 import { discountModel, storeModel } from "../../database";
-import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData } from "../../helper";
+import { cacheService, countData, deleteData, getData, getFirstMatch, handlePostUpdate, reqInfo, responseMessage, updateData, validate, verifyStoreAccess } from "../../helper";
 import { apiResponse } from "../../type";
 import { createDiscountSchema, discountIdSchema, getAllDiscountsQuerySchema, updateDiscountSchema } from "../../validation";
 
 export const createDiscount = async (req, res) => {
   reqInfo(req);
   try {
-    const value = validate(createDiscountSchema, req.body, res);
-    if (!value) return;
+    const val = validate(createDiscountSchema, req.body, res);
+    if (!val) return;
 
-    const user = req.headers.user;
-    const store = await findOne(storeModel, getStoreCriteria(user, value.storeId));
-    if (!store) return sendError(res, HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Store"));
+    const user = req.headers.user as any;
+    if (!await verifyStoreAccess(user, val.storeId)) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Store not found", {}, {}));
 
-    const duplicate = await findOne(discountModel, { storeId: value.storeId, code: value.code, isDeleted: { $ne: true } });
-    if (duplicate) return sendError(res, HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("code"));
+    const duplicate = await getFirstMatch(discountModel, { storeId: val.storeId, code: val.code, isDeleted: { $ne: true } }, {}, {});
+    if (duplicate) return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, "Code already exists", {}, {}));
 
-    const created = await new discountModel(value).save();
+    const created = await new discountModel(val).save();
+    await handlePostUpdate({ user, action: "create", resourceType: "discount", resourceId: String(created._id), newData: created, storeId: val.storeId, req });
 
     return res.status(HTTP_STATUS.CREATED).json(apiResponse(HTTP_STATUS.CREATED, responseMessage.addDataSuccess("Discount"), created, {}));
   } catch (error) {
-    return handleMongoError(res, error);
+    console.error(error);
+    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }
 };
 
@@ -29,135 +30,101 @@ export const updateDiscount = async (req, res) => {
   reqInfo(req);
   try {
     const { id, ...body } = req.body;
+    const idVal = validate(discountIdSchema, { id }, res);
+    const val = validate(updateDiscountSchema, body, res);
+    if (!idVal || !val) return;
 
-    const idValue = validate(discountIdSchema, { id }, res);
-    if (!idValue) return;
+    const existing: any = await getFirstMatch(discountModel, { _id: idVal.id, isDeleted: { $ne: true } }, {}, {});
+    if (!existing) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Discount not found", {}, {}));
 
-    const value = validate(updateDiscountSchema, body, res);
-    if (!value) return;
+    const user = req.headers.user as any;
+    if (!await verifyStoreAccess(user, String(existing.storeId))) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
 
-    const existing = await findOne(discountModel, { _id: idValue.id, isDeleted: { $ne: true } });
-    if (!existing) return sendError(res, HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Discount"));
-
-    const user = req.headers.user;
-    const store = await findOne(storeModel, getStoreCriteria(user, String(existing.storeId)));
-    if (!store) return sendError(res, HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Discount"));
-
-    if (value.code) {
-      const duplicate = await findOne(discountModel, { storeId: existing.storeId, code: value.code, _id: { $ne: idValue.id }, isDeleted: { $ne: true } });
-      if (duplicate) return sendError(res, HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("code"));
+    if (val.code) {
+      const duplicate = await getFirstMatch(discountModel, { storeId: existing.storeId, code: val.code, _id: { $ne: idVal.id }, isDeleted: { $ne: true } }, {}, {});
+      if (duplicate) return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, "Code already exists", {}, {}));
     }
 
-    const updated = await updateData(discountModel, { _id: idValue.id, isDeleted: { $ne: true } }, value, {});
+    const updated = await updateData(discountModel, { _id: idVal.id }, val, {});
+    await handlePostUpdate({ user, action: "update", resourceType: "discount", resourceId: idVal.id, oldData: existing, newData: updated, storeId: String(existing.storeId), req });
 
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.updateDataSuccess("Discount"), updated, {}));
   } catch (error) {
-    return handleMongoError(res, error);
+    console.error(error);
+    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }
 };
 
 export const deleteDiscount = async (req, res) => {
   reqInfo(req);
   try {
-    const value = validate(discountIdSchema, req.params, res);
-    if (!value) return;
+    const val = validate(discountIdSchema, req.params, res);
+    if (!val) return;
 
-    const existing = await findOne(discountModel, { _id: value.id, isDeleted: { $ne: true } });
-    if (!existing) return sendError(res, HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Discount"));
+    const existing: any = await getFirstMatch(discountModel, { _id: val.id, isDeleted: { $ne: true } }, {}, {});
+    if (!existing || !await verifyStoreAccess(req.headers.user, String(existing?.storeId))) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Discount not found", {}, {}));
 
-    const user = req.headers.user;
-    const store = await findOne(storeModel, getStoreCriteria(user, String(existing.storeId)));
-    if (!store) return sendError(res, HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Discount"));
-
-    const deleted = await deleteData(discountModel, { _id: value.id }, { isActive: false }, {});
+    const deleted = await deleteData(discountModel, { _id: val.id }, { isActive: false }, {});
+    await handlePostUpdate({ user: req.headers.user, action: "delete", resourceType: "discount", resourceId: val.id, oldData: existing, storeId: String(existing.storeId), req });
 
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.deleteDataSuccess("Discount"), deleted, {}));
   } catch (error) {
-    return handleMongoError(res, error);
+    console.error(error);
+    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }
 };
 
 export const getDiscounts = async (req, res) => {
   reqInfo(req);
   try {
-    const value = validate(getAllDiscountsQuerySchema, req.query, res);
-    if (!value) return;
+    const val = validate(getAllDiscountsQuerySchema, req.query, res);
+    if (!val) return;
 
-    const { criteria, options, page, limit } = resolveSortAndFilter(value, ["title", "code"]);
+    const cacheKey = `discounts_${JSON.stringify(req.query)}`;
+    const cached = await cacheService.get(cacheKey);
+    if (cached) return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Success", cached, {}));
 
-    if (value?.storeId) criteria.storeId = value.storeId;
-    if (value?.isActive !== undefined) criteria.isActive = value.isActive;
-    if (value?.type) criteria.type = value.type;
+    const { criteria, options, page, limit } = resolveSortAndFilter(val, ["title", "code"]);
+    if (val.storeId) criteria.storeId = val.storeId;
+    if (val.isActive !== undefined) criteria.isActive = val.isActive;
+    if (val.type) criteria.type = val.type;
 
     const user = req.headers.user as any;
     if (user?.role === ACCOUNT_TYPE.VENDOR) {
-      const stores = await getData(storeModel, { userId: user._id, isDeleted: { $ne: true } }, { _id: 1 }, {});
-      const storeIds = stores.map((store) => store._id);
-
-      if (!storeIds.length) {
-        return res.status(HTTP_STATUS.OK).json(
-          apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Discounts"), {
-            discounts: [],
-            ...getPaginationState(0, Number(page), Number(limit)),
-            total_count: 0,
-          }, {})
-        );
-      }
-
-      criteria.storeId = { $in: storeIds };
+      const stores = await getStoreIds(user);
+      if (!stores.length) return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Success", { discounts: [], ...getPaginationState(0, page, limit), total_count: 0 }, {}));
+      criteria.storeId = { $in: stores };
     }
 
     const discounts = await getData(discountModel, criteria, {}, options);
     const total = await countData(discountModel, criteria);
-    const pagination = getPaginationState(total, Number(page), Number(limit));
+    const result = { discounts, ...getPaginationState(total, page, limit), total_count: total };
 
-    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Discounts"), { discounts, ...pagination, total_count: total }, {}));
+    await cacheService.set(cacheKey, result, 300);
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Success", result, {}));
   } catch (error) {
-    return handleMongoError(res, error);
+    console.error(error);
+    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }
 };
 
 export const getDiscountById = async (req, res) => {
   reqInfo(req);
   try {
-    const value = validate(discountIdSchema, req.params, res);
-    if (!value) return;
+    const val = validate(discountIdSchema, req.params, res);
+    if (!val) return;
 
-    const discount = await findOne(discountModel, { _id: value.id, isDeleted: { $ne: true } });
-    if (!discount) return sendError(res, HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Discount"));
+    const discount: any = await getFirstMatch(discountModel, { _id: val.id, isDeleted: { $ne: true } }, {}, {});
+    if (!discount || !await verifyStoreAccess(req.headers.user, String(discount?.storeId))) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Discount not found", {}, {}));
 
-    const user = req.headers.user;
-    const store = await findOne(storeModel, getStoreCriteria(user, String(discount.storeId)));
-    if (!store) return sendError(res, HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Discount"));
-
-    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Discount"), discount, {}));
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Success", discount, {}));
   } catch (error) {
-    return handleMongoError(res, error);
+    console.error(error);
+    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }
 };
 
-const sendError = (res, status, message, error = {}) => res.status(status).json(apiResponse(status, message, {}, error));
-
-const validate = (schema, data, res) => {
-  const { error, value } = schema.validate(data);
-  if (error) {
-    sendError(res, HTTP_STATUS.BAD_REQUEST, error.details[0].message);
-    return null;
-  }
-  return value;
+const getStoreIds = async (user: any) => {
+  const stores = await getData(storeModel, { userId: user._id, isDeleted: { $ne: true } }, { _id: 1 }, {});
+  return stores.map(s => String(s._id));
 };
-
-const handleMongoError = (res, error) => {
-  if (error?.code === 11000) return sendError(res, HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("code"));
-
-  console.error(error);
-  return sendError(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, error);
-};
-
-const findOne = (model, query) => getFirstMatch(model, query, {}, {});
-
-const getStoreCriteria = (user, storeId) => ({
-  _id: storeId,
-  isDeleted: { $ne: true },
-  ...(user?.role === ACCOUNT_TYPE.VENDOR && { userId: user._id }),
-});

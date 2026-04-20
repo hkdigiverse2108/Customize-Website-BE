@@ -24,6 +24,7 @@ const componentSchema = new Schema<IComponent>(
     supportedThemes: [{ type: Schema.Types.ObjectId, ref: "theme" }],
     version: { type: String, default: "1.0.0", trim: true },
     isDeprecated: { type: Boolean, default: false },
+    isReadOnly: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
   },
@@ -31,8 +32,8 @@ const componentSchema = new Schema<IComponent>(
 );
 
 componentSchema.index({ type: 1, category: 1 });
-componentSchema.index({ storeId: 1, sourceComponentId: 1 }, { unique: true, partialFilterExpression: { isDeleted: false, storeId: { $exists: true, $type: "objectId" }, sourceComponentId: { $exists: true, $type: "objectId" } } });
-componentSchema.index({ storeId: 1, name: 1, type: 1, version: 1 }, { unique: true, partialFilterExpression: { isDeleted: false, storeId: { $exists: true, $type: "objectId" } } });
-componentSchema.index({ name: 1, type: 1, version: 1 }, { unique: true, partialFilterExpression: { isDeleted: false, $or: [{ storeId: null }, { storeId: { $exists: false } }] } });
+componentSchema.index({ storeId: 1, name: 1, type: 1, version: 1 }, { unique: true, partialFilterExpression: { isDeleted: false, storeId: { $ne: null } } });
+componentSchema.index({ name: 1, type: 1, version: 1 }, { unique: true, partialFilterExpression: { isDeleted: false, storeId: null } });
+componentSchema.index({ isGlobal: 1, isActive: 1, isDeleted: 1 }); // Optimized for fetching global components
 
 export const componentModel = model<IComponent>("component", componentSchema);

@@ -27,6 +27,7 @@ const storeSchema = new Schema<IStore>(
     description: { type: String, default: "", trim: true },
     logo: { type: String, default: null, trim: true },
     banner: { type: String, default: null, trim: true },
+    themeId: { type: Schema.Types.ObjectId, ref: "theme", required: true },
     themeIds: [{ type: Schema.Types.ObjectId, ref: "theme", required: true }],
     themeConfig: {
       colors: { type: Schema.Types.Mixed, default: {} },
@@ -52,6 +53,22 @@ const storeSchema = new Schema<IStore>(
     totalProducts: { type: Number, default: 0, min: 0 },
     totalOrders: { type: Number, default: 0, min: 0 },
     totalRevenue: { type: Number, default: 0, min: 0 },
+    
+    // 🌐 Ecosystem & Marketing (Shopify style)
+    externalScripts: [{
+      name: String,
+      src: String,
+      position: { type: String, enum: ['head', 'body_start', 'body_end'], default: 'head' },
+      isActive: { type: Boolean, default: true }
+    }],
+    socialLinks: {
+      facebook: String,
+      instagram: String,
+      twitter: String,
+      youtube: String,
+      linkedin: String
+    },
+
     isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }

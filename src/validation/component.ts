@@ -45,10 +45,16 @@ export const updateComponentSchema = Joi.object({
   version: Joi.string().trim().allow("").optional(),
   isDeprecated: Joi.boolean().optional(),
   isActive: Joi.boolean().optional(),
+  changeSummary: Joi.string().trim().allow("").optional(),
 }).min(1);
 
 export const componentIdSchema = Joi.object({
   id: objectId().required(),
+});
+
+export const rollbackComponentSchema = Joi.object({
+  id: objectId().required(),
+  historyId: objectId().required(),
 });
 
 export const customizeComponentSchema = Joi.object({
@@ -67,6 +73,7 @@ export const customizeComponentSchema = Joi.object({
   isReusable: Joi.boolean().optional(),
   isDeprecated: Joi.boolean().optional(),
   isActive: Joi.boolean().optional(),
+  changeSummary: Joi.string().trim().allow("").optional(),
 }).min(3);
 
 export const getAllComponentsQuerySchema = Joi.object({

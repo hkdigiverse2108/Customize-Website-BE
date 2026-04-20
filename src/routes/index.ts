@@ -6,7 +6,7 @@ import { userRouter } from "./user";
 import { storeRouter } from "./store";
 import { settingRouter } from "./setting";
 import { phonePeRouter } from "./phonepe";
-import{razorpayRouter} from "./razorpay";
+import { razorpayRouter } from "./razorpay";
 import { themeRouter } from "./theme";
 import { pageRouter } from "./page";
 import { componentRouter } from "./component";
@@ -16,7 +16,10 @@ import { collectionRouter } from "./collection";
 import { productRouter } from "./product";
 import { orderRouter } from "./order";
 import { discountRouter } from "./discount";
+import storefrontRouter from "./storefront";
 const router = Router();
+
+router.use("/storefront", storefrontRouter);
 
 router.use("/upload", uploadRouter);
 router.use("/plan", planRouter);

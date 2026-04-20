@@ -1,29 +1,14 @@
 import { ACCOUNT_TYPE, getPaginationState, HTTP_STATUS, resolveSortAndFilter } from "../../common";
 import { storeModel, userModel } from "../../database";
-import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData } from "../../helper";
+import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, checkFieldDuplicate } from "../../helper";
 import { apiResponse } from "../../type";
 import { createStoreSchema, getAllStoresQuerySchema, storeIdSchema, updateStoreSchema } from "../../validation";
-
-const getDuplicateFieldFromError = (error: any) => {
-  const keyPattern = error?.keyPattern || {};
-  const keyValue = error?.keyValue || {};
-  return Object.keys(keyPattern)[0] || Object.keys(keyValue)[0] || "value";
-};
-
-const checkStoreFieldDuplicate = async (field: string, value: any, storeId?: string) => {
-  if (value === undefined || value === null || value === "") return null;
-
-  const duplicateCriteria: any = { [field]: value, isDeleted: { $ne: true } };
-  if (storeId) duplicateCriteria._id = { $ne: storeId };
-
-  return getFirstMatch(storeModel, duplicateCriteria, {}, {});
-};
 
 export const createStore = async (req, res) => {
   reqInfo(req);
   try {
-    const { error, value } = createStoreSchema.validate(req.body);
-    if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
+    const value = validate(createStoreSchema, req.body, res);
+    if (!value) return;
 
     const loggedInUser = req.headers.user as any;
     const isStoreOwner = loggedInUser?.role === ACCOUNT_TYPE.VENDOR;
@@ -35,30 +20,19 @@ export const createStore = async (req, res) => {
     const existingUser = await getFirstMatch(userModel, { _id: payload.userId, isDeleted: { $ne: true } }, {}, {});
     if (!existingUser) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.getDataNotFound("User"), {}, {}));
 
-    const duplicateSlug = await checkStoreFieldDuplicate("slug", payload.slug);
-    if (duplicateSlug) return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
+    // Check Duplicates
+    if (await checkFieldDuplicate(storeModel, "slug", payload.slug)) 
+        return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
+    
+    if (await checkFieldDuplicate(storeModel, "subdomain", payload.subdomain))
+        return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("subdomain"), {}, {}));
 
-    const duplicateSubdomain = await checkStoreFieldDuplicate("subdomain", payload.subdomain);
-    if (duplicateSubdomain) return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("subdomain"), {}, {}));
-
-    if (payload?.customDomain) {
-      const duplicateCustomDomain = await checkStoreFieldDuplicate("customDomain", payload.customDomain);
-      if (duplicateCustomDomain) return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("custom domain"), {}, {}));
-    }
-
-    if (payload?.panNumber) {
-      const duplicatePanNumber = await checkStoreFieldDuplicate("panNumber", payload.panNumber);
-      if (duplicatePanNumber) return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("pan number"), {}, {}));
-    }
+    if (payload?.customDomain && await checkFieldDuplicate(storeModel, "customDomain", payload.customDomain))
+        return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("custom domain"), {}, {}));
 
     const createdStore = await new storeModel(payload).save();
     return res.status(HTTP_STATUS.CREATED).json(apiResponse(HTTP_STATUS.CREATED, responseMessage.addDataSuccess("Store"), createdStore, {}));
   } catch (error) {
-    if (error?.code === 11000) {
-      const duplicateField = getDuplicateFieldFromError(error);
-      return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist(duplicateField), {}, {}));
-    }
-
     console.error(error);
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }
@@ -68,11 +42,11 @@ export const updateStore = async (req, res) => {
   reqInfo(req);
   try {
     const { id, ...updatePayload } = req.body;
-    const { error: idError, value: idValue } = storeIdSchema.validate({ id });
-    if (idError) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, idError?.details[0]?.message, {}, {}));
+    const idValue = validate(storeIdSchema, { id }, res);
+    if (!idValue) return;
 
-    const { error: bodyError, value: bodyValue } = updateStoreSchema.validate(updatePayload);
-    if (bodyError) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, bodyError?.details[0]?.message, {}, {}));
+    const bodyValue = validate(updateStoreSchema, updatePayload, res);
+    if (!bodyValue) return;
 
     const loggedInUser = req.headers.user as any;
     const isStoreOwner = loggedInUser?.role === ACCOUNT_TYPE.VENDOR;
@@ -85,40 +59,16 @@ export const updateStore = async (req, res) => {
     const payload: any = { ...bodyValue };
     if (isStoreOwner) delete payload.userId;
 
-    if (payload?.userId && String(payload.userId) !== String(existingStore.userId)) {
-      const userExists = await getFirstMatch(userModel, { _id: payload.userId, isDeleted: { $ne: true } }, {}, {});
-      if (!userExists) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.getDataNotFound("User"), {}, {}));
-    }
+    // Check Duplicates if changed
+    if (payload.slug && await checkFieldDuplicate(storeModel, "slug", payload.slug, idValue.id))
+        return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
 
-    const nextSlug = payload?.slug || existingStore.slug;
-    const nextSubdomain = payload?.subdomain || existingStore.subdomain;
-    const nextCustomDomain = payload.customDomain !== undefined ? payload.customDomain : existingStore.customDomain;
-    const nextPanNumber = payload.panNumber !== undefined ? payload.panNumber : existingStore.panNumber;
-
-    const duplicateSlug = await checkStoreFieldDuplicate("slug", nextSlug, idValue.id);
-    if (duplicateSlug) return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
-
-    const duplicateSubdomain = await checkStoreFieldDuplicate("subdomain", nextSubdomain, idValue.id);
-    if (duplicateSubdomain) return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("subdomain"), {}, {}));
-
-    if (nextCustomDomain) {
-      const duplicateCustomDomain = await checkStoreFieldDuplicate("customDomain", nextCustomDomain, idValue.id);
-      if (duplicateCustomDomain) return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("custom domain"), {}, {}));
-    }
-
-    if (nextPanNumber) {
-      const duplicatePanNumber = await checkStoreFieldDuplicate("panNumber", nextPanNumber, idValue.id);
-      if (duplicatePanNumber) return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("pan number"), {}, {}));
-    }
+    if (payload.subdomain && await checkFieldDuplicate(storeModel, "subdomain", payload.subdomain, idValue.id))
+        return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("subdomain"), {}, {}));
 
     const updatedStore = await updateData(storeModel, criteria, payload, {});
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.updateDataSuccess("Store"), updatedStore, {}));
   } catch (error) {
-    if (error?.code === 11000) {
-      const duplicateField = getDuplicateFieldFromError(error);
-      return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist(duplicateField), {}, {}));
-    }
-
     console.error(error);
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }
@@ -127,8 +77,8 @@ export const updateStore = async (req, res) => {
 export const deleteStore = async (req, res) => {
   reqInfo(req);
   try {
-    const { error, value } = storeIdSchema.validate(req.params);
-    if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
+    const value = validate(storeIdSchema, req.params, res);
+    if (!value) return;
 
     const loggedInUser = req.headers.user as any;
     const criteria: any = { _id: value.id, isDeleted: { $ne: true } };
@@ -147,25 +97,23 @@ export const deleteStore = async (req, res) => {
 export const getStores = async (req, res) => {
   reqInfo(req);
   try {
-    const { error, value } = getAllStoresQuerySchema.validate(req.query);
-    if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
+    const value = validate(getAllStoresQuerySchema, req.query, res);
+    if (!value) return;
 
     const { criteria, options, page, limit } = resolveSortAndFilter(value, ["name", "slug", "businessName", "email", "phone"]);
 
-    if (value?.isPublishedFilter === true) criteria.isPublished = true;
-    else if (value?.isPublishedFilter === false) criteria.isPublished = false;
-
-    if (value?.isBlockedFilter === true) criteria.isBlocked = true;
-    else if (value?.isBlockedFilter === false) criteria.isBlocked = false;
-
+    if (value?.isPublishedFilter !== undefined) criteria.isPublished = value.isPublishedFilter;
+    if (value?.isBlockedFilter !== undefined) criteria.isBlocked = value.isBlockedFilter;
     if (value?.kycStatusFilter) criteria.kycStatus = value.kycStatusFilter;
-    if (value?.userId) criteria.userId = value.userId;
 
     const loggedInUser = req.headers.user as any;
     if (loggedInUser?.role === ACCOUNT_TYPE.VENDOR) criteria.userId = loggedInUser?._id;
 
-    const stores = await getData(storeModel, criteria, {}, options);
-    const totalCount = await countData(storeModel, criteria);
+    const [stores, totalCount] = await Promise.all([
+        getData(storeModel, criteria, {}, options),
+        countData(storeModel, criteria)
+    ]);
+    
     const pagination = getPaginationState(totalCount, Number(page), Number(limit));
 
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Stores"), { stores, ...pagination, total_count: totalCount }, {}));
@@ -178,8 +126,8 @@ export const getStores = async (req, res) => {
 export const getStoreById = async (req, res) => {
   reqInfo(req);
   try {
-    const { error, value } = storeIdSchema.validate(req.params);
-    if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
+    const value = validate(storeIdSchema, req.params, res);
+    if (!value) return;
 
     const loggedInUser = req.headers.user as any;
     const criteria: any = { _id: value.id, isDeleted: { $ne: true } };

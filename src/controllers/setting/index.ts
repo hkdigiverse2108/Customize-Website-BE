@@ -1,8 +1,22 @@
 import { ACCOUNT_TYPE, HTTP_STATUS } from "../../common";
 import { settingModel, storeModel, userModel } from "../../database";
-import { getFirstMatch, reqInfo, responseMessage, updateData } from "../../helper";
+import { getFirstMatch, reqInfo, responseMessage, updateData, validate, verifyStoreAccess } from "../../helper";
 import { apiResponse } from "../../type";
 import { getStoreSettingSchema, upsertAdminSettingSchema, upsertStoreSettingSchema } from "../../validation";
+
+export const getSetting = async (req, res) => {
+  const loggedInUser = req.headers.user as any;
+  if (loggedInUser?.role === ACCOUNT_TYPE.ADMIN) return getAdminSetting(req, res);
+  if (loggedInUser?.role === ACCOUNT_TYPE.VENDOR) return getStoreSetting(req, res);
+  return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
+};
+
+export const upsertSetting = async (req, res) => {
+  const loggedInUser = req.headers.user as any;
+  if (loggedInUser?.role === ACCOUNT_TYPE.ADMIN) return upsertAdminSetting(req, res);
+  if (loggedInUser?.role === ACCOUNT_TYPE.VENDOR) return upsertStoreSetting(req, res);
+  return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
+};
 
 export const getAdminSetting = async (req, res) => {
   reqInfo(req);
@@ -18,39 +32,53 @@ export const getAdminSetting = async (req, res) => {
   }
 };
 
-export const getSetting = async (req, res) => {
-  const loggedInUser = req.headers.user as any;
-  if (loggedInUser?.role === ACCOUNT_TYPE.ADMIN) return getAdminSetting(req, res);
-  if (loggedInUser?.role === ACCOUNT_TYPE.VENDOR) return getStoreSetting(req, res);
-  return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
+export const getStoreSetting = async (req, res) => {
+  reqInfo(req);
+  try {
+    const value = validate(getStoreSettingSchema, req.query, res);
+    if (!value) return;
+
+    const loggedInUser = req.headers.user as any;
+    if (!await verifyStoreAccess(loggedInUser, value.storeId)) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Store"), {}, {}));
+    }
+
+    const setting = await getFirstMatch(settingModel, { storeId: value.storeId, isDeleted: { $ne: true } }, {}, {});
+    if (!setting) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Store setting"), {}, {}));
+
+    const responseData = await formatStoreSettingResponse(setting);
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Store setting"), responseData, {}));
+  } catch (error) {
+    console.error(error);
+    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
+  }
 };
 
 export const upsertStoreSetting = async (req, res) => {
   reqInfo(req);
   try {
-    const { error, value } = upsertStoreSettingSchema.validate(req.body);
-    if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
+    const value = validate(upsertStoreSettingSchema, req.body, res);
+    if (!value) return;
 
     const loggedInUser = req.headers.user as any;
-    const existingStore = await getFirstMatch(storeModel, getStoreCriteria(loggedInUser, value.storeId), {}, {});
-    if (!existingStore) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Store"), {}, {}));
-
-    const { storeId, ...payloadWithoutStoreId } = value;
-    const settingPayload = { ...payloadWithoutStoreId, userId: null, storeId };
-
-    const existingSetting = await getFirstMatch(settingModel, { storeId, isDeleted: { $ne: true } }, {}, {});
-
-    if (existingSetting) {
-      const updatedSetting = await updateData(settingModel, { _id: existingSetting._id, isDeleted: { $ne: true } }, settingPayload, { runValidators: true });
-      const responseData = await formatStoreSettingResponse(updatedSetting, existingStore);
-      return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.updateDataSuccess("Store setting"), responseData, {}));
+    if (!await verifyStoreAccess(loggedInUser, value.storeId)) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Store"), {}, {}));
     }
 
-    const createdSetting = await new settingModel(settingPayload).save();
-    const responseData = await formatStoreSettingResponse(createdSetting, existingStore);
-    return res.status(HTTP_STATUS.CREATED).json(apiResponse(HTTP_STATUS.CREATED, responseMessage.addDataSuccess("Store setting"), responseData, {}));
+    const { storeId, ...payload } = value;
+    const criteria = { storeId, isDeleted: { $ne: true } };
+    const existing = await getFirstMatch(settingModel, criteria, {}, {});
+
+    let result;
+    if (existing) {
+        result = await updateData(settingModel, { _id: existing._id }, { ...payload, storeId, userId: null }, { runValidators: true });
+    } else {
+        result = await new settingModel({ ...payload, storeId, userId: null }).save();
+    }
+
+    const responseData = await formatStoreSettingResponse(result);
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Setting updated", responseData, {}));
   } catch (error) {
-    if (handleDuplicateKeyError(error, res)) return;
     console.error(error);
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }
@@ -59,84 +87,41 @@ export const upsertStoreSetting = async (req, res) => {
 export const upsertAdminSetting = async (req, res) => {
   reqInfo(req);
   try {
-    const { error, value } = upsertAdminSettingSchema.validate(req.body);
-    if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
+    const value = validate(upsertAdminSettingSchema, req.body, res);
+    if (!value) return;
 
     const loggedInUser = req.headers.user as any;
-    const settingPayload = { ...value, userId: loggedInUser?._id, storeId: null };
+    const existing = await findAdminSettingForUser(loggedInUser?._id);
 
-    const existingAdminSetting = await findAdminSettingForUser(loggedInUser?._id);
-
-    if (existingAdminSetting) {
-      const updatedSetting = await updateData(settingModel, { _id: existingAdminSetting._id, isDeleted: { $ne: true } }, settingPayload, { runValidators: true });
-      return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.updateDataSuccess("Admin setting"), updatedSetting, {}));
+    const payload = { ...value, userId: loggedInUser?._id, storeId: null };
+    let result;
+    if (existing && existing.userId) {
+        result = await updateData(settingModel, { _id: existing._id }, payload, { runValidators: true });
+    } else {
+        result = await new settingModel(payload).save();
     }
 
-    const createdSetting = await new settingModel(settingPayload).save();
-    return res.status(HTTP_STATUS.CREATED).json(apiResponse(HTTP_STATUS.CREATED, responseMessage.addDataSuccess("Admin setting"), createdSetting, {}));
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Admin setting updated", result, {}));
   } catch (error) {
-    if (handleDuplicateKeyError(error, res)) return;
     console.error(error);
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }
 };
 
-export const upsertSetting = async (req, res) => {
-  const loggedInUser = req.headers.user as any;
-  if (loggedInUser?.role === ACCOUNT_TYPE.ADMIN) return upsertAdminSetting(req, res);
-  if (loggedInUser?.role === ACCOUNT_TYPE.VENDOR) return upsertStoreSetting(req, res);
-  return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
-};
-
-const handleDuplicateKeyError = (error: any, res) => {
-  if (error?.code !== 11000) return false;
-  const duplicateField = Object.keys(error?.keyPattern || {})[0] || "field";
-  res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist(duplicateField), {}, {}));
-  return true;
-};
-
-const getStoreCriteria = (loggedInUser: any, storeId: string) => {
-  const criteria: any = { _id: storeId, isDeleted: { $ne: true } };
-  if (loggedInUser?.role === ACCOUNT_TYPE.VENDOR) criteria.userId = loggedInUser?._id;
-  return criteria;
-};
-
-const getStoreSubscription = async (storeUserId: any) => {
-  const storeUser: any = await getFirstMatch(userModel, { _id: storeUserId, isDeleted: { $ne: true } }, { subscription: 1 }, {});
-  const subscription = storeUser?.subscription || null;
-  return subscription;
-};
-
-const formatStoreSettingResponse = async (setting: any, store: any) => {
-  const plainSetting = setting?.toObject ? setting.toObject() : setting;
-  const subscription = await getStoreSubscription(store?.userId);
-  return { ...plainSetting, subscription };
-};
+/* --- Helpers --- */
 
 const findAdminSettingForUser = async (userId: string) => {
-  const existingAdminSetting = await getFirstMatch(settingModel, { userId, isDeleted: { $ne: true } }, {}, {});
-  if (existingAdminSetting) return existingAdminSetting;
-
-  return getFirstMatch(settingModel,{isDeleted: { $ne: true },$and: [{ $or: [{ userId: null }, { userId: { $exists: false } }] },{ $or: [{ storeId: null }, { storeId: { $exists: false } }] },],},{},{});
+  const existing = await getFirstMatch(settingModel, { userId, isDeleted: { $ne: true } }, {}, {});
+  if (existing) return existing;
+  return getFirstMatch(settingModel,{isDeleted: { $ne: true }, userId: null, storeId: null},{},{});
 };
 
-export const getStoreSetting = async (req, res) => {
-  reqInfo(req);
-  try {
-    const { error, value } = getStoreSettingSchema.validate(req.query);
-    if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
-
-    const loggedInUser = req.headers.user as any;
-    const existingStore = await getFirstMatch(storeModel, getStoreCriteria(loggedInUser, value.storeId), {}, {});
-    if (!existingStore) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Store"), {}, {}));
-
-    const setting = await getFirstMatch(settingModel, { storeId: value.storeId, isDeleted: { $ne: true } }, {}, {});
-    if (!setting) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Store setting"), {}, {}));
-
-    const responseData = await formatStoreSettingResponse(setting, existingStore);
-    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Store setting"), responseData, {}));
-  } catch (error) {
-    console.error(error);
-    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
+const formatStoreSettingResponse = async (setting: any) => {
+  const plain = setting?.toObject ? setting.toObject() : setting;
+  if (plain.storeId) {
+      const store: any = await getFirstMatch(storeModel, { _id: plain.storeId }, { userId: 1 }, {});
+      const user: any = await getFirstMatch(userModel, { _id: store?.userId }, { subscription: 1 }, {});
+      plain.subscription = user?.subscription || null;
   }
+  return plain;
 };
