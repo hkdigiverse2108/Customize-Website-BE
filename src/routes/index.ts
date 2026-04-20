@@ -16,6 +16,7 @@ import { collectionRouter } from "./collection";
 import { productRouter } from "./product";
 import { orderRouter } from "./order";
 import { discountRouter } from "./discount";
+import { blogRouter } from "./blog";
 import storefrontRouter from "./storefront";
 const router = Router();
 
@@ -37,6 +38,7 @@ router.use("/collection", collectionRouter);
 router.use("/product", productRouter);
 router.use("/order", orderRouter);
 router.use("/discount", discountRouter);
+router.use("/blog", blogRouter);
 router.use("/site", siteRouter);
 
 

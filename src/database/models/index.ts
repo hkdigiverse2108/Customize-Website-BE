@@ -13,5 +13,6 @@ export * from "./order";
 export * from "./discount";
 export * from "./auditLog";
 export * from "./componentHistory";
+export * from "./blog";
 export * from "./analytics";
 export * from "./webhook";
