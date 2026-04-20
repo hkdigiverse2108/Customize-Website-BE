@@ -4,7 +4,6 @@ import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage
 import { apiResponse } from "../../type";
 import { componentIdSchema, createComponentSchema, customizeComponentSchema, getAllComponentsQuerySchema, updateComponentSchema } from "../../validation";
 
-
 export const createComponent = async (req, res) => {
   reqInfo(req);
   try {

@@ -13,3 +13,4 @@ export * as categoryController from "./category";
 export * as collectionController from "./collection";
 export * as productController from "./product";
 export * as orderController from "./order";
+export * as discountController from "./discount";

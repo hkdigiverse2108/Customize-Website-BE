@@ -15,6 +15,7 @@ import { categoryRouter } from "./category";
 import { collectionRouter } from "./collection";
 import { productRouter } from "./product";
 import { orderRouter } from "./order";
+import { discountRouter } from "./discount";
 const router = Router();
 
 router.use("/upload", uploadRouter);
@@ -32,6 +33,7 @@ router.use("/category", categoryRouter);
 router.use("/collection", collectionRouter);
 router.use("/product", productRouter);
 router.use("/order", orderRouter);
+router.use("/discount", discountRouter);
 router.use("/site", siteRouter);
 
 

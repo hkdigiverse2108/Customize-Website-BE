@@ -5,7 +5,7 @@ import { allowRoles, requireAuth } from "../middleware";
 
 const router = Router();
 
-router.post("/", requireAuth, allowRoles(ACCOUNT_TYPE.ADMIN), componentController.createComponent);
+router.post("/", requireAuth, allowRoles(ACCOUNT_TYPE.ADMIN,), componentController.createComponent);
 router.put("/", requireAuth, allowRoles(ACCOUNT_TYPE.ADMIN), componentController.updateComponent);
 router.put("/customize", requireAuth, allowRoles(ACCOUNT_TYPE.VENDOR), componentController.customizeComponent);
 router.delete("/:id", requireAuth, allowRoles(ACCOUNT_TYPE.ADMIN), componentController.deleteComponent);

@@ -101,3 +101,16 @@ export enum SHIPMENT_STATUS {
     RETURNED = "returned",
     CANCELLED = "cancelled"
 }
+
+export enum DISCOUNT_TYPE {
+    PERCENTAGE = "percentage",
+    FIXED_AMOUNT = "fixed_amount",
+    FREE_SHIPPING = "free_shipping",
+    BUY_X_GET_Y = "buy_x_get_y"
+}
+
+export enum DISCOUNT_APPLIES_TO {
+    ALL = "all",
+    PRODUCTS = "products",
+    COLLECTIONS = "collections"
+}
