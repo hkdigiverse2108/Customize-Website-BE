@@ -228,6 +228,31 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
+export const resendOtp = async (req, res) => {
+  reqInfo(req);
+  try {
+    const { error, value } = forgotPasswordSchema.validate(req.body);
+    if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
+
+    const email = String(value.email).trim().toLowerCase();
+    const existingUser: any = await userModel.findOne({ email, isDeleted: { $ne: true } });
+    if (!existingUser) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.invalidEmail, {}, {}));
+    if (existingUser?.isActive === false) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accountBlock, {}, {}));
+
+    const otp = generateOtpCode();
+    existingUser.otp = otp;
+    existingUser.otpExpireTime = new Date(Date.now() + otpValidityMinutes * 60 * 1000);
+    await existingUser.save();
+
+    await loginOtpMail(existingUser, otp);
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.otpSendSuccess, {}, {}));
+  } catch (error) {
+    console.error(error);
+    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
+  }
+};
+
+
 export const resetPassword = async (req, res) => {
   reqInfo(req);
 

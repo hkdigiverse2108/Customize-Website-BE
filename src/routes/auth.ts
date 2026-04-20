@@ -9,6 +9,7 @@ router.post("/google-signup", authController.googleSignup);
 router.post("/login", authController.login);
 router.post("/verify-otp", authController.verifyOtp);
 router.post("/forgot-password", authController.forgotPassword);
+router.post("/resend-otp", authController.resendOtp);
 router.post("/reset-password", authController.resetPassword);
 router.post("/change-password", requireAuth, authController.changePassword);
 router.post("/logout", requireAuth, authController.logout);

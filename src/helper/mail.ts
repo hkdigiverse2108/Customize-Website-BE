@@ -13,184 +13,126 @@ const options = {
   },
 };
 
-const title = "Portfolio";
+const title = "Zazzi App";
+const primaryColor = "#F43939"; // Red from screenshot
 
 const transporter = nodemailer.createTransport(options);
+
+const getHtmlTemplate = (user: any, otp: number, subject: string, message: string) => {
+    const name = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : "User";
+    
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${subject}</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7ff; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+        .wrapper { width: 100%; table-layout: fixed; background-color: #f4f7ff; padding-bottom: 40px; }
+        .main-table { width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; margin-top: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .header { background-color: ${primaryColor}; padding: 30px; text-align: center; }
+        .header h1 { color: #ffffff; margin: 0; font-size: 28px; letter-spacing: 1px; }
+        .content { padding: 40px 30px; color: #333333; line-height: 1.6; }
+        .content h2 { color: #111111; font-size: 20px; margin-top: 0; }
+        .otp-container { background-color: #f2f5ff; border-radius: 6px; padding: 30px; text-align: center; margin: 30px 0; }
+        .otp-code { font-size: 36px; font-weight: bold; color: ${primaryColor}; letter-spacing: 8px; margin: 0; }
+        .footer { padding: 0 30px 40px 30px; color: #666666; font-size: 14px; }
+        .footer p { margin: 5px 0; }
+        .validity { display: flex; align-items: center; justify-content: start; color: #666; margin-top: 20px; }
+        .validity-icon { margin-right: 8px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <table class="main-table" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="header">
+                    <h1>${title}</h1>
+                </td>
+            </tr>
+            <tr>
+                <td class="content">
+                    <h2>${subject}</h2>
+                    <p>Thank you for choosing <strong>${title}</strong>.</p>
+                    <p>${message}</p>
+                    
+                    <div class="otp-container">
+                        <p class="otp-code">${otp}</p>
+                    </div>
+
+                    <div class="validity">
+                        <span class="validity-icon">⏱</span> This OTP is valid for <strong>10 minutes</strong>.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="footer">
+                    <p>If you did not request this verification, please ignore this email.</p>
+                    <br>
+                    <p>Regards,</p>
+                    <p><strong>The ${title} Team</strong></p>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>`;
+};
 
 export const emailVerificationMail = async (user: any, otp: number) => {
   return new Promise(async (resolve, reject) => {
     try {
+      const subject = "Email Verification";
+      const message = "Please use the OTP below to verify your email address:";
       const mailOptions = {
-        from: mail, // sender address
-        to: user.email, // list of receivers
-        subject: `${title} - Email Verification`,
-        html: `<html lang="en-US">
-    
-                <head>
-                    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-                    <title>${title} - Email Verification</title>
-                    <meta name="description" content="Email Verification for ${title}.">
-                    <style type="text/css">
-                        a:hover {
-                            text-decoration: underline !important;
-                        }
-                    </style>
-                </head>
-    
-                <body marginheight="0" topmargin="0" marginwidth="0" style="margin: 0px; background-color: #f2f3f8;" leftmargin="0">
-                    <!--100% body table-->
-                    <table cellspacing="0" border="0" cellpadding="0" width="100%" bgcolor="#f2f3f8"
-                        style="@import url(https://fonts.googleapis.com/css?family=Rubik:300,400,500,700|Open+Sans:300,400,600,700); font-family: 'Open Sans', sans-serif;">
-                        <tr>
-                            <td>
-                                <table style="background-color: #f2f3f8; max-width:700px;  margin:0 auto;" width="100%" border="0"
-                                    align="center" cellpadding="0" cellspacing="0">
-                                    <tr>
-                                        <td style="height:80px;">&nbsp;</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="text-align:center;">
-                                            <h1
-                                                style="color:#F43939; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;">
-                                                ${title}</h1>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style="height:20px;">&nbsp;</td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <table width="95%" border="0" align="center" cellpadding="0" cellspacing="0"
-                                                style="max-width:670px;background:#fff; border-radius:3px; text-align:center;-webkit-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06);">
-                                                <tr>
-                                                    <td style="height:40px;">&nbsp;</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="padding:0 35px;">
-                                                        <h1
-                                                            style="color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;">
-                                                            Email Verification</h1>
-                                                        <span
-                                                            style="display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;"></span>
-                                                        <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
-                                                            Hi ${user.firstName + " " + user.lastName != null ? user.firstName + " " + user.lastName : "dear"}, 
-                                                            <br>
-                                                            Welcome to the ${title}! Please verify your email to continue.
-                                                            <br>
-                                                            OTP will expire in 10 minutes.
-                                                            <br>
-                                                            Verification code: ${otp}
-                                                            <br>
-                                                            <br>
-                                                            The ${title} Team
-                                                        </p>
-    
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="height:40px;">&nbsp;</td>
-                                                </tr>
-                                            </table>
-                                        </td>
-                                    <tr>
-                                        <td style="height:20px;">&nbsp;</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="text-align:center;">
-                                            <strong></strong></p>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style="height:80px;">&nbsp;</td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
-                    </table>
-                    <!--/100% body table-->
-                </body>
-    
-                </html>`,
+        from: mail,
+        to: user.email,
+        subject: `${title} - ${subject}`,
+        html: getHtmlTemplate(user, otp, subject, message),
       };
-      await transporter.sendMail(mailOptions, function (err, data) {
-        if (err) {
-          console.error(err);
-          reject(err);
-        } else {
-          resolve(`Email has been sent to ${user.email}, kindly follow the instructions`);
-        }
+      
+      await transporter.sendMail(mailOptions, (err) => {
+        if (err) { reject(err); } else { resolve(`Email has been sent to ${user.email}`); }
       });
-    } catch (error) {
-      console.error(error);
-      reject(error);
-    }
+    } catch (error) { reject(error); }
   });
 };
 
 export const forgotPasswordOtpMail = async (user: any, otp: number) => {
   return new Promise(async (resolve, reject) => {
     try {
+      const subject = "Reset Your Password";
+      const message = "We received a request to reset your password. Use the code below to proceed:";
       const mailOptions = {
         from: mail,
         to: user.email,
-        subject: `${title} - Forgot Password OTP`,
-        html: `
-          <html>
-            <body style="font-family: Arial, sans-serif; color: #111;">
-              <h2>${title} - Password Reset</h2>
-              <p>Your OTP for password reset is:</p>
-              <h1 style="letter-spacing: 4px;">${otp}</h1>
-              <p>This OTP will expire in 10 minutes.</p>
-            </body>
-          </html>
-        `,
+        subject: `${title} - ${subject}`,
+        html: getHtmlTemplate(user, otp, subject, message),
       };
 
-      await transporter.sendMail(mailOptions, function (err) {
-        if (err) {
-          console.error(err);
-          reject(err);
-        } else {
-          resolve(`Email has been sent to ${user.email}`);
-        }
+      await transporter.sendMail(mailOptions, (err) => {
+        if (err) { reject(err); } else { resolve(`Email has been sent to ${user.email}`); }
       });
-    } catch (error) {
-      console.error(error);
-      reject(error);
-    }
+    } catch (error) { reject(error); }
   });
 };
 
 export const loginOtpMail = async (user: any, otp: number) => {
   return new Promise(async (resolve, reject) => {
     try {
+      const subject = "Login Verification";
+      const message = "Your one-time password for secure login is:";
       const mailOptions = {
         from: mail,
         to: user.email,
-        subject: `${title} - Login OTP`,
-        html: `
-          <html>
-            <body style="font-family: Arial, sans-serif; color: #111;">
-              <h2>${title} - Login Verification</h2>
-              <p>Your OTP for login is:</p>
-              <h1 style="letter-spacing: 4px;">${otp}</h1>
-              <p>This OTP will expire in 10 minutes.</p>
-            </body>
-          </html>
-        `,
+        subject: `${title} - ${subject}`,
+        html: getHtmlTemplate(user, otp, subject, message),
       };
 
-      await transporter.sendMail(mailOptions, function (err) {
-        if (err) {
-          console.error(err);
-          reject(err);
-        } else {
-          resolve(`Email has been sent to ${user.email}`);
-        }
+      await transporter.sendMail(mailOptions, (err) => {
+        if (err) { reject(err); } else { resolve(`Email has been sent to ${user.email}`); }
       });
-    } catch (error) {
-      console.error(error);
-      reject(error);
-    }
+    } catch (error) { reject(error); }
   });
 };
