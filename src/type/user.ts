@@ -62,4 +62,4 @@ export interface IUser extends Document {
   updatedAt: Date;
 }
 
-export interface IUpdateUserPayload extends Partial<ICreateUserPayload> {}
+export interface IUpdateUserPayload extends Partial<ICreateUserPayload> { }

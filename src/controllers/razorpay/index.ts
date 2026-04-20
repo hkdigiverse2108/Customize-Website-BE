@@ -1,6 +1,6 @@
 import crypto from "crypto";
-import { HTTP_STATUS, PAYMENT_FOR, PAYMENT_METHOD, PAYMENT_STATUS, PLAN_DURATION, SUBSCRIPTION_STATUS } from "../../common";
-import { paymentModel, planModel, settingModel, themeModel, userModel } from "../../database";
+import { ACCOUNT_TYPE, HTTP_STATUS, PAYMENT_FOR, PAYMENT_METHOD, PAYMENT_STATUS, PLAN_DURATION, SUBSCRIPTION_STATUS } from "../../common";
+import { orderModel, paymentModel, planModel, settingModel, storeModel, themeModel, userModel } from "../../database";
 import { getFirstMatch, reqInfo, responseMessage, updateData } from "../../helper";
 import { apiResponse } from "../../type";
 import { createRazorpayPaymentSchema, razorpayPaymentVerifySchema } from "../../validation";
@@ -71,7 +71,63 @@ const applySubscriptionForPayment = async (existingPayment: any) => {
   );
 };
 
-const resolvePaymentContext = async (value: any, res: any) => {
+const hasOrderAccess = async (loggedInUser: any, existingOrder: any) => {
+  if (!loggedInUser || !existingOrder) return false;
+  if (loggedInUser?.role === ACCOUNT_TYPE.ADMIN) return true;
+
+  if (loggedInUser?.role === ACCOUNT_TYPE.VENDOR) {
+    const existingStore = await getFirstMatch(
+      storeModel,
+      {
+        _id: existingOrder.storeId,
+        userId: loggedInUser._id,
+        isDeleted: { $ne: true },
+      },
+      {},
+      {}
+    );
+
+    return !!existingStore;
+  }
+
+  return String(existingOrder?.customerId) === String(loggedInUser?._id);
+};
+
+const applyOrderPayment = async (paymentData: {
+  orderId: string;
+  paymentMethod: PAYMENT_METHOD;
+  transactionId: string;
+  paidAt: Date;
+  paymentStatus: PAYMENT_STATUS;
+}) => {
+  const existingOrder: any = await getFirstMatch(orderModel, { _id: paymentData.orderId, isDeleted: { $ne: true } }, {}, {});
+  if (!existingOrder) return;
+
+  const existingPaymentDetails = existingOrder?.paymentDetails || {};
+  const orderPaymentDetailsStatus = paymentData.paymentStatus === PAYMENT_STATUS.SUCCESS ? "success" : paymentData.paymentStatus === PAYMENT_STATUS.FAILED ? "failed" : "pending";
+
+  const updatePayload: any = {
+    paymentDetails: {
+      ...existingPaymentDetails,
+      method: paymentData.paymentMethod,
+      transactionId: paymentData.transactionId,
+      status: orderPaymentDetailsStatus,
+      paidAt: paymentData.paymentStatus === PAYMENT_STATUS.SUCCESS ? paymentData.paidAt : null,
+    },
+  };
+
+  if (paymentData.paymentStatus === PAYMENT_STATUS.SUCCESS) {
+    updatePayload.financialStatus = "paid";
+    updatePayload.isPaid = true;
+  } else if (paymentData.paymentStatus === PAYMENT_STATUS.FAILED) {
+    updatePayload.financialStatus = existingOrder?.isPaid ? existingOrder?.financialStatus : "failed";
+    updatePayload.isPaid = existingOrder?.isPaid === true;
+  }
+
+  await updateData(orderModel, { _id: existingOrder._id, isDeleted: { $ne: true } }, updatePayload, { runValidators: true });
+};
+
+const resolvePaymentContext = async (value: any, res: any, loggedInUser: any) => {
   if (value?.planId) {
     const existingPlan: any = await getFirstMatch(planModel, { _id: value.planId, isActive: true, isDeleted: { $ne: true } }, {}, {});
     if (!existingPlan) {
@@ -94,30 +150,77 @@ const resolvePaymentContext = async (value: any, res: any) => {
       amount,
       plan: existingPlan,
       theme: null,
+      order: null,
     };
   }
 
-  const existingTheme: any = await getFirstMatch(themeModel, { _id: value.themeId, isActive: true, isDeleted: { $ne: true } }, {}, {});
-  if (!existingTheme) {
+  if (value?.themeId) {
+    const existingTheme: any = await getFirstMatch(themeModel, { _id: value.themeId, isActive: true, isDeleted: { $ne: true } }, {}, {});
+    if (!existingTheme) {
+      return {
+        errorResponse: res
+          .status(HTTP_STATUS.NOT_FOUND)
+          .json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Theme"), {}, {})),
+      };
+    }
+
+    const amount = Number(existingTheme?.price || 0);
+    if (existingTheme?.isPremium !== true || !Number.isFinite(amount) || amount <= 0) {
+      return {
+        errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Theme payment is not required", {}, {})),
+      };
+    }
+
+    return {
+      paymentFor: PAYMENT_FOR.THEME_PURCHASE,
+      amount,
+      plan: null,
+      theme: existingTheme,
+      order: null,
+    };
+  }
+
+  const existingOrder: any = await getFirstMatch(orderModel, { _id: value.orderId, isDeleted: { $ne: true } }, {}, {});
+  if (!existingOrder) {
     return {
       errorResponse: res
         .status(HTTP_STATUS.NOT_FOUND)
-        .json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Theme"), {}, {})),
+        .json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Order"), {}, {})),
     };
   }
 
-  const amount = Number(existingTheme?.price || 0);
-  if (existingTheme?.isPremium !== true || !Number.isFinite(amount) || amount <= 0) {
+  const isOrderAccessible = await hasOrderAccess(loggedInUser, existingOrder);
+  if (!isOrderAccessible) {
     return {
-      errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Theme payment is not required", {}, {})),
+      errorResponse: res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {})),
+    };
+  }
+
+  if (existingOrder?.isCancelled === true || existingOrder?.status === "cancelled") {
+    return {
+      errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Cancelled order cannot be paid", {}, {})),
+    };
+  }
+
+  if (existingOrder?.isPaid === true || existingOrder?.financialStatus === "paid") {
+    return {
+      errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Order is already paid", {}, {})),
+    };
+  }
+
+  const amount = Number(existingOrder?.totalPrice || 0);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return {
+      errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Order amount is invalid", {}, {})),
     };
   }
 
   return {
-    paymentFor: PAYMENT_FOR.THEME_PURCHASE,
+    paymentFor: PAYMENT_FOR.ORDER_PURCHASE,
     amount,
     plan: null,
-    theme: existingTheme,
+    theme: null,
+    order: existingOrder,
   };
 };
 
@@ -155,7 +258,7 @@ export const createRazorpaySubscriptionPayment = async (req, res) => {
     if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error.details[0].message, {}, {}));
 
     const loggedInUser = req.headers.user as any;
-    const paymentContext = await resolvePaymentContext(value, res);
+    const paymentContext = await resolvePaymentContext(value, res, loggedInUser);
     if (paymentContext?.errorResponse) return paymentContext.errorResponse;
 
     const setting = await resolveRazorpaySetting();
@@ -169,11 +272,17 @@ export const createRazorpaySubscriptionPayment = async (req, res) => {
     const currency = value.currency || "INR";
     const receipt = value.receipt || generateReceipt();
     const order = await createRazorpayOrder({ amount: paymentContext.amount, currency, receipt, keyId, keySecret });
+    const paymentUserId = paymentContext.order ? paymentContext.order.customerId : loggedInUser?._id;
+
+    if (!paymentUserId) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Unable to resolve payment user", {}, {}));
+    }
 
     await new paymentModel({
-      userId: loggedInUser?._id,
+      userId: paymentUserId,
       planId: paymentContext.plan?._id || null,
       themeId: paymentContext.theme?._id || null,
+      orderId: paymentContext.order?._id || null,
       paymentFor: paymentContext.paymentFor,
       amount: paymentContext.amount,
       currency,
@@ -197,6 +306,7 @@ export const createRazorpaySubscriptionPayment = async (req, res) => {
           paymentFor: paymentContext.paymentFor,
           planId: paymentContext.plan?._id || null,
           themeId: paymentContext.theme?._id || null,
+          orderId: paymentContext.order?._id || null,
         },
         {}
       )
@@ -235,20 +345,35 @@ export const verifyRazorpaySubscriptionPayment = async (req, res) => {
       paymentMethod: PAYMENT_METHOD.RAZORPAY,
       providerOrderId: orderId,
     };
-    if (loggedInUser?._id) criteria.userId = loggedInUser._id;
+    if (loggedInUser?.role === ACCOUNT_TYPE.USER && loggedInUser?._id) criteria.userId = loggedInUser._id;
     if (value.transactionId) criteria.transactionId = value.transactionId;
+    if (value.orderId) criteria.orderId = value.orderId;
 
     const existingPayment: any = await getFirstMatch(paymentModel, criteria, {}, {});
     if (!existingPayment) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Payment not found", {}, {}));
 
+    if (existingPayment?.paymentFor === PAYMENT_FOR.ORDER_PURCHASE && existingPayment?.orderId) {
+      const existingOrder: any = await getFirstMatch(orderModel, { _id: existingPayment.orderId, isDeleted: { $ne: true } }, {}, {});
+      if (!existingOrder) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Order"), {}, {}));
+
+      const isOrderAccessible = await hasOrderAccess(loggedInUser, existingOrder);
+      if (!isOrderAccessible) {
+        return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
+      }
+    }
+
     const isPlanPayment = existingPayment?.paymentFor === PAYMENT_FOR.PLAN_SUBSCRIPTION || !!existingPayment?.planId;
+    const isOrderPayment = existingPayment?.paymentFor === PAYMENT_FOR.ORDER_PURCHASE || !!existingPayment?.orderId;
     const shouldUpdateSubscription = isPlanPayment && existingPayment?.status !== PAYMENT_STATUS.SUCCESS;
+    const shouldUpdateOrderPayment = isOrderPayment && existingPayment?.status !== PAYMENT_STATUS.SUCCESS;
+    const paidAt = new Date();
+
     const updatedPayment = await updateData(
       paymentModel,
       { _id: existingPayment._id },
       {
         status: PAYMENT_STATUS.SUCCESS,
-        paidAt: new Date(),
+        paidAt,
         providerResponse: {
           ...(existingPayment?.providerResponse || {}),
           verification: req.body || {},
@@ -258,6 +383,15 @@ export const verifyRazorpaySubscriptionPayment = async (req, res) => {
     );
 
     if (shouldUpdateSubscription) await applySubscriptionForPayment(existingPayment);
+    if (shouldUpdateOrderPayment) {
+      await applyOrderPayment({
+        orderId: String(existingPayment.orderId),
+        paymentMethod: PAYMENT_METHOD.RAZORPAY,
+        transactionId: paymentId,
+        paidAt,
+        paymentStatus: PAYMENT_STATUS.SUCCESS,
+      });
+    }
 
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.customMessage("Payment verified"), { verified: true, payment: updatedPayment }, {}));
   } catch (error) {

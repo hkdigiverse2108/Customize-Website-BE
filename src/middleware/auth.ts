@@ -50,6 +50,25 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
+export const optionalAuth = async (req: Request, res: Response, next: NextFunction) => {
+  const { authorization } = req.headers;
+  if (!authorization) return next();
+
+  try {
+    const decodedToken: any = verifyToken(authorization as string);
+    const tokenUserId = getTokenUserId(decodedToken);
+    const validObjectId = isValidObjectId(tokenUserId);
+
+    if (tokenUserId && validObjectId) {
+      const user = await userModel.findOne({ _id: validObjectId, isDeleted: { $ne: true }, isActive: true }, {}, { lean: true });
+      if (user) req.headers.user = user as any;
+    }
+  } catch (error) {
+    // Optionally logged, but we don't throw an error for optional auth
+  }
+  return next();
+};
+
 export const allowRoles = (...roles: ACCOUNT_TYPE[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const user = req.headers.user as any;

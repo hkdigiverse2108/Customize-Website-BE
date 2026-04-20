@@ -1,6 +1,6 @@
 import axios from "axios";
-import { HTTP_STATUS, PAYMENT_FOR, PAYMENT_METHOD, PAYMENT_STATUS, PLAN_DURATION, SUBSCRIPTION_STATUS } from "../../common";
-import { paymentModel, planModel, settingModel, themeModel, userModel } from "../../database";
+import { ACCOUNT_TYPE, HTTP_STATUS, PAYMENT_FOR, PAYMENT_METHOD, PAYMENT_STATUS, PLAN_DURATION, SUBSCRIPTION_STATUS } from "../../common";
+import { orderModel, paymentModel, planModel, settingModel, storeModel, themeModel, userModel } from "../../database";
 import { getFirstMatch, reqInfo, responseMessage, updateData } from "../../helper";
 import { apiResponse } from "../../type";
 import { createPhonePePaymentSchema } from "../../validation";
@@ -12,7 +12,17 @@ const PHONEPE_PAY_URL = isProd ? "https://api.phonepe.com/apis/pg/checkout/v2/pa
 const generateMerchantOrderId = () => `pp_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 
 const resolvePhonePeSetting = async () => {
-  return getFirstMatch(settingModel,{isDeleted: { $ne: true },phonePeApiKey: { $exists: true, $nin: ["", null] },phonePeApiSecret: { $exists: true, $nin: ["", null] },phonePeVersion: { $exists: true, $nin: ["", null] },},{},{ sort: { updatedAt: -1 } });
+  return getFirstMatch(
+    settingModel,
+    {
+      isDeleted: { $ne: true },
+      phonePeApiKey: { $exists: true, $nin: ["", null] },
+      phonePeApiSecret: { $exists: true, $nin: ["", null] },
+      phonePeVersion: { $exists: true, $nin: ["", null] },
+    },
+    {},
+    { sort: { updatedAt: -1 } }
+  );
 };
 
 const getPhonePeAccessToken = async (setting: any) => {
@@ -58,7 +68,63 @@ const resolveSubscriptionEndDate = (duration: PLAN_DURATION, startDate: Date) =>
   return nextDate;
 };
 
-const resolvePaymentContext = async (value: any, res: any) => {
+const hasOrderAccess = async (loggedInUser: any, existingOrder: any) => {
+  if (!loggedInUser || !existingOrder) return false;
+  if (loggedInUser?.role === ACCOUNT_TYPE.ADMIN) return true;
+
+  if (loggedInUser?.role === ACCOUNT_TYPE.VENDOR) {
+    const existingStore = await getFirstMatch(
+      storeModel,
+      {
+        _id: existingOrder.storeId,
+        userId: loggedInUser._id,
+        isDeleted: { $ne: true },
+      },
+      {},
+      {}
+    );
+
+    return !!existingStore;
+  }
+
+  return String(existingOrder?.customerId) === String(loggedInUser?._id);
+};
+
+const applyOrderPayment = async (paymentData: {
+  orderId: string;
+  paymentMethod: PAYMENT_METHOD;
+  transactionId: string;
+  paidAt: Date | null;
+  paymentStatus: PAYMENT_STATUS;
+}) => {
+  const existingOrder: any = await getFirstMatch(orderModel, { _id: paymentData.orderId, isDeleted: { $ne: true } }, {}, {});
+  if (!existingOrder) return;
+
+  const existingPaymentDetails = existingOrder?.paymentDetails || {};
+  const orderPaymentDetailsStatus = paymentData.paymentStatus === PAYMENT_STATUS.SUCCESS ? "success" : paymentData.paymentStatus === PAYMENT_STATUS.FAILED ? "failed" : "pending";
+
+  const updatePayload: any = {
+    paymentDetails: {
+      ...existingPaymentDetails,
+      method: paymentData.paymentMethod,
+      transactionId: paymentData.transactionId,
+      status: orderPaymentDetailsStatus,
+      paidAt: paymentData.paymentStatus === PAYMENT_STATUS.SUCCESS ? paymentData.paidAt : null,
+    },
+  };
+
+  if (paymentData.paymentStatus === PAYMENT_STATUS.SUCCESS) {
+    updatePayload.financialStatus = "paid";
+    updatePayload.isPaid = true;
+  } else if (paymentData.paymentStatus === PAYMENT_STATUS.FAILED) {
+    updatePayload.financialStatus = existingOrder?.isPaid ? existingOrder?.financialStatus : "failed";
+    updatePayload.isPaid = existingOrder?.isPaid === true;
+  }
+
+  await updateData(orderModel, { _id: existingOrder._id, isDeleted: { $ne: true } }, updatePayload, { runValidators: true });
+};
+
+const resolvePaymentContext = async (value: any, res: any, loggedInUser: any) => {
   if (value?.planId) {
     const existingPlan: any = await getFirstMatch(planModel, { _id: value.planId, isActive: true, isDeleted: { $ne: true } }, {}, {});
     if (!existingPlan) {
@@ -81,32 +147,80 @@ const resolvePaymentContext = async (value: any, res: any) => {
       amount,
       plan: existingPlan,
       theme: null,
+      order: null,
       message: `Subscription payment for plan ${existingPlan?.name}`,
     };
   }
 
-  const existingTheme: any = await getFirstMatch(themeModel, { _id: value.themeId, isActive: true, isDeleted: { $ne: true } }, {}, {});
-  if (!existingTheme) {
+  if (value?.themeId) {
+    const existingTheme: any = await getFirstMatch(themeModel, { _id: value.themeId, isActive: true, isDeleted: { $ne: true } }, {}, {});
+    if (!existingTheme) {
+      return {
+        errorResponse: res
+          .status(HTTP_STATUS.NOT_FOUND)
+          .json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Theme"), {}, {})),
+      };
+    }
+
+    const amount = Number(existingTheme?.price || 0);
+    if (existingTheme?.isPremium !== true || !Number.isFinite(amount) || amount <= 0) {
+      return {
+        errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Theme payment is not required", {}, {})),
+      };
+    }
+
     return {
-      errorResponse: res
-        .status(HTTP_STATUS.NOT_FOUND)
-        .json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Theme"), {}, {})),
+      paymentFor: PAYMENT_FOR.THEME_PURCHASE,
+      amount,
+      plan: null,
+      theme: existingTheme,
+      order: null,
+      message: `Theme purchase payment for theme ${existingTheme?.name}`,
     };
   }
 
-  const amount = Number(existingTheme?.price || 0);
-  if (existingTheme?.isPremium !== true || !Number.isFinite(amount) || amount <= 0) {
+  const existingOrder: any = await getFirstMatch(orderModel, { _id: value.orderId, isDeleted: { $ne: true } }, {}, {});
+  if (!existingOrder) {
     return {
-      errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Theme payment is not required", {}, {})),
+      errorResponse: res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Order"), {}, {})),
+    };
+  }
+
+  const isOrderAccessible = await hasOrderAccess(loggedInUser, existingOrder);
+  if (!isOrderAccessible) {
+    return {
+      errorResponse: res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {})),
+    };
+  }
+
+  if (existingOrder?.isCancelled === true || existingOrder?.status === "cancelled") {
+    return {
+      errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Cancelled order cannot be paid", {}, {})),
+    };
+  }
+
+  if (existingOrder?.isPaid === true || existingOrder?.financialStatus === "paid") {
+    return {
+      errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Order is already paid", {}, {})),
+    };
+  }
+
+  const amount = Number(existingOrder?.totalPrice || 0);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return {
+      errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Order amount is invalid", {}, {})),
     };
   }
 
   return {
-    paymentFor: PAYMENT_FOR.THEME_PURCHASE,
+    paymentFor: PAYMENT_FOR.ORDER_PURCHASE,
     amount,
     plan: null,
-    theme: existingTheme,
-    message: `Theme purchase payment for theme ${existingTheme?.name}`,
+    theme: null,
+    order: existingOrder,
+    message: `Order payment for ${existingOrder?.orderName || `#${existingOrder?.orderNumber}`}`,
   };
 };
 
@@ -117,7 +231,7 @@ export const createPhonePeSubscriptionPayment = async (req, res) => {
     if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
 
     const loggedInUser = req.headers.user as any;
-    const paymentContext = await resolvePaymentContext(value, res);
+    const paymentContext = await resolvePaymentContext(value, res, loggedInUser);
     if (paymentContext?.errorResponse) return paymentContext.errorResponse;
 
     const setting = await resolvePhonePeSetting();
@@ -157,10 +271,16 @@ export const createPhonePeSubscriptionPayment = async (req, res) => {
     if (!paymentUrl) throw new Error("Payment URL not found in PhonePe response");
 
     const providerOrderId = paymentResponse?.data?.orderId || paymentResponse?.data?.data?.orderId || "";
+    const paymentUserId = paymentContext.order ? paymentContext.order.customerId : loggedInUser?._id;
+    if (!paymentUserId) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Unable to resolve payment user", {}, {}));
+    }
+
     await new paymentModel({
-      userId: loggedInUser?._id,
+      userId: paymentUserId,
       planId: paymentContext.plan?._id || null,
       themeId: paymentContext.theme?._id || null,
+      orderId: paymentContext.order?._id || null,
       paymentFor: paymentContext.paymentFor,
       amount: paymentContext.amount,
       currency: value.currency || "INR",
@@ -184,6 +304,7 @@ export const createPhonePeSubscriptionPayment = async (req, res) => {
           paymentFor: paymentContext.paymentFor,
           planId: paymentContext.plan?._id || null,
           themeId: paymentContext.theme?._id || null,
+          orderId: paymentContext.order?._id || null,
         },
         {}
       )
@@ -210,6 +331,7 @@ export const phonePeCallback = async (req, res) => {
     const payload = req.body?.payload || req.body || {};
     const merchantOrderId = payload?.merchantOrderId || req.body?.merchantOrderId;
     const state = payload?.state || req.body?.state;
+    const providerTxnId = payload?.transactionId || req.body?.transactionId;
 
     if (!merchantOrderId) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "merchantOrderId is required", {}, {}));
     if (!state) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "state is required", {}, {}));
@@ -219,14 +341,26 @@ export const phonePeCallback = async (req, res) => {
 
     const paymentStatus = mapPaymentStateToStatus(state);
     const isPlanPayment = existingPayment?.paymentFor === PAYMENT_FOR.PLAN_SUBSCRIPTION || !!existingPayment?.planId;
+    const isOrderPayment = existingPayment?.paymentFor === PAYMENT_FOR.ORDER_PURCHASE || !!existingPayment?.orderId;
     const shouldUpdateSubscription = paymentStatus === PAYMENT_STATUS.SUCCESS && isPlanPayment && existingPayment?.status !== PAYMENT_STATUS.SUCCESS;
+    const paidAt = paymentStatus === PAYMENT_STATUS.SUCCESS ? new Date() : null;
     const paymentUpdatePayload: any = {
       status: paymentStatus,
       providerResponse: req.body,
+      paidAt,
     };
-    if (paymentStatus === PAYMENT_STATUS.SUCCESS) paymentUpdatePayload.paidAt = new Date();
 
     const updatedPayment = await updateData(paymentModel, { _id: existingPayment._id }, paymentUpdatePayload, { runValidators: true });
+
+    if (isOrderPayment && existingPayment?.orderId) {
+      await applyOrderPayment({
+        orderId: String(existingPayment.orderId),
+        paymentMethod: PAYMENT_METHOD.PHONEPE,
+        transactionId: providerTxnId || merchantOrderId,
+        paidAt,
+        paymentStatus,
+      });
+    }
 
     if (shouldUpdateSubscription) {
       const existingPlan: any = await getFirstMatch(planModel, { _id: existingPayment.planId, isDeleted: { $ne: true } }, {}, {});

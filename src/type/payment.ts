@@ -5,6 +5,7 @@ export interface IPaymentType {
   userId: Types.ObjectId | string;
   planId: Types.ObjectId | string | null;
   themeId: Types.ObjectId | string | null;
+  orderId: Types.ObjectId | string | null;
   paymentFor: PAYMENT_FOR;
   amount: number;
   currency: string;
@@ -22,6 +23,7 @@ export interface ICreatePaymentPayload {
   userId: Types.ObjectId | string;
   planId?: Types.ObjectId | string | null;
   themeId?: Types.ObjectId | string | null;
+  orderId?: Types.ObjectId | string | null;
   paymentFor?: PAYMENT_FOR;
   amount: number;
   currency: string;
@@ -39,6 +41,7 @@ export interface IPayment extends Document {
   userId: Types.ObjectId | string;
   planId: Types.ObjectId | string | null;
   themeId: Types.ObjectId | string | null;
+  orderId: Types.ObjectId | string | null;
   paymentFor: PAYMENT_FOR;
   amount: number;
   currency: string;

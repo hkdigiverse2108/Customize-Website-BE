@@ -38,9 +38,7 @@ export const createProduct = async (req, res) => {
 
     const created = await new productModel(payload).save();
 
-    return res
-      .status(HTTP_STATUS.CREATED)
-      .json(apiResponse(HTTP_STATUS.CREATED, responseMessage.addDataSuccess("Product"), created, {}));
+    return res.status(HTTP_STATUS.CREATED).json(apiResponse(HTTP_STATUS.CREATED, responseMessage.addDataSuccess("Product"), created, {}));
   } catch (error) {
     return handleMongoError(res, error);
   }
@@ -94,9 +92,7 @@ export const updateProduct = async (req, res) => {
 
     const updated = await updateData(productModel, { _id: idValue.id, isDeleted: { $ne: true } }, payload, {});
 
-    return res
-      .status(HTTP_STATUS.OK)
-      .json(apiResponse(HTTP_STATUS.OK, responseMessage.updateDataSuccess("Product"), updated, {}));
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.updateDataSuccess("Product"), updated, {}));
   } catch (error) {
     return handleMongoError(res, error);
   }
@@ -117,9 +113,7 @@ export const deleteProduct = async (req, res) => {
 
     const deleted = await deleteData(productModel, { _id: value.id }, { isActive: false, status: "archived" }, {});
 
-    return res
-      .status(HTTP_STATUS.OK)
-      .json(apiResponse(HTTP_STATUS.OK, responseMessage.deleteDataSuccess("Product"), deleted, {}));
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.deleteDataSuccess("Product"), deleted, {}));
   } catch (error) {
     return handleMongoError(res, error);
   }
@@ -168,9 +162,7 @@ export const getProducts = async (req, res) => {
     const total = await countData(productModel, criteria);
     const pagination = getPaginationState(total, Number(page), Number(limit));
 
-    return res
-      .status(HTTP_STATUS.OK)
-      .json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Products"), { products, ...pagination, total_count: total }, {}));
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Products"), { products, ...pagination, total_count: total }, {}));
   } catch (error) {
     return handleMongoError(res, error);
   }
@@ -189,9 +181,7 @@ export const getProductById = async (req, res) => {
     const store = await findOne(storeModel, getStoreCriteria(user, String(product.storeId)));
     if (!store) return sendError(res, HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Product"));
 
-    return res
-      .status(HTTP_STATUS.OK)
-      .json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Product"), product, {}));
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Product"), product, {}));
   } catch (error) {
     return handleMongoError(res, error);
   }
