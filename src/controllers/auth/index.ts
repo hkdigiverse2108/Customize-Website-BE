@@ -138,6 +138,13 @@ export const googleAuth = async (req, res) => {
       // Login Flow
       if (user.isActive === false) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accountBlock, {}, {}));
       
+      // Update missing fields if necessary
+      let shouldSave = false;
+      if (!user.firstName && googleProfile.firstName) { user.firstName = googleProfile.firstName; shouldSave = true; }
+      if (!user.lastName && googleProfile.lastName) { user.lastName = googleProfile.lastName; shouldSave = true; }
+      if (!user.phone && value.phone) { user.phone = value.phone; shouldSave = true; }
+      if (shouldSave) await user.save();
+
       const userData = sanitizeUser(user.toObject());
       const token = await generateToken({ _id: String(user._id), email: user.email, role: user.role }, { expiresIn: tokenExpireIn });
       return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.loginSuccess, { user: userData, token }, {}));
@@ -147,8 +154,8 @@ export const googleAuth = async (req, res) => {
         firstName: googleProfile.firstName,
         lastName: googleProfile.lastName,
         email: googleProfile.email,
+        phone: value.phone || "",
         role: ACCOUNT_TYPE.VENDOR,
-        phone: "",
       }).save();
 
       const userData = sanitizeUser(newUser.toObject());
@@ -165,7 +172,7 @@ export const googleAuth = async (req, res) => {
     if (errorMap[error?.message]) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, errorMap[error.message], {}, {}));
     }
-
+    
     console.error(error);
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }

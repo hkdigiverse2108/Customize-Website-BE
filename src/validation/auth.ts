@@ -50,6 +50,7 @@ export const loginSchema = Joi.object({
 export const googleAuthSchema = Joi.object({
   credential: Joi.string().trim().required(),
   type: Joi.string().trim().lowercase().valid("signup", "signin").optional(),
+  phone: Joi.string().trim().allow("").optional(),
 });
 
 export const verifyLoginOtpSchema = Joi.object({
