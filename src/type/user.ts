@@ -14,8 +14,9 @@ export interface IUserType {
   firstName: string;
   lastName: string;
   email: string;
-  password: string;
+  password?: string;
   role: ACCOUNT_TYPE;
+  storeId?: Types.ObjectId | string | null;
   subscription: IUserSubscriptionType;
   otp: number | null;
   otpExpireTime: Date | null;
@@ -30,8 +31,9 @@ export interface ICreateUserPayload {
   firstName: string;
   lastName: string;
   email: string;
-  password: string;
+  password?: string;
   role: ACCOUNT_TYPE;
+  storeId?: Types.ObjectId | string | null;
   subscription?: IUserSubscriptionType;
   trialUsed?: boolean;
   isActive?: boolean;
@@ -50,8 +52,9 @@ export interface IUser extends Document {
   firstName: string;
   lastName: string;
   email: string;
-  password: string;
+  password?: string;
   role: ACCOUNT_TYPE;
+  storeId?: Types.ObjectId | string | null;
   subscription: IUserSubscription;
   otp: number | null;
   otpExpireTime: Date | null;

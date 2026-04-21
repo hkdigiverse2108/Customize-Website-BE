@@ -18,6 +18,7 @@ import { orderRouter } from "./order";
 import { discountRouter } from "./discount";
 import { blogRouter } from "./blog";
 import storefrontRouter from "./storefront";
+import { customerRouter } from "./customer";
 const router = Router();
 
 router.use("/storefront", storefrontRouter);
@@ -39,6 +40,7 @@ router.use("/product", productRouter);
 router.use("/order", orderRouter);
 router.use("/discount", discountRouter);
 router.use("/blog", blogRouter);
+router.use("/customer", customerRouter);
 router.use("/site", siteRouter);
 
 

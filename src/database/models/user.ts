@@ -30,4 +30,7 @@ const userSchema = new Schema<IUser>({
   { timestamps: true, versionKey: false, }
 );
 
+// Unique email per store (for CUSTOMER/STAFF) and unique global email (for VENDOR/ADMIN)
+userSchema.index({ email: 1, storeId: 1, isDeleted: 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });
+
 export const userModel = model<IUser>("user", userSchema);

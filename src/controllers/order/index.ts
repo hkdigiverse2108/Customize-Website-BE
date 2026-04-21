@@ -24,6 +24,7 @@ export const createOrder = async (req, res) => {
           email: value.email.toLowerCase(),
           phone: value.phone,
           role: ACCOUNT_TYPE.USER,
+          storeId: value.storeId,
           firstName: value?.shippingAddress?.firstName || "",
           lastName: value?.shippingAddress?.lastName || ""
         }).save();

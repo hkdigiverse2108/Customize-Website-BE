@@ -153,10 +153,14 @@ export const login = async (req, res) => {
     const passwordMatched = await compareHash(value.password, existingUser.password);
     if (!passwordMatched) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.invalidPassword, {}, {}));
 
-    const token = await generateToken({ _id: String(existingUser._id), email: existingUser.email, role: existingUser.role }, { expiresIn: tokenExpireIn });
-    const userData = sanitizeUser(existingUser.toObject());
+    const otp = generateOtpCode();
+    existingUser.otp = otp;
+    existingUser.otpExpireTime = new Date(Date.now() + otpValidityMinutes * 60 * 1000);
+    await existingUser.save();
 
-    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.loginSuccess, { user: userData, token }, {}));
+    await loginOtpMail(existingUser, otp);
+
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.otpSendSuccess, { otpRequired: true, email: existingUser.email }, {}));
   } catch (error) {
     console.error(error);
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
