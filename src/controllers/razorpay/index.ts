@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { ACCOUNT_TYPE, HTTP_STATUS, PAYMENT_FOR, PAYMENT_METHOD, PAYMENT_STATUS, PLAN_DURATION, SUBSCRIPTION_STATUS } from "../../common";
 import { orderModel, paymentModel, planModel, settingModel, userModel } from "../../database";
-import { getFirstMatch, reqInfo, responseMessage, updateData, validate, verifyStoreAccess } from "../../helper";
+import { applySubscription, getFirstMatch, reqInfo, resolvePaymentContext, responseMessage, updateData, validate, verifyStoreAccess } from "../../helper";
 import { apiResponse } from "../../type";
 import { createRazorpayPaymentSchema, razorpayPaymentVerifySchema } from "../../validation";
 export { createPhonePeSubscriptionPayment, phonePeCallback } from "../phonePe";
@@ -18,7 +18,7 @@ export const createRazorpaySubscriptionPayment = async (req, res) => {
     if (!value) return;
 
     const loggedInUser = req.headers.user as any;
-    const paymentContext: any = await resolvePaymentContext(value, res, loggedInUser);
+    const paymentContext: any = await resolvePaymentContext(value, loggedInUser, res);
     if (paymentContext?.errorResponse) return paymentContext.errorResponse;
 
     const setting = await resolveRazorpaySetting();
@@ -74,7 +74,7 @@ export const verifyRazorpaySubscriptionPayment = async (req, res) => {
     await updateData(paymentModel, { _id: existingPayment._id }, { status: PAYMENT_STATUS.SUCCESS, paidAt }, {});
 
     if (existingPayment.planId) {
-        // Apply Subscription Logic...
+        await applySubscription(existingPayment.userId, existingPayment.planId);
     }
 
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Verified", { verified: true }, {}));
@@ -89,12 +89,3 @@ export const verifyRazorpaySubscriptionPayment = async (req, res) => {
 const resolveRazorpaySetting = async () => 
   getFirstMatch(settingModel, { isDeleted: { $ne: true }, razorpayApiKey: { $exists: true } }, {}, { sort: { updatedAt: -1 } });
 
-const resolvePaymentContext = async (value: any, res: any, user: any) => {
-    if (value.orderId) {
-        const order: any = await getFirstMatch(orderModel, { _id: value.orderId, isDeleted: { $ne: true } }, {}, {});
-        if (!order) return { errorResponse: res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Order not found", {}, {})) };
-        if (!await verifyStoreAccess(user, order.storeId)) return { errorResponse: res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, "Access denied", {}, {})) };
-        return { amount: order.totalPrice, order };
-    }
-    return { errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Invalid request", {}, {})) };
-};

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { HTTP_STATUS, PAYMENT_FOR, PAYMENT_METHOD, PAYMENT_STATUS } from "../../common";
 import { orderModel, paymentModel, planModel, settingModel } from "../../database";
-import { getFirstMatch, reqInfo, updateData, validate, verifyStoreAccess } from "../../helper";
+import { applySubscription, getFirstMatch, reqInfo, resolvePaymentContext, updateData, validate, verifyStoreAccess } from "../../helper";
 import { apiResponse } from "../../type";
 import { createPhonePePaymentSchema } from "../../validation";
 
@@ -16,7 +16,7 @@ export const createPhonePeSubscriptionPayment = async (req, res) => {
     if (!value) return;
 
     const loggedInUser = req.headers.user as any;
-    const paymentContext: any = await resolvePaymentContext(value, res, loggedInUser);
+    const paymentContext: any = await resolvePaymentContext(value, loggedInUser, res);
     if (paymentContext?.errorResponse) return paymentContext.errorResponse;
 
     const setting = await resolvePhonePeSetting();
@@ -87,6 +87,10 @@ export const phonePeCallback = async (req, res) => {
         const status = (payload.state === "COMPLETED" || payload.state === "SUCCESS") ? PAYMENT_STATUS.SUCCESS : PAYMENT_STATUS.FAILED;
         const updated = await updateData(paymentModel, { _id: existingPayment._id }, { status, providerResponse: req.body, paidAt: status === PAYMENT_STATUS.SUCCESS ? new Date() : null }, {});
 
+        if (status === PAYMENT_STATUS.SUCCESS && existingPayment.planId) {
+            await applySubscription(existingPayment.userId, existingPayment.planId);
+        }
+
         return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Processed", updated, {}));
     } catch (error) {
         console.error(error);
@@ -110,15 +114,3 @@ const getPhonePeAccessToken = async (setting: any) => {
     return resp.data.access_token;
 };
 
-const resolvePaymentContext = async (value: any, res: any, user: any) => {
-    if (value.orderId) {
-        const order: any = await getFirstMatch(orderModel, { _id: value.orderId, isDeleted: { $ne: true } }, {}, {});
-        if (!order) return { errorResponse: res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Order not found", {}, {})) };
-        
-        if (!await verifyStoreAccess(user, order.storeId)) return { errorResponse: res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, "Access denied", {}, {})) };
-
-        return { paymentFor: PAYMENT_FOR.ORDER_PURCHASE, amount: order.totalPrice, order, message: `Order #${order.orderNumber}` };
-    }
-    // Handle Plan/Theme...
-    return { errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Invalid payment request", {}, {})) };
-};

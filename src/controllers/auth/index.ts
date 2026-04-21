@@ -264,14 +264,6 @@ export const resetPassword = async (req, res) => {
     const existingUser: any = await userModel.findOne({ email, isDeleted: { $ne: true } });
     if (!existingUser) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.invalidEmail, {}, {}));
 
-    if (!existingUser.otp || Number(existingUser.otp) !== Number(value.otp)) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.invalidOTP, {}, {}));
-    }
-
-    if (!existingUser.otpExpireTime || new Date(existingUser.otpExpireTime).getTime() < Date.now()) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.expireOTP, {}, {}));
-    }
-
     if (existingUser?.password) {
       const isSamePassword = await compareHash(value.password, existingUser.password);
       if (isSamePassword) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.passwordSameError, {}, {}));

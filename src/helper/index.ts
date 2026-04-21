@@ -8,3 +8,5 @@ export * from "./auditLog";
 export * from "./cache";
 export * from "./controllerHelper";
 export * from "./analytics";
+export * from "./paymentHelper";
+export * from "./themeHelper";

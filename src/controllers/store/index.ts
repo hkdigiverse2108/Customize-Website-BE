@@ -1,6 +1,6 @@
 import { ACCOUNT_TYPE, getPaginationState, HTTP_STATUS, resolveSortAndFilter } from "../../common";
 import { storeModel, userModel } from "../../database";
-import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, checkFieldDuplicate } from "../../helper";
+import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, checkFieldDuplicate, checkThemeLimit } from "../../helper";
 import { apiResponse } from "../../type";
 import { createStoreSchema, getAllStoresQuerySchema, storeIdSchema, updateStoreSchema } from "../../validation";
 
@@ -29,6 +29,9 @@ export const createStore = async (req, res) => {
 
     if (payload?.customDomain && await checkFieldDuplicate(storeModel, "customDomain", payload.customDomain))
         return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("custom domain"), {}, {}));
+
+    const themeCheck = await checkThemeLimit(loggedInUser, [payload.themeId, ...(payload.themeIds || [])]);
+    if (!themeCheck.allowed) return res.status(HTTP_STATUS.PAYMENT_REQUIRED).json(apiResponse(HTTP_STATUS.PAYMENT_REQUIRED, themeCheck.message, themeCheck, {}));
 
     const createdStore = await new storeModel(payload).save();
     return res.status(HTTP_STATUS.CREATED).json(apiResponse(HTTP_STATUS.CREATED, responseMessage.addDataSuccess("Store"), createdStore, {}));
@@ -65,6 +68,11 @@ export const updateStore = async (req, res) => {
 
     if (payload.subdomain && await checkFieldDuplicate(storeModel, "subdomain", payload.subdomain, idValue.id))
         return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("subdomain"), {}, {}));
+
+    if (payload.themeId || payload.themeIds) {
+        const themeCheck = await checkThemeLimit(loggedInUser, [payload.themeId, ...(payload.themeIds || [])].filter(Boolean));
+        if (!themeCheck.allowed) return res.status(HTTP_STATUS.PAYMENT_REQUIRED).json(apiResponse(HTTP_STATUS.PAYMENT_REQUIRED, themeCheck.message, themeCheck, {}));
+    }
 
     const updatedStore = await updateData(storeModel, criteria, payload, {});
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.updateDataSuccess("Store"), updatedStore, {}));

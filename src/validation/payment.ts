@@ -18,9 +18,7 @@ export const createPhonePePaymentSchema = Joi.object({
   currency: Joi.string().trim().uppercase().optional(),
 })
   .custom(validatePurchaseReference)
-  .messages({
-    "any.invalid": "Exactly one of planId, themeId or orderId is required",
-  });
+  .messages({"any.invalid": "Exactly one of planId, themeId or orderId is required",});
 
 export const createRazorpayPaymentSchema = Joi.object({
   planId: objectId().optional(),
@@ -30,9 +28,7 @@ export const createRazorpayPaymentSchema = Joi.object({
   receipt: Joi.string().trim().max(80).optional(),
 })
   .custom(validatePurchaseReference)
-  .messages({
-    "any.invalid": "Exactly one of planId, themeId or orderId is required",
-  });
+  .messages({"any.invalid": "Exactly one of planId, themeId or orderId is required",});
 
 export const razorpayPaymentVerifySchema = Joi.object({
   razorpay_order_id: Joi.string().trim().optional(),
@@ -51,6 +47,4 @@ export const razorpayPaymentVerifySchema = Joi.object({
     if (!orderId || !paymentId || !signature) return helpers.error("any.invalid");
     return value;
   })
-  .messages({
-    "any.invalid": "razorpay_order_id, razorpay_payment_id and razorpay_signature are required",
-  });
+  .messages({"any.invalid": "razorpay_order_id, razorpay_payment_id and razorpay_signature are required",});

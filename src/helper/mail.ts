@@ -118,7 +118,7 @@ export const forgotPasswordOtpMail = async (user: any, otp: number) => {
   });
 };
 
-export const loginOtpMail = async (user: any, otp: number) => {
+export const loginOtpMail = async (user, otp: number) => {
   return new Promise(async (resolve, reject) => {
     try {
       const subject = "Login Verification";

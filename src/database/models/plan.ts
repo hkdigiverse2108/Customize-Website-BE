@@ -7,6 +7,7 @@ const planSchema = new Schema<IPlan>(
     name: { type: String, enum: Object.values(SUBSCRIPTION_TYPE), required: true, },
     price: { type: Number, required: true, min: 0, },
     duration: { type: String, enum: Object.values(PLAN_DURATION), required: true, },
+    themeLimit: { type: Number, required: true, min: 1, default: 1 },
     features: { type: [String], required: true, default: [], },
     isActive: { type: Boolean, required: true, default: true, },
     isDeleted: { type: Boolean, required: true, default: false },
