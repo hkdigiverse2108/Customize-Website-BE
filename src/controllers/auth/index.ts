@@ -3,7 +3,7 @@ import { ACCOUNT_TYPE, compareHash, generateHash, generateOtpCode, generateToken
 import { userModel } from "../../database";
 import { forgotPasswordOtpMail, loginOtpMail, reqInfo, responseMessage } from "../../helper";
 import { apiResponse } from "../../type";
-import { resetPasswordSchema, forgotPasswordSchema, changePasswordSchema, googleSignupSchema, loginSchema, signupSchema, verifyLoginOtpSchema } from "../../validation";
+import { resetPasswordSchema, forgotPasswordSchema, changePasswordSchema, googleAuthSchema, loginSchema, signupSchema, verifyLoginOtpSchema } from "../../validation";
 
 
 const resolveGoogleClientId = () => process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_WEB_CLIENT_ID || "";
@@ -81,11 +81,19 @@ export const googleAuth = async (req, res) => {
   reqInfo(req);
 
   try {
-    const { error, value } = googleSignupSchema.validate(req.body);
+    const { error, value } = googleAuthSchema.validate(req.body);
     if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
 
-    const googleToken = value.idToken || value.credential;
-    const googleProfile = await verifyGoogleIdToken(googleToken);
+    if (!value.credential) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Google credential required", {}, {}));
+    }
+
+    let googleProfile;
+    try {
+      googleProfile = await verifyGoogleIdToken(value.credential);
+    } catch (err) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Invalid Google token", {}, {}));
+    }
     
     let user: any = await userModel.findOne({ email: googleProfile.email, isDeleted: { $ne: true } });
 

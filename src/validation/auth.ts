@@ -47,10 +47,9 @@ export const loginSchema = Joi.object({
   password: Joi.string().min(8).required(),
 });
 
-export const googleSignupSchema = Joi.object({
-  idToken: Joi.string().trim().optional(),
-  credential: Joi.string().trim().optional(),
-}).or("idToken", "credential");
+export const googleAuthSchema = Joi.object({
+  credential: Joi.string().trim().required(),
+});
 
 export const verifyLoginOtpSchema = Joi.object({
   email: Joi.string().trim().email().lowercase().required(),
