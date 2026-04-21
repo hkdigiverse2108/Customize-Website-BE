@@ -41,7 +41,6 @@ const verifyGoogleIdToken = async (token: string) => {
 
     if (!email || !subject || !emailVerified) throw new Error("INVALID_GOOGLE_TOKEN");
 
-    // Audience check is only relevant for ID Tokens
     if (!isAccessToken) {
       const audience = String(payload?.aud || "").trim();
       const googleClientId = resolveGoogleClientId();
@@ -125,23 +124,37 @@ export const googleAuth = async (req, res) => {
 
     const user: any = await userModel.findOne({ email: googleProfile.email, isDeleted: { $ne: true } });
 
-    if (user) {
+    // 1. Explicit Signup Check
+    if (value.type === "signup" && user) {
       return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("email"), {}, {}));
     }
 
-    // Create new user if doesn't exist
-    const newUser = await new userModel({
-      firstName: googleProfile.firstName,
-      lastName: googleProfile.lastName,
-      email: googleProfile.email,
-      role: ACCOUNT_TYPE.VENDOR,
-      phone: "",
-    }).save();
+    // 2. Explicit Signin Check
+    if (value.type === "signin" && !user) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("User"), {}, {}));
+    }
 
-    const userData = sanitizeUser(newUser.toObject());
-    const token = await generateToken({ _id: String(newUser._id), email: newUser.email, role: newUser.role }, { expiresIn: tokenExpireIn });
-    
-    return res.status(HTTP_STATUS.CREATED).json(apiResponse(HTTP_STATUS.CREATED, responseMessage.signupSuccess, { user: userData, token }, {}));
+    if (user) {
+      // Login Flow
+      if (user.isActive === false) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accountBlock, {}, {}));
+      
+      const userData = sanitizeUser(user.toObject());
+      const token = await generateToken({ _id: String(user._id), email: user.email, role: user.role }, { expiresIn: tokenExpireIn });
+      return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.loginSuccess, { user: userData, token }, {}));
+    } else {
+      // Create/Signup Flow
+      const newUser = await new userModel({
+        firstName: googleProfile.firstName,
+        lastName: googleProfile.lastName,
+        email: googleProfile.email,
+        role: ACCOUNT_TYPE.VENDOR,
+        phone: "",
+      }).save();
+
+      const userData = sanitizeUser(newUser.toObject());
+      const token = await generateToken({ _id: String(newUser._id), email: newUser.email, role: newUser.role }, { expiresIn: tokenExpireIn });
+      return res.status(HTTP_STATUS.CREATED).json(apiResponse(HTTP_STATUS.CREATED, responseMessage.signupSuccess, { user: userData, token }, {}));
+    }
   } catch (error) {
     const errorMap = {
       "GOOGLE_CLIENT_ID_MISSING": "Google configuration missing on server",
