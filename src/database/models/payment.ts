@@ -8,6 +8,7 @@ const paymentSchema = new Schema<IPayment>(
     planId: { type: Schema.Types.ObjectId, ref: "plan", default: null },
     themeId: { type: Schema.Types.ObjectId, ref: "theme", default: null },
     orderId: { type: Schema.Types.ObjectId, ref: "order", default: null },
+    storeId: { type: Schema.Types.ObjectId, ref: "store", default: null },
     paymentFor: { type: String, enum: Object.values(PAYMENT_FOR), required: true, default: PAYMENT_FOR.PLAN_SUBSCRIPTION },
     amount: { type: Number, required: true, min: 0 },
     currency: { type: String, required: true, trim: true, uppercase: true },

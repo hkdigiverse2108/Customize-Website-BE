@@ -77,7 +77,7 @@ export const signup = async (req, res) => {
   }
 };
 
-export const googleSignup = async (req, res) => {
+export const googleAuth = async (req, res) => {
   reqInfo(req);
 
   try {
@@ -86,50 +86,40 @@ export const googleSignup = async (req, res) => {
 
     const googleToken = value.idToken || value.credential;
     const googleProfile = await verifyGoogleIdToken(googleToken);
-    const existingUser: any = await userModel.findOne({ email: googleProfile.email, isDeleted: { $ne: true } });
+    
+    let user: any = await userModel.findOne({ email: googleProfile.email, isDeleted: { $ne: true } });
 
-    if (existingUser) {
-      if (existingUser?.isActive === false) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accountBlock, {}, {}));
-
+    if (user) {
+      if (user.isActive === false) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accountBlock, {}, {}));
+      
+      // Update missing names if necessary
       let shouldSave = false;
-      if (!existingUser.firstName && googleProfile.firstName) {
-        existingUser.firstName = googleProfile.firstName;
-        shouldSave = true;
-      }
-
-      if (!existingUser.lastName && googleProfile.lastName) {
-        existingUser.lastName = googleProfile.lastName;
-        shouldSave = true;
-      }
-
-      if (shouldSave) await existingUser.save();
-
-      const token = await generateToken({ _id: String(existingUser._id), email: existingUser.email, role: existingUser.role }, { expiresIn: tokenExpireIn });
-      const userData = sanitizeUser(existingUser.toObject());
-      return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.loginSuccess, { user: userData, token }, {}));
+      if (!user.firstName && googleProfile.firstName) { user.firstName = googleProfile.firstName; shouldSave = true; }
+      if (!user.lastName && googleProfile.lastName) { user.lastName = googleProfile.lastName; shouldSave = true; }
+      if (shouldSave) await user.save();
+    } else {
+      // Create new user if doesn't exist
+      user = await new userModel({
+        firstName: googleProfile.firstName,
+        lastName: googleProfile.lastName,
+        email: googleProfile.email,
+        role: ACCOUNT_TYPE.VENDOR,
+      }).save();
     }
 
-    const createdUser = await new userModel({
-      firstName: googleProfile.firstName,
-      lastName: googleProfile.lastName,
-      email: googleProfile.email,
-      role: ACCOUNT_TYPE.VENDOR,
-    }).save();
-
-    const userData = sanitizeUser(createdUser.toObject());
-    const token = await generateToken({ _id: String(createdUser._id), email: createdUser.email, role: createdUser.role }, { expiresIn: tokenExpireIn });
-    return res.status(HTTP_STATUS.CREATED).json(apiResponse(HTTP_STATUS.CREATED, responseMessage.signupSuccess, { user: userData, token }, {}));
+    const userData = sanitizeUser(user.toObject());
+    const token = await generateToken({ _id: String(user._id), email: user.email, role: user.role }, { expiresIn: tokenExpireIn });
+    
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.loginSuccess, { user: userData, token }, {}));
   } catch (error) {
-    if (error?.message === "GOOGLE_CLIENT_ID_MISSING") {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "GOOGLE_CLIENT_ID is not configured on server", {}, {}));
-    }
+    const errorMap = {
+        "GOOGLE_CLIENT_ID_MISSING": "Google configuration missing on server",
+        "GOOGLE_AUDIENCE_MISMATCH": "Google token audience mismatch",
+        "INVALID_GOOGLE_TOKEN": "Invalid Google token"
+    };
 
-    if (error?.message === "GOOGLE_AUDIENCE_MISMATCH") {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Google token audience mismatch", {}, {}));
-    }
-
-    if (error?.message === "INVALID_GOOGLE_TOKEN") {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Invalid Google token", {}, {}));
+    if (errorMap[error?.message]) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, errorMap[error.message], {}, {}));
     }
 
     console.error(error);
@@ -155,14 +145,10 @@ export const login = async (req, res) => {
     const passwordMatched = await compareHash(value.password, existingUser.password);
     if (!passwordMatched) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.invalidPassword, {}, {}));
 
-    const otp = generateOtpCode();
-    existingUser.otp = otp;
-    existingUser.otpExpireTime = new Date(Date.now() + otpValidityMinutes * 60 * 1000);
-    await existingUser.save();
+    const token = await generateToken({ _id: String(existingUser._id), email: existingUser.email, role: existingUser.role }, { expiresIn: tokenExpireIn });
+    const userData = sanitizeUser(existingUser.toObject());
 
-    await loginOtpMail(existingUser, otp);
-
-    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.otpSendSuccess, { otpRequired: true, email: existingUser.email }, {}));
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.loginSuccess, { user: userData, token }, {}));
   } catch (error) {
     console.error(error);
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));

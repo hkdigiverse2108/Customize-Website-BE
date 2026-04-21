@@ -43,6 +43,7 @@ export interface IThemeType {
   previewImage: string;
   category: string;
   tags: string[];
+  price: number;
   isActive: boolean;
   isDeleted: boolean;
   createdAt: Date;
@@ -59,6 +60,7 @@ export interface ITheme extends Document {
   previewImage: string;
   category: string;
   tags: string[];
+  price: number;
   isActive: boolean;
   isDeleted: boolean;
   createdAt: Date;

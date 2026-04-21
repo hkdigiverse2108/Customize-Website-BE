@@ -1,7 +1,7 @@
 import axios from "axios";
 import { HTTP_STATUS, PAYMENT_FOR, PAYMENT_METHOD, PAYMENT_STATUS } from "../../common";
 import { orderModel, paymentModel, planModel, settingModel } from "../../database";
-import { applySubscription, getFirstMatch, reqInfo, resolvePaymentContext, updateData, validate, verifyStoreAccess } from "../../helper";
+import { applySubscription, getFirstMatch, grantTheme, reqInfo, resolvePaymentContext, updateData, validate, verifyStoreAccess } from "../../helper";
 import { apiResponse } from "../../type";
 import { createPhonePePaymentSchema } from "../../validation";
 
@@ -57,6 +57,7 @@ export const createPhonePeSubscriptionPayment = async (req, res) => {
       planId: paymentContext.plan?._id || null,
       themeId: paymentContext.theme?._id || null,
       orderId: paymentContext.order?._id || null,
+      storeId: value.storeId || paymentContext.order?.storeId || null,
       paymentFor: paymentContext.paymentFor,
       amount: paymentContext.amount,
       currency: value.currency || "INR",
@@ -89,6 +90,10 @@ export const phonePeCallback = async (req, res) => {
 
         if (status === PAYMENT_STATUS.SUCCESS && existingPayment.planId) {
             await applySubscription(existingPayment.userId, existingPayment.planId);
+        }
+
+        if (status === PAYMENT_STATUS.SUCCESS && existingPayment.themeId) {
+            await grantTheme(existingPayment.storeId || existingPayment.userId, existingPayment.themeId);
         }
 
         return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Processed", updated, {}));

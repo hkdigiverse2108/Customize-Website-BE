@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { ACCOUNT_TYPE, HTTP_STATUS, PAYMENT_FOR, PAYMENT_METHOD, PAYMENT_STATUS, PLAN_DURATION, SUBSCRIPTION_STATUS } from "../../common";
 import { orderModel, paymentModel, planModel, settingModel, userModel } from "../../database";
-import { applySubscription, getFirstMatch, reqInfo, resolvePaymentContext, responseMessage, updateData, validate, verifyStoreAccess } from "../../helper";
+import { applySubscription, getFirstMatch, grantTheme, reqInfo, resolvePaymentContext, responseMessage, updateData, validate, verifyStoreAccess } from "../../helper";
 import { apiResponse } from "../../type";
 import { createRazorpayPaymentSchema, razorpayPaymentVerifySchema } from "../../validation";
 export { createPhonePeSubscriptionPayment, phonePeCallback } from "../phonePe";
@@ -41,6 +41,7 @@ export const createRazorpaySubscriptionPayment = async (req, res) => {
       planId: paymentContext.plan?._id || null,
       themeId: paymentContext.theme?._id || null,
       orderId: paymentContext.order?._id || null,
+      storeId: value.storeId || paymentContext.order?.storeId || null,
       amount: paymentContext.amount,
       paymentMethod: PAYMENT_METHOD.RAZORPAY,
       transactionId: receipt,
@@ -75,6 +76,10 @@ export const verifyRazorpaySubscriptionPayment = async (req, res) => {
 
     if (existingPayment.planId) {
         await applySubscription(existingPayment.userId, existingPayment.planId);
+    }
+
+    if (existingPayment.themeId) {
+        await grantTheme(existingPayment.storeId || existingPayment.userId, existingPayment.themeId);
     }
 
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Verified", { verified: true }, {}));

@@ -1,6 +1,6 @@
 import { HTTP_STATUS, PAYMENT_FOR, PLAN_DURATION, SUBSCRIPTION_STATUS } from "../common";
 import { orderModel, planModel, themeModel, userModel } from "../database";
-import { getFirstMatch, updateData, verifyStoreAccess } from "../helper";
+import { checkThemeLimit, getFirstMatch, updateData, verifyStoreAccess, validatePlanSwitch } from "../helper";
 import { apiResponse } from "../type";
 
 export const resolvePaymentContext = async (value: any, user: any, res: any) => {
@@ -20,17 +20,34 @@ export const resolvePaymentContext = async (value: any, user: any, res: any) => 
         if (!plan) {
             return { errorResponse: res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Plan not found", {}, {})) };
         }
+
+        const switchValidation = await validatePlanSwitch(user, value.planId);
+        if (!switchValidation.allowed) {
+            return { errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, switchValidation.message, switchValidation, {})) };
+        }
+
         return { paymentFor: PAYMENT_FOR.PLAN_SUBSCRIPTION, amount: plan.price, plan, message: `Plan Subscription: ${plan.name} (${plan.duration})` };
     }
 
     if (value.themeId) {
+        if (!value.storeId) {
+            return { errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "storeId is required for theme purchase", {}, {})) };
+        }
+        
+        if (!await verifyStoreAccess(user, value.storeId)) {
+            return { errorResponse: res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, "Access denied to store", {}, {})) };
+        }
+
         const theme: any = await getFirstMatch(themeModel, { _id: value.themeId, isDeleted: { $ne: true } }, {}, {});
         if (!theme) {
             return { errorResponse: res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Theme not found", {}, {})) };
         }
-        // Assuming theme price is fixed or fetched from somewhere else for now, 
-        // but as it's not in the model yet, we'll return an error or handle it if we find where the price is.
-        return { errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Theme purchase not fully implemented", {}, {})) };
+        const themeCheck = await checkThemeLimit(user, [value.themeId]);
+        if (themeCheck.allowed === false) {
+            return { errorResponse: res.status(HTTP_STATUS.PAYMENT_REQUIRED).json(apiResponse(HTTP_STATUS.PAYMENT_REQUIRED, themeCheck.message, themeCheck, {})) };
+        }
+
+        return { paymentFor: PAYMENT_FOR.THEME_PURCHASE, amount: theme.price, theme, message: `Theme Purchase: ${theme.name}` };
     }
 
     return { errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Invalid payment request: orderId or planId required", {}, {})) };
@@ -58,4 +75,12 @@ export const applySubscription = async (userId: string, planId: string) => {
     };
 
     return await updateData(userModel, { _id: userId }, { subscription }, { new: true });
+};
+
+export const grantTheme = async (storeId: string, themeId: string) => {
+    const { storeModel } = await import("../database");
+    return await storeModel.updateOne(
+        { _id: storeId }, 
+        { $addToSet: { themeIds: themeId } }
+    );
 };

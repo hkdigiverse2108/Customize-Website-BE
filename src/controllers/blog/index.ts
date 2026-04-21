@@ -1,6 +1,6 @@
 import { getPaginationState, HTTP_STATUS, resolveSortAndFilter } from "../../common";
-import { blogModel } from "../../database";
-import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, verifyStoreAccess, checkFieldDuplicate } from "../../helper";
+import { blogModel, storeModel } from "../../database";
+import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, verifyStoreAccess, checkFieldDuplicate, checkBlogLimit, verifyThemeForStore } from "../../helper";
 import { apiResponse } from "../../type";
 import { createBlogSchema, getAllBlogsQuerySchema, updateBlogSchema } from "../../validation";
 
@@ -12,6 +12,15 @@ export const createBlog = async (req, res) => {
 
     const user = req.headers.user as any;
     if (!await verifyStoreAccess(user, value.storeId)) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
+
+    const blogLimitCheck = await checkBlogLimit(user, value.storeId);
+    if (!blogLimitCheck.allowed) return res.status(HTTP_STATUS.PAYMENT_REQUIRED).json(apiResponse(HTTP_STATUS.PAYMENT_REQUIRED, blogLimitCheck.message, blogLimitCheck, {}));
+
+    if (value.themeId) {
+        if (!await verifyThemeForStore(value.storeId, value.themeId)) {
+            return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Theme not purchased for this store", {}, {}));
+        }
+    }
 
     if (await checkFieldDuplicate(blogModel, "seo.slug", value.seo.slug, undefined, { storeId: value.storeId })) {
         return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, "Blog slug already exists in this store", {}, {}));
@@ -36,6 +45,12 @@ export const updateBlog = async (req, res) => {
 
     const user = req.headers.user as any;
     if (!await verifyStoreAccess(user, existing.storeId)) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
+
+    if (value.themeId) {
+        if (!await verifyThemeForStore(existing.storeId, value.themeId)) {
+            return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Theme not purchased for this store", {}, {}));
+        }
+    }
 
     if (value.seo?.slug && await checkFieldDuplicate(blogModel, "seo.slug", value.seo.slug, value.id, { storeId: existing.storeId })) {
         return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, "Blog slug already exists", {}, {}));

@@ -44,7 +44,6 @@ export interface IStoreType {
   description: string;
   logo: string | null;
   banner: string | null;
-  themeId: Types.ObjectId | string;
   themeIds: (Types.ObjectId | string)[];
   themeConfig: IStoreThemeConfig;
   userId: Types.ObjectId | string;
@@ -79,7 +78,6 @@ export interface ICreateStorePayload {
   description?: string;
   logo?: string | null;
   banner?: string | null;
-  themeId?: Types.ObjectId | string;
   themeIds?: (Types.ObjectId | string)[];
   themeConfig?: Partial<IStoreThemeConfig>;
   userId: Types.ObjectId | string;
@@ -108,7 +106,6 @@ export interface IStore extends Document {
   description: string;
   logo: string | null;
   banner: string | null;
-  themeId: Types.ObjectId | string;
   themeIds: (Types.ObjectId | string)[];
   themeConfig: IStoreThemeConfig;
   userId: Types.ObjectId | string;

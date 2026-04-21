@@ -22,7 +22,7 @@ export interface ICreatePlanPayload {
   isActive?: boolean;
 }
 
-export interface IUpdatePlanPayload extends Partial<ICreatePlanPayload> {}
+export interface IUpdatePlanPayload extends Partial<ICreatePlanPayload> { }
 
 export interface IPlan extends Document {
   name: SUBSCRIPTION_TYPE;

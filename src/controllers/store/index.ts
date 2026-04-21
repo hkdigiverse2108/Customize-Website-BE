@@ -1,6 +1,6 @@
 import { ACCOUNT_TYPE, getPaginationState, HTTP_STATUS, resolveSortAndFilter } from "../../common";
 import { storeModel, userModel } from "../../database";
-import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, checkFieldDuplicate, checkThemeLimit } from "../../helper";
+import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, checkFieldDuplicate, checkThemeLimit, checkStoreLimit } from "../../helper";
 import { apiResponse } from "../../type";
 import { createStoreSchema, getAllStoresQuerySchema, storeIdSchema, updateStoreSchema } from "../../validation";
 
@@ -20,17 +20,20 @@ export const createStore = async (req, res) => {
     const existingUser = await getFirstMatch(userModel, { _id: payload.userId, isDeleted: { $ne: true } }, {}, {});
     if (!existingUser) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.getDataNotFound("User"), {}, {}));
 
+    const storeLimitCheck = await checkStoreLimit(loggedInUser);
+    if (!storeLimitCheck.allowed) return res.status(HTTP_STATUS.PAYMENT_REQUIRED).json(apiResponse(HTTP_STATUS.PAYMENT_REQUIRED, storeLimitCheck.message, storeLimitCheck, {}));
+
     // Check Duplicates
-    if (await checkFieldDuplicate(storeModel, "slug", payload.slug)) 
-        return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
-    
+    if (await checkFieldDuplicate(storeModel, "slug", payload.slug))
+      return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
+
     if (await checkFieldDuplicate(storeModel, "subdomain", payload.subdomain))
-        return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("subdomain"), {}, {}));
+      return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("subdomain"), {}, {}));
 
     if (payload?.customDomain && await checkFieldDuplicate(storeModel, "customDomain", payload.customDomain))
-        return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("custom domain"), {}, {}));
+      return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("custom domain"), {}, {}));
 
-    const themeCheck = await checkThemeLimit(loggedInUser, [payload.themeId, ...(payload.themeIds || [])]);
+    const themeCheck = await checkThemeLimit(loggedInUser, payload.themeIds);
     if (!themeCheck.allowed) return res.status(HTTP_STATUS.PAYMENT_REQUIRED).json(apiResponse(HTTP_STATUS.PAYMENT_REQUIRED, themeCheck.message, themeCheck, {}));
 
     const createdStore = await new storeModel(payload).save();
@@ -64,14 +67,14 @@ export const updateStore = async (req, res) => {
 
     // Check Duplicates if changed
     if (payload.slug && await checkFieldDuplicate(storeModel, "slug", payload.slug, idValue.id))
-        return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
+      return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
 
     if (payload.subdomain && await checkFieldDuplicate(storeModel, "subdomain", payload.subdomain, idValue.id))
-        return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("subdomain"), {}, {}));
+      return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("subdomain"), {}, {}));
 
-    if (payload.themeId || payload.themeIds) {
-        const themeCheck = await checkThemeLimit(loggedInUser, [payload.themeId, ...(payload.themeIds || [])].filter(Boolean));
-        if (!themeCheck.allowed) return res.status(HTTP_STATUS.PAYMENT_REQUIRED).json(apiResponse(HTTP_STATUS.PAYMENT_REQUIRED, themeCheck.message, themeCheck, {}));
+    if (payload.themeIds) {
+      const themeCheck = await checkThemeLimit(loggedInUser, payload.themeIds);
+      if (!themeCheck.allowed) return res.status(HTTP_STATUS.PAYMENT_REQUIRED).json(apiResponse(HTTP_STATUS.PAYMENT_REQUIRED, themeCheck.message, themeCheck, {}));
     }
 
     const updatedStore = await updateData(storeModel, criteria, payload, {});
@@ -118,10 +121,10 @@ export const getStores = async (req, res) => {
     if (loggedInUser?.role === ACCOUNT_TYPE.VENDOR) criteria.userId = loggedInUser?._id;
 
     const [stores, totalCount] = await Promise.all([
-        getData(storeModel, criteria, {}, options),
-        countData(storeModel, criteria)
+      getData(storeModel, criteria, {}, options),
+      countData(storeModel, criteria)
     ]);
-    
+
     const pagination = getPaginationState(totalCount, Number(page), Number(limit));
 
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Stores"), { stores, ...pagination, total_count: totalCount }, {}));

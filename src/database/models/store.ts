@@ -27,8 +27,7 @@ const storeSchema = new Schema<IStore>(
     description: { type: String, default: "", trim: true },
     logo: { type: String, default: null, trim: true },
     banner: { type: String, default: null, trim: true },
-    themeId: { type: Schema.Types.ObjectId, ref: "theme", required: true },
-    themeIds: [{ type: Schema.Types.ObjectId, ref: "theme", required: true }],
+    themeIds: [{ type: Schema.Types.ObjectId, ref: "theme", required: true, default: [] }],
     themeConfig: {
       colors: { type: Schema.Types.Mixed, default: {} },
       fonts: { type: Schema.Types.Mixed, default: {} },

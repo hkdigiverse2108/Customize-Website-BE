@@ -26,10 +26,10 @@ export const getStorefrontPage = async (req, res) => {
     }
 
     // 1. Fetch Store and Active Theme
-    const store: any = await getFirstMatch(storeModel, { slug: val.slug, isDeleted: false, isActive: true }, {}, { populate: "themeId" });
+    const store: any = await getFirstMatch(storeModel, { slug: val.slug, isDeleted: false, isActive: true }, {}, { populate: "themeIds" });
     if (!store) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Store not found", {}, {}));
 
-    const theme = store.themeId;
+    const theme = store.themeIds?.[0];
     if (!theme) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Active theme not found", {}, {}));
 
     // 2. Get Layout Structure (Live vs Draft)

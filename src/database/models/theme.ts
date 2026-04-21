@@ -5,11 +5,8 @@ const themeSchema = new Schema<ITheme>(
   {
     name: { type: String, required: true },
     slug: { type: String, unique: true, required: true },
-
     isGlobal: { type: Boolean, default: true }, // Admin theme
     storeId: { type: Schema.Types.ObjectId, ref: "store", default: null },
-
-    // 🎨 Global Styling
     styles: {
       colors: {
         primary: String,
@@ -26,8 +23,6 @@ const themeSchema = new Schema<ITheme>(
         spacing: String,
       },
     },
-
-    // 🧠 Page Structure
     layoutJSON: {
       home: [{
         componentId: { type: String, required: true },
@@ -50,12 +45,10 @@ const themeSchema = new Schema<ITheme>(
         config: { type: Object, default: {} }
       }],
     },
-
-    // 📦 Metadata
     previewImage: String,
-    category: String, // fashion, electronics
+    category: String,
     tags: [String],
-
+    price: { type: Number, default: 0, min: 0 },
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
   },

@@ -14,6 +14,7 @@ export const createPhonePePaymentSchema = Joi.object({
   planId: objectId().optional(),
   themeId: objectId().optional(),
   orderId: objectId().optional(),
+  storeId: objectId().optional(),
   redirectUrl: Joi.string().trim().uri().required(),
   currency: Joi.string().trim().uppercase().optional(),
 })
@@ -24,6 +25,7 @@ export const createRazorpayPaymentSchema = Joi.object({
   planId: objectId().optional(),
   themeId: objectId().optional(),
   orderId: objectId().optional(),
+  storeId: objectId().optional(),
   currency: Joi.string().trim().uppercase().optional(),
   receipt: Joi.string().trim().max(80).optional(),
 })

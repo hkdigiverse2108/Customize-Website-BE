@@ -27,9 +27,7 @@ export const themeConfigSchema = Joi.object({
   colors: Joi.object().unknown(true).optional(),
   fonts: Joi.object().unknown(true).optional(),
   spacing: Joi.object().unknown(true).optional(),
-})
-  .unknown(true)
-  .optional();
+}).unknown(true).optional();
 
 export const createStoreSchema = Joi.object({
   name: Joi.string().trim().min(2).max(120).required(),
@@ -37,8 +35,7 @@ export const createStoreSchema = Joi.object({
   description: Joi.string().trim().allow("").optional(),
   logo: Joi.string().trim().allow(null, "").optional(),
   banner: Joi.string().trim().allow(null, "").optional(),
-  themeId: objectId().required(),
-  themeIds: Joi.array().items(objectId()).optional(),
+  themeIds: Joi.array().items(objectId()).min(1).required(),
   themeConfig: themeConfigSchema,
   userId: objectId().optional(),
   subdomain: Joi.string().trim().lowercase().pattern(subdomainRegex).required(),
@@ -67,7 +64,6 @@ export const updateStoreSchema = Joi.object({
   description: Joi.string().trim().allow("").optional(),
   logo: Joi.string().trim().allow(null, "").optional(),
   banner: Joi.string().trim().allow(null, "").optional(),
-  themeId: objectId().optional(),
   themeIds: Joi.array().items(objectId()).optional(),
   themeConfig: themeConfigSchema,
   userId: objectId().optional(),
