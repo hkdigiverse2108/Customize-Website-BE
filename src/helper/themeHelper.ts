@@ -40,21 +40,14 @@ export const checkThemeLimit = async (user: any, requestedThemeIds: string[] = [
 export const checkStoreLimit = async (user: any) => {
     if (user.role === ACCOUNT_TYPE.ADMIN) return { allowed: true };
 
-    const userData: any = await getFirstMatch(userModel, { _id: user._id, isDeleted: { $ne: true } }, {}, {});
-    if (!userData || !userData.subscription?.planId) {
-        return { allowed: false, message: "Active subscription required." };
-    }
-
-    const plan: any = await getFirstMatch(planModel, { _id: userData.subscription.planId, isDeleted: { $ne: true } }, {}, {});
-    if (!plan) return { allowed: false, message: "Subscription plan not found." };
-
+    // Hard limit: each vendor can only have 1 store
     const storeCount = await countData(storeModel, { userId: user._id, isDeleted: { $ne: true } });
 
-    if (storeCount >= plan.storeLimit) {
+    if (storeCount >= 1) {
         return {
             allowed: false,
-            message: `Store limit reached. Your ${plan.name} plan allows up to ${plan.storeLimit} stores. Please upgrade to create more.`,
-            limit: plan.storeLimit,
+            message: "You already have a store. Each vendor can only create 1 store.",
+            limit: 1,
             current: storeCount
         };
     }
@@ -128,17 +121,45 @@ export const validatePlanSwitch = async (user: any, newPlanId: string) => {
         };
     }
 
-    // 3. Check Blog Limits across all stores
+    // 3. Check Blog, Product, and Order Limits across all stores
+    const { productModel, orderModel } = await import("../database");
     for (const store of stores) {
-        const blogCount = await countData(blogModel, { storeId: store._id, isDeleted: { $ne: true } });
-        if (blogCount > newPlan.blogLimit) {
-            return {
-                allowed: false,
-                message: `Cannot switch to ${newPlan.name}. Your store "${store.name}" has ${blogCount} blogs, which exceeds the limit of ${newPlan.blogLimit}.`,
-                type: "BLOG_LIMIT_EXCEEDED"
-            };
+        // Blog limit
+        if (newPlan.blogLimit !== -1) {
+            const blogCount = await countData(blogModel, { storeId: store._id, isDeleted: { $ne: true } });
+            if (blogCount > newPlan.blogLimit) {
+                return {
+                    allowed: false,
+                    message: `Cannot switch to ${newPlan.name}. Store "${store.name}" has ${blogCount} blogs, exceeding the limit of ${newPlan.blogLimit}.`,
+                    type: "BLOG_LIMIT_EXCEEDED"
+                };
+            }
+        }
+
+        // Product limit
+        if (newPlan.productLimit !== -1) {
+            const productCount = await countData(productModel, { storeId: store._id, isDeleted: { $ne: true } });
+            if (productCount > newPlan.productLimit) {
+                return {
+                    allowed: false,
+                    message: `Cannot switch to ${newPlan.name}. Store "${store.name}" has ${productCount} products, exceeding the limit of ${newPlan.productLimit}.`,
+                    type: "PRODUCT_LIMIT_EXCEEDED"
+                };
+            }
+        }
+
+        // Order limit (total orders for the store)
+        if (newPlan.orderLimit !== -1) {
+            const orderCount = await countData(orderModel, { storeId: store._id, isDeleted: { $ne: true } });
+            if (orderCount > newPlan.orderLimit) {
+                return {
+                    allowed: false,
+                    message: `Cannot switch to ${newPlan.name}. Store "${store.name}" has ${orderCount} orders, exceeding the new plan's limit of ${newPlan.orderLimit}.`,
+                    type: "ORDER_LIMIT_EXCEEDED"
+                };
+            }
         }
     }
 
-    return { allowed: true };
+    return { allowed: true, plan: newPlan };
 };

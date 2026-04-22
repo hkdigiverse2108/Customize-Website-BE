@@ -5,7 +5,12 @@ export interface IPlanType {
   name: SUBSCRIPTION_TYPE;
   price: number;
   duration: PLAN_DURATION;
+  storeLimit: number;
   themeLimit: number;
+  productLimit: number;
+  blogLimit: number;
+  orderLimit: number;
+  customDomainSupport: boolean;
   features: string[];
   isActive: boolean;
   isDeleted: boolean;
@@ -17,7 +22,12 @@ export interface ICreatePlanPayload {
   name: SUBSCRIPTION_TYPE;
   price: number;
   duration: PLAN_DURATION;
+  storeLimit: number;
   themeLimit: number;
+  productLimit: number;
+  blogLimit: number;
+  orderLimit: number;
+  customDomainSupport: boolean;
   features: string[];
   isActive?: boolean;
 }
@@ -28,7 +38,12 @@ export interface IPlan extends Document {
   name: SUBSCRIPTION_TYPE;
   price: number;
   duration: PLAN_DURATION;
+  storeLimit: number;
   themeLimit: number;
+  productLimit: number;
+  blogLimit: number;
+  orderLimit: number;
+  customDomainSupport: boolean;
   features: string[];
   isActive: boolean;
   isDeleted: boolean;

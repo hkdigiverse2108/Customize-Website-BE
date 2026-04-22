@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { ACCOUNT_TYPE, HTTP_STATUS, PAYMENT_FOR, PAYMENT_METHOD, PAYMENT_STATUS, PLAN_DURATION, SUBSCRIPTION_STATUS } from "../../common";
-import { orderModel, paymentModel, planModel, settingModel, userModel } from "../../database";
+import { orderModel, paymentModel, planModel, paymentSettingModel, userModel } from "../../database";
 import { applySubscription, getFirstMatch, grantTheme, reqInfo, resolvePaymentContext, responseMessage, updateData, validate, verifyStoreAccess } from "../../helper";
 import { apiResponse } from "../../type";
 import { createRazorpayPaymentSchema, razorpayPaymentVerifySchema } from "../../validation";
@@ -92,5 +92,5 @@ export const verifyRazorpaySubscriptionPayment = async (req, res) => {
 /* --- Helpers --- */
 
 const resolveRazorpaySetting = async () => 
-  getFirstMatch(settingModel, { isDeleted: { $ne: true }, razorpayApiKey: { $exists: true } }, {}, { sort: { updatedAt: -1 } });
+  getFirstMatch(paymentSettingModel, { isDeleted: { $ne: true }, razorpayApiKey: { $exists: true }, isRazorpay: true }, {}, { sort: { updatedAt: -1 } });
 

@@ -24,7 +24,9 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
       return res.status(HTTP_STATUS.UNAUTHORIZED).json(apiResponse(HTTP_STATUS.UNAUTHORIZED, responseMessage.invalidToken, {}, {}));
     }
 
-    const user = await userModel.findOne({ _id: validObjectId, isDeleted: { $ne: true } }, {}, { lean: true });
+    const user = await userModel.findOne({ _id: validObjectId, isDeleted: { $ne: true } })
+      .populate("subscription.planId")
+      .lean();
 
     if (!user) {
       return res.status(HTTP_STATUS.UNAUTHORIZED).json(apiResponse(HTTP_STATUS.UNAUTHORIZED, responseMessage.invalidToken, {}, {}));

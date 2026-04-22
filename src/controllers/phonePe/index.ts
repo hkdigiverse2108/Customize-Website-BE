@@ -1,6 +1,6 @@
 import axios from "axios";
 import { HTTP_STATUS, PAYMENT_FOR, PAYMENT_METHOD, PAYMENT_STATUS } from "../../common";
-import { orderModel, paymentModel, planModel, settingModel } from "../../database";
+import { orderModel, paymentModel, planModel, paymentSettingModel } from "../../database";
 import { applySubscription, getFirstMatch, grantTheme, reqInfo, resolvePaymentContext, updateData, validate, verifyStoreAccess } from "../../helper";
 import { apiResponse } from "../../type";
 import { createPhonePePaymentSchema } from "../../validation";
@@ -106,7 +106,7 @@ export const phonePeCallback = async (req, res) => {
 /* --- Helpers --- */
 
 const resolvePhonePeSetting = async () => {
-    return getFirstMatch(settingModel, { isDeleted: { $ne: true }, phonePeApiKey: { $exists: true } }, {}, { sort: { updatedAt: -1 } });
+    return getFirstMatch(paymentSettingModel, { isDeleted: { $ne: true }, phonePeApiKey: { $exists: true }, isPhonePe: true }, {}, { sort: { updatedAt: -1 } });
 };
 
 const getPhonePeAccessToken = async (setting: any) => {
