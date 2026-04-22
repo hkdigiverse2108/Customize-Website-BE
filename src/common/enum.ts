@@ -114,3 +114,12 @@ export enum DISCOUNT_APPLIES_TO {
     PRODUCTS = "products",
     COLLECTIONS = "collections"
 }
+
+export enum POLICY_TYPE {
+  RETURN_AND_REFUND = "return_and_refund",
+  PRIVACY = "privacy",
+  TERMS_OF_SERVICE = "terms_of_service",
+  SHIPPING = "shipping",
+  CONTACT_INFORMATION = "contact_information",
+  LEGAL_NOTICE = "legal_notice",
+}

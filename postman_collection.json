@@ -1,7 +1,7 @@
 {
   "item": [
     {
-      "id": "a5b1937f-80f4-44e6-833c-32ef1af43c6b",
+      "id": "8315ebf6-d950-4fdd-b732-5a0015c5602c",
       "name": "STOREFRONT",
       "description": {
         "content": "Routes for storefront",
@@ -9,7 +9,7 @@
       },
       "item": [
         {
-          "id": "ef4d3be2-7324-4cbe-9b24-ee7d7104cd62",
+          "id": "ec39ffc0-3b4b-4af7-8353-3aa83b41f1f4",
           "name": "Get Page",
           "request": {
             "description": {
@@ -37,7 +37,7 @@
       "event": []
     },
     {
-      "id": "ecdf7ded-045e-4d24-b551-de7ea0fdf44f",
+      "id": "df316523-9b2b-4c13-9bd3-1d8d803de133",
       "name": "UPLOAD",
       "description": {
         "content": "Routes for upload",
@@ -45,7 +45,7 @@
       },
       "item": [
         {
-          "id": "4466255a-ab41-4090-b020-da89bf9d5570",
+          "id": "9fe6eb3a-438a-42e5-b885-d248ae661f1d",
           "name": "Create Item",
           "request": {
             "description": {
@@ -69,7 +69,7 @@
           "event": []
         },
         {
-          "id": "e10a5721-2e0b-4f49-b831-9fde0af5893e",
+          "id": "9c1f9efc-5e05-4a94-874e-554e397729fb",
           "name": "Delete Delete",
           "request": {
             "description": {
@@ -94,7 +94,7 @@
           "event": []
         },
         {
-          "id": "f687aeab-bf8f-4bb6-8c76-9d36bca033a1",
+          "id": "f47d51ae-ac1f-4d8c-b034-52b50f78ec6d",
           "name": "Get Images",
           "request": {
             "description": {
@@ -119,7 +119,7 @@
           "event": []
         },
         {
-          "id": "47921d8d-9ea6-4f34-9f44-e55c95956b7b",
+          "id": "fcba5c39-6c78-4b74-899f-0ac48dc1b603",
           "name": "Get Pdfs",
           "request": {
             "description": {
@@ -147,7 +147,7 @@
       "event": []
     },
     {
-      "id": "634271ce-2244-4aff-87f6-580e62767e7e",
+      "id": "df82314b-602e-4176-b5af-92f4d467ed6e",
       "name": "PLAN",
       "description": {
         "content": "Routes for plan",
@@ -155,7 +155,7 @@
       },
       "item": [
         {
-          "id": "fb6c39e8-db53-447a-a549-28788517f793",
+          "id": "1132ba0d-6851-4747-8b44-9d7941400393",
           "name": "Create Plan",
           "request": {
             "description": {
@@ -188,7 +188,7 @@
           "event": []
         },
         {
-          "id": "13ce8bce-b3d3-4060-80a2-c976856c6e89",
+          "id": "ab1c1841-39d0-49c0-83c6-0d6f1069a459",
           "name": "Plan Id",
           "request": {
             "description": {
@@ -221,7 +221,7 @@
           "event": []
         },
         {
-          "id": "dedc2ace-2c5e-480b-a0f4-5026dc6947b5",
+          "id": "0f3f73b2-8bc0-4285-9cd8-3ac8a8c95256",
           "name": "Plan Id",
           "request": {
             "description": {
@@ -265,7 +265,7 @@
           "event": []
         },
         {
-          "id": "c2f86357-79f0-4ce4-8e8e-85f3345555c0",
+          "id": "bc7cc7cb-e886-4407-8bf5-7333823977eb",
           "name": "Get Item",
           "request": {
             "description": {
@@ -289,7 +289,7 @@
           "event": []
         },
         {
-          "id": "d32829ff-7a4a-4a7b-a721-5436909a29fc",
+          "id": "541b724b-c4e0-4e1c-96e3-f8a57cb443af",
           "name": "Plan Id",
           "request": {
             "description": {
@@ -337,7 +337,7 @@
       }
     },
     {
-      "id": "3d478ce7-2a03-4b92-897b-d2b3580c8c78",
+      "id": "f4614468-c42a-4400-8563-ff7f4f04d538",
       "name": "AUTH",
       "description": {
         "content": "Routes for auth",
@@ -345,7 +345,7 @@
       },
       "item": [
         {
-          "id": "18b62e30-6a54-4285-ae36-d76d49a2a6ad",
+          "id": "cd5923e7-a1b9-4f1f-892e-4b9f0417b35a",
           "name": "Signup",
           "request": {
             "description": {
@@ -379,11 +379,11 @@
           "event": []
         },
         {
-          "id": "550d7260-1f28-48bd-9fed-62a39b3444e0",
+          "id": "a842e69e-9291-4c2a-812d-0ceea0eececc",
           "name": "Google Auth",
           "request": {
             "description": {
-              "content": "Controller: googleAuth\nSchema: googleAuthSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| credential | string | Required |\n",
+              "content": "Controller: googleAuth\nSchema: googleAuthSchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| credential | string | Required |\n| type | string | Optional |\n| phone | string | Optional |\n",
               "type": "text/markdown"
             },
             "url": {
@@ -406,14 +406,14 @@
             "method": "POST",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"credential\": \"sample_credential\"\n}"
+              "raw": "{\n  \"credential\": \"sample_credential\",\n  \"type\": \"sample_type\",\n  \"phone\": \"sample_phone\"\n}"
             }
           },
           "response": [],
           "event": []
         },
         {
-          "id": "c1c5fff8-cf24-4710-958f-e585601a729a",
+          "id": "7f02c046-a0a5-4e68-9370-02c87080e726",
           "name": "Login",
           "request": {
             "description": {
@@ -447,7 +447,7 @@
           "event": []
         },
         {
-          "id": "0f4ea778-0bf3-435b-9069-0ea1ebebdb47",
+          "id": "29fcd5f4-762e-433f-aef8-4d73a97d7ba0",
           "name": "Verify Login Otp",
           "request": {
             "description": {
@@ -481,7 +481,7 @@
           "event": []
         },
         {
-          "id": "0f86aa2f-95bc-41c2-9e5d-b82150249856",
+          "id": "5259a2a5-8e36-4041-839b-47d8e581cbfc",
           "name": "Forgot Password",
           "request": {
             "description": {
@@ -515,7 +515,7 @@
           "event": []
         },
         {
-          "id": "5129616e-82de-451e-abff-ad4b0d4dddc9",
+          "id": "7eaf3a13-0f0d-4fc1-9f2a-02b8329309c7",
           "name": "Forgot Password",
           "request": {
             "description": {
@@ -549,7 +549,7 @@
           "event": []
         },
         {
-          "id": "243fc329-d9e0-4cc6-bad1-8d0867c3cc59",
+          "id": "d00e40cb-6d31-403d-9218-c27acde3d044",
           "name": "Reset Password",
           "request": {
             "description": {
@@ -583,7 +583,7 @@
           "event": []
         },
         {
-          "id": "896eacdd-811e-42cc-a331-ef7f642be114",
+          "id": "517610c5-6b58-4a5a-9764-4fec6c47b0a7",
           "name": "Change Password",
           "request": {
             "description": {
@@ -617,7 +617,7 @@
           "event": []
         },
         {
-          "id": "1c3cac0b-8cfd-4744-a788-e6df7c414ad4",
+          "id": "70a083c0-4908-491a-b22d-cd7e1306c065",
           "name": "Create Logout",
           "request": {
             "description": {
@@ -655,7 +655,7 @@
       }
     },
     {
-      "id": "319a261c-2379-48e2-a3ef-1388fc56e9d4",
+      "id": "f3545241-e166-4b6b-9e58-b774f6cfa54e",
       "name": "USER",
       "description": {
         "content": "Routes for user",
@@ -663,7 +663,7 @@
       },
       "item": [
         {
-          "id": "316b5e36-df74-42fb-be03-1425714b8d41",
+          "id": "0c607be8-0d00-4328-8213-b9195284332a",
           "name": "Get Item",
           "request": {
             "description": {
@@ -687,7 +687,7 @@
           "event": []
         },
         {
-          "id": "238054ba-5061-4e39-8981-5b10df4a243b",
+          "id": "4a21d774-3b37-41fc-baf2-667cd263c491",
           "name": "Get :id",
           "request": {
             "description": {
@@ -722,7 +722,7 @@
           "event": []
         },
         {
-          "id": "7d90794d-d529-470e-b515-eac2d2d8e72b",
+          "id": "48e1981f-b86f-48bb-9364-1b7366143385",
           "name": "Update :id",
           "request": {
             "description": {
@@ -770,7 +770,7 @@
       }
     },
     {
-      "id": "34600d5b-7605-466a-9fb6-b506c0839b5b",
+      "id": "5d95917b-92f6-4635-afce-69fb7130b0be",
       "name": "STORE",
       "description": {
         "content": "Routes for store",
@@ -778,7 +778,7 @@
       },
       "item": [
         {
-          "id": "bae9c356-974a-478e-b939-2ccb6b461bc5",
+          "id": "c2408ee9-7cff-4f94-a240-baafc6d114f6",
           "name": "Create Store",
           "request": {
             "description": {
@@ -811,7 +811,7 @@
           "event": []
         },
         {
-          "id": "ede38cff-7fb9-4c45-ac47-7f1051320d82",
+          "id": "7e59d9c8-4ada-4e79-afe8-afd6819e08cd",
           "name": "Update Store",
           "request": {
             "description": {
@@ -844,7 +844,7 @@
           "event": []
         },
         {
-          "id": "85a3f40c-586c-40de-8693-056a317eb319",
+          "id": "ccc9cf2f-0139-4856-aea7-fe5af4c80d97",
           "name": "Delete :id",
           "request": {
             "description": {
@@ -879,7 +879,7 @@
           "event": []
         },
         {
-          "id": "a36a20ca-a86d-4716-aeeb-b9d04d32a831",
+          "id": "a7796863-de0d-415d-a641-a46ea670c492",
           "name": "Get Item",
           "request": {
             "description": {
@@ -903,7 +903,7 @@
           "event": []
         },
         {
-          "id": "9e38711c-2ef4-4e00-83fa-03ce4684e224",
+          "id": "0e3ce695-148a-420d-958b-d026b7c16d01",
           "name": "Get :id",
           "request": {
             "description": {
@@ -951,7 +951,7 @@
       }
     },
     {
-      "id": "0a478c17-617f-4bb9-951e-1a6acd416deb",
+      "id": "26e85304-eddd-40f6-a500-4ac236e92467",
       "name": "SETTING",
       "description": {
         "content": "Routes for setting",
@@ -959,7 +959,7 @@
       },
       "item": [
         {
-          "id": "a6c2733e-c7d0-4667-ba1f-ad2e18b81843",
+          "id": "198ee2b8-f93e-4281-80ce-8f8315eab0b6",
           "name": "Get Item",
           "request": {
             "description": {
@@ -983,7 +983,7 @@
           "event": []
         },
         {
-          "id": "47f45958-0dd8-46cd-aa67-3e5dcfc693e5",
+          "id": "37584f4e-140b-4711-ac32-fd92d53578d8",
           "name": "Create Item",
           "request": {
             "description": {
@@ -1020,7 +1020,7 @@
       }
     },
     {
-      "id": "9a1f688c-60cd-4a80-b9ae-f198ec0a741c",
+      "id": "8d585bbf-9628-4416-8c89-c931e24a4422",
       "name": "PHONEPE",
       "description": {
         "content": "Routes for phonePe",
@@ -1028,7 +1028,7 @@
       },
       "item": [
         {
-          "id": "82b0074a-8c33-4d1a-9901-6ecce6a12fe8",
+          "id": "b6109eb1-0345-4dd2-b700-2df7f6f42bda",
           "name": "Create Create",
           "request": {
             "description": {
@@ -1054,7 +1054,7 @@
           "event": []
         },
         {
-          "id": "aeb985d1-6890-4ae0-91bd-a519084fb05b",
+          "id": "bbc0a47e-98a9-41ea-945c-96fc8884bea8",
           "name": "Create Callback",
           "request": {
             "description": {
@@ -1093,7 +1093,7 @@
       }
     },
     {
-      "id": "33fdaf6f-dd75-4a18-acfc-0054f9cba007",
+      "id": "5fcb00ec-e0c2-43ce-9e28-656629af3178",
       "name": "RAZORPAY",
       "description": {
         "content": "Routes for razorpay",
@@ -1101,7 +1101,7 @@
       },
       "item": [
         {
-          "id": "6a1bdb59-785c-43a5-9d37-31002014eac3",
+          "id": "e31f5fa3-8d4b-4b68-89f9-51412e0e358c",
           "name": "Create Create",
           "request": {
             "description": {
@@ -1127,7 +1127,7 @@
           "event": []
         },
         {
-          "id": "16f12d2d-3413-4552-b76c-0079534fb6f8",
+          "id": "6426ebfa-0d35-4b96-9d74-602248f28fd8",
           "name": "Create Verify",
           "request": {
             "description": {
@@ -1166,7 +1166,7 @@
       }
     },
     {
-      "id": "7ea8fe2c-58cf-4048-9072-2717cf09f15f",
+      "id": "fa3ada2b-883d-42a8-9f6d-0b71e2809dd8",
       "name": "THEME",
       "description": {
         "content": "Routes for theme",
@@ -1174,7 +1174,7 @@
       },
       "item": [
         {
-          "id": "f8aa5461-dbeb-4a0e-afdc-6a2c6b48956c",
+          "id": "629abc28-fb59-48f2-80ca-967064191fc2",
           "name": "Create Theme",
           "request": {
             "description": {
@@ -1207,7 +1207,7 @@
           "event": []
         },
         {
-          "id": "9ec256bf-30ed-4f14-b57d-c44be58a5995",
+          "id": "9e0c5666-708c-4f6a-984b-948c4b778fc7",
           "name": "Update Theme",
           "request": {
             "description": {
@@ -1240,7 +1240,7 @@
           "event": []
         },
         {
-          "id": "f6920414-37ed-4cde-8ac3-b3fd2e213f1c",
+          "id": "1ebcb999-b499-4213-af71-4556b5a3e265",
           "name": "Delete :id",
           "request": {
             "description": {
@@ -1275,7 +1275,7 @@
           "event": []
         },
         {
-          "id": "75991deb-c5c3-48d8-8127-a5077f29e701",
+          "id": "aa13205a-b8a9-420b-b284-7a7ef07fd61c",
           "name": "Get Item",
           "request": {
             "description": {
@@ -1299,7 +1299,7 @@
           "event": []
         },
         {
-          "id": "4d83a57e-6189-4f85-b44c-7d855d50dc2e",
+          "id": "952fab5d-bc26-4379-b44b-07832aa16ba4",
           "name": "Get :id",
           "request": {
             "description": {
@@ -1347,7 +1347,7 @@
       }
     },
     {
-      "id": "3fb3668f-0464-480b-b5ce-cad80931d407",
+      "id": "f5f29347-e651-4583-8ac4-6685a28867ca",
       "name": "PAGE",
       "description": {
         "content": "Routes for page",
@@ -1355,7 +1355,7 @@
       },
       "item": [
         {
-          "id": "caacfa18-5418-4ee4-8995-bcfdb0fb02e5",
+          "id": "aa67e521-3bbc-404d-83f0-a0407e1312f3",
           "name": "Create Page",
           "request": {
             "description": {
@@ -1388,7 +1388,7 @@
           "event": []
         },
         {
-          "id": "f6a4e7ca-b56e-479b-a157-7f951bf3300b",
+          "id": "6f5dd328-91f9-42fe-9bda-78bfdc4eb10f",
           "name": "Update Page",
           "request": {
             "description": {
@@ -1421,7 +1421,7 @@
           "event": []
         },
         {
-          "id": "829345ad-f52a-41e8-b2db-d6020c5bb18e",
+          "id": "e81fa82b-9007-49ef-bc41-1e4dba61f4c2",
           "name": "Delete :id",
           "request": {
             "description": {
@@ -1456,7 +1456,7 @@
           "event": []
         },
         {
-          "id": "1971c467-b8a7-439d-84cd-5dacf29a0b47",
+          "id": "62f7e520-7ef2-451f-bd0f-2ceb33562500",
           "name": "Get Item",
           "request": {
             "description": {
@@ -1480,7 +1480,7 @@
           "event": []
         },
         {
-          "id": "5fe761a9-2af3-4732-b360-436c98aea373",
+          "id": "44279cd0-466d-4ed6-a036-138813a418c4",
           "name": "Get :id",
           "request": {
             "description": {
@@ -1528,7 +1528,7 @@
       }
     },
     {
-      "id": "fa41edc2-1ee4-462f-8290-d30078018718",
+      "id": "e4ed71ee-4c4e-43ae-a646-a8d258e7939e",
       "name": "COMPONENT",
       "description": {
         "content": "Routes for component",
@@ -1536,7 +1536,7 @@
       },
       "item": [
         {
-          "id": "38b46302-62bd-494c-b3c9-062a38d384d7",
+          "id": "9b846b1a-0a85-4e5a-961e-90de80019d75",
           "name": "Create Component",
           "request": {
             "description": {
@@ -1569,7 +1569,7 @@
           "event": []
         },
         {
-          "id": "74c6025e-550b-46b2-ac67-fcc74dc2d8a1",
+          "id": "2d0605d9-a8fd-4b4c-86ad-7e494953c9d4",
           "name": "Update Component",
           "request": {
             "description": {
@@ -1602,7 +1602,7 @@
           "event": []
         },
         {
-          "id": "e0b0b478-8c07-48f2-8683-5de571500cfa",
+          "id": "e0894d5b-bafd-43ad-9dc6-d3bb47292c4a",
           "name": "Customize Component",
           "request": {
             "description": {
@@ -1636,7 +1636,7 @@
           "event": []
         },
         {
-          "id": "e6b15148-527e-4fdd-ad72-f864959bc3c7",
+          "id": "29e81e68-c9f0-4de8-a492-bf80f00d4dd9",
           "name": "Rollback Component",
           "request": {
             "description": {
@@ -1670,7 +1670,7 @@
           "event": []
         },
         {
-          "id": "74cabc25-1170-4f2d-914d-4081e1efd56b",
+          "id": "260a6a20-0ac7-451b-bd14-37d595ed26aa",
           "name": "Delete :id",
           "request": {
             "description": {
@@ -1705,7 +1705,7 @@
           "event": []
         },
         {
-          "id": "34d844cb-0344-4762-ba2d-81c4f369e4be",
+          "id": "b178a7ad-f949-42b1-b846-d7eda1940c4d",
           "name": "Get Item",
           "request": {
             "description": {
@@ -1729,7 +1729,7 @@
           "event": []
         },
         {
-          "id": "3ada4fe7-1add-44c1-b761-364d823328c8",
+          "id": "bdfab44b-d26e-4b26-be20-781909bf7df5",
           "name": "Get :id",
           "request": {
             "description": {
@@ -1777,7 +1777,7 @@
       }
     },
     {
-      "id": "eed45bc5-536a-4ecb-96ec-42881d724f85",
+      "id": "1f3e1a1d-1bf4-4139-90a1-bc6205c077ea",
       "name": "CATEGORY",
       "description": {
         "content": "Routes for category",
@@ -1785,7 +1785,7 @@
       },
       "item": [
         {
-          "id": "ed40dee3-8911-46b2-92bf-46d871c32618",
+          "id": "ac0ca635-1dad-41d7-8475-539a459e3a2e",
           "name": "Get Item",
           "request": {
             "description": {
@@ -1809,7 +1809,7 @@
           "event": []
         },
         {
-          "id": "d0ee07b3-7f5e-4322-912d-6aa098d19529",
+          "id": "b03dfdcf-7c26-4992-941e-2781cd49ce16",
           "name": "Create Category",
           "request": {
             "description": {
@@ -1842,7 +1842,7 @@
           "event": []
         },
         {
-          "id": "fa09c14f-3f78-42d9-9aa5-a0d3e157ee60",
+          "id": "9370f3ee-ac33-4249-bf10-e4321b8aeaa6",
           "name": "Update Category",
           "request": {
             "description": {
@@ -1875,7 +1875,7 @@
           "event": []
         },
         {
-          "id": "489aada1-0c02-41f3-bad0-09f8a7af4aea",
+          "id": "c271a68b-e9a2-436d-85e8-bff7a70cadc6",
           "name": "Delete :id",
           "request": {
             "description": {
@@ -1923,7 +1923,7 @@
       }
     },
     {
-      "id": "7147f886-212d-4275-82ad-7e0d2000941e",
+      "id": "8dfc2aa5-b35a-4826-8ea0-523ff4ac2ddf",
       "name": "COLLECTION",
       "description": {
         "content": "Routes for collection",
@@ -1931,7 +1931,7 @@
       },
       "item": [
         {
-          "id": "21e58f13-5416-4a98-924f-938048824b76",
+          "id": "baa96871-1e8c-42e7-891c-d637765460b3",
           "name": "Create Collection",
           "request": {
             "description": {
@@ -1964,7 +1964,7 @@
           "event": []
         },
         {
-          "id": "b93ad409-b2b0-4279-8b89-1f6103af18f5",
+          "id": "64d7139c-fe21-41eb-8a2f-74a892e25333",
           "name": "Update Collection",
           "request": {
             "description": {
@@ -1997,7 +1997,7 @@
           "event": []
         },
         {
-          "id": "5419e2f5-1fbe-40fb-8e15-e39c1f15938d",
+          "id": "7b63a54c-fd86-496e-8290-6c05aff0af83",
           "name": "Delete :id",
           "request": {
             "description": {
@@ -2032,7 +2032,7 @@
           "event": []
         },
         {
-          "id": "51bbd29f-408c-4907-bd71-e68164cbc5a7",
+          "id": "a9c415d3-3d1a-44e3-ac31-298a32a7131d",
           "name": "Get Item",
           "request": {
             "description": {
@@ -2056,7 +2056,7 @@
           "event": []
         },
         {
-          "id": "3744d1a1-3e1f-4ce3-927a-b5b14f1ad471",
+          "id": "bed166a3-5342-4488-85fc-13b68da3b271",
           "name": "Get :id",
           "request": {
             "description": {
@@ -2104,7 +2104,7 @@
       }
     },
     {
-      "id": "67473096-9587-4eaa-8c27-fbba2f8b1582",
+      "id": "55a5edd9-9c53-4e43-b43d-4889bff426e2",
       "name": "PRODUCT",
       "description": {
         "content": "Routes for product",
@@ -2112,7 +2112,7 @@
       },
       "item": [
         {
-          "id": "83b55a03-00fe-4102-824f-bab1cf8e711b",
+          "id": "ca3448a1-33f3-4e0e-82d6-5681f22192c8",
           "name": "Create Product",
           "request": {
             "description": {
@@ -2145,7 +2145,7 @@
           "event": []
         },
         {
-          "id": "b9b2a7ff-b5f0-4a55-8fe9-db94149c0739",
+          "id": "ec3aa469-2f7d-46c4-8551-fc1a3a970930",
           "name": "Update Product",
           "request": {
             "description": {
@@ -2178,7 +2178,7 @@
           "event": []
         },
         {
-          "id": "e058dac3-7c9d-4e05-8e35-3a493de13bcc",
+          "id": "3984124c-8928-4efd-8529-c9d6a14aee81",
           "name": "Delete :id",
           "request": {
             "description": {
@@ -2213,7 +2213,7 @@
           "event": []
         },
         {
-          "id": "1dc133b6-627f-4c87-bfa2-2b241bc18b57",
+          "id": "1e9130de-2e39-477b-9f33-3531d8509173",
           "name": "Get Item",
           "request": {
             "description": {
@@ -2237,7 +2237,7 @@
           "event": []
         },
         {
-          "id": "c2749993-d73b-4fa7-9a7b-779949e9ad0b",
+          "id": "6b12106d-4212-43db-b879-45358ab0f305",
           "name": "Get :id",
           "request": {
             "description": {
@@ -2285,7 +2285,7 @@
       }
     },
     {
-      "id": "ee4b9ded-6fa4-451c-8187-f65a1666d5c6",
+      "id": "bd7e36a0-adcf-42b0-8b1b-b6d72121b085",
       "name": "ORDER",
       "description": {
         "content": "Routes for order",
@@ -2293,7 +2293,7 @@
       },
       "item": [
         {
-          "id": "2606f531-64e5-4838-a538-a135ef4bb25c",
+          "id": "0e321d61-9864-44e2-a9d0-3fcf6510826f",
           "name": "Create Order",
           "request": {
             "description": {
@@ -2326,7 +2326,7 @@
           "event": []
         },
         {
-          "id": "b5709e1b-f8d8-4fdf-95dc-f3de2baa861a",
+          "id": "0243be9e-bb24-4e85-8944-8220099afd3c",
           "name": "Update Order",
           "request": {
             "description": {
@@ -2359,7 +2359,7 @@
           "event": []
         },
         {
-          "id": "64d63a46-4930-4411-a95e-44e74d47ab94",
+          "id": "4d490d6f-8790-4d21-977e-a9c7223cc287",
           "name": "Delete :id",
           "request": {
             "description": {
@@ -2394,7 +2394,7 @@
           "event": []
         },
         {
-          "id": "a5ade7a6-a669-42aa-bece-5f77e402317d",
+          "id": "ef6ead7a-ab2a-44a3-9c5d-d2dcb2b8a193",
           "name": "Get Item",
           "request": {
             "description": {
@@ -2418,7 +2418,7 @@
           "event": []
         },
         {
-          "id": "14411db1-7cd5-4a5b-9f0d-8a1437bec9e1",
+          "id": "b900f939-4c21-47f7-8798-472f2cf78bbf",
           "name": "Get :id",
           "request": {
             "description": {
@@ -2466,7 +2466,7 @@
       }
     },
     {
-      "id": "ba7572ae-78df-453a-8a75-8e4772411e98",
+      "id": "7b8c08b9-e26d-48d3-9aff-2dfc82e3fa8d",
       "name": "DISCOUNT",
       "description": {
         "content": "Routes for discount",
@@ -2474,7 +2474,7 @@
       },
       "item": [
         {
-          "id": "b64790ca-b572-47af-9c6d-a0fac832dfbc",
+          "id": "724ced08-be83-41e9-8570-c782e1308c1f",
           "name": "Create Discount",
           "request": {
             "description": {
@@ -2507,7 +2507,7 @@
           "event": []
         },
         {
-          "id": "b102a5f2-0715-4b52-aad2-66166accfcef",
+          "id": "f34ba4bf-6a85-465e-b2c9-d1e3c8291957",
           "name": "Update Discount",
           "request": {
             "description": {
@@ -2540,7 +2540,7 @@
           "event": []
         },
         {
-          "id": "3bb410a0-d6c4-4419-bd7e-d880b63f74d8",
+          "id": "e6c5fdc6-5734-45c3-9d13-b366a827225e",
           "name": "Delete :id",
           "request": {
             "description": {
@@ -2575,7 +2575,7 @@
           "event": []
         },
         {
-          "id": "20c68cb0-b643-4e80-8f26-2673e81b97e3",
+          "id": "1b68422c-e9b5-4b6d-984c-a6b62515e08a",
           "name": "Get Item",
           "request": {
             "description": {
@@ -2599,7 +2599,7 @@
           "event": []
         },
         {
-          "id": "29ad8607-586a-4f20-a384-848ae1456059",
+          "id": "248a801f-ccb6-4f94-8af2-de6e04ff6348",
           "name": "Get :id",
           "request": {
             "description": {
@@ -2647,7 +2647,7 @@
       }
     },
     {
-      "id": "604786cf-3660-4b75-94e4-ebe0255e7606",
+      "id": "914f5e3f-6096-4534-9b47-6452f00238ca",
       "name": "BLOG",
       "description": {
         "content": "Routes for blog",
@@ -2655,7 +2655,7 @@
       },
       "item": [
         {
-          "id": "1ebe3e3c-b1b8-403b-9ebc-eb643e71ad5b",
+          "id": "e3bccb4f-9bf5-4b72-8d5a-fa7a243f9d63",
           "name": "Get Item",
           "request": {
             "description": {
@@ -2679,7 +2679,7 @@
           "event": []
         },
         {
-          "id": "a19959a2-5e4e-4989-93a1-ae20c191fbd8",
+          "id": "1d79da4f-27a9-4cf9-8cf5-ea35ccf3cf40",
           "name": "Get :id",
           "request": {
             "description": {
@@ -2714,7 +2714,7 @@
           "event": []
         },
         {
-          "id": "cced4f96-1871-42ac-93c1-31fdfbb5c161",
+          "id": "9ee714ec-72e9-46f7-a390-3905af316fe6",
           "name": "Create Blog",
           "request": {
             "description": {
@@ -2747,7 +2747,7 @@
           "event": []
         },
         {
-          "id": "ccfb0f71-5c89-4a2d-a9c7-5f4c93055aff",
+          "id": "bd604898-45ae-47c1-bbe8-49d28512d21d",
           "name": "Update Blog",
           "request": {
             "description": {
@@ -2780,7 +2780,7 @@
           "event": []
         },
         {
-          "id": "ce4b0b0d-5cbd-4e00-a77a-5f3f4a0ca92b",
+          "id": "abe349f2-ba8d-4f28-a4fc-50ff4cfcca87",
           "name": "Delete :id",
           "request": {
             "description": {
@@ -2828,7 +2828,7 @@
       }
     },
     {
-      "id": "6848a11f-7b89-43d7-b527-23cd2ef4cf8e",
+      "id": "d9d5e749-2bd5-4f7b-a763-da004d5cdd53",
       "name": "CUSTOMER",
       "description": {
         "content": "Routes for customer",
@@ -2836,7 +2836,7 @@
       },
       "item": [
         {
-          "id": "bb4a3973-3179-46d7-8792-55d74f079402",
+          "id": "4fc5a81e-e1b4-42a0-9d9c-26a0f3800cd4",
           "name": "Create Add",
           "request": {
             "description": {
@@ -2861,7 +2861,7 @@
           "event": []
         },
         {
-          "id": "ae5d93ed-6b02-4404-b023-5e6d120fb1ba",
+          "id": "375c75eb-6202-4662-b342-5a43bfda156e",
           "name": "Get :storeId",
           "request": {
             "description": {
@@ -2910,7 +2910,85 @@
       }
     },
     {
-      "id": "b1db99fa-2916-4e2c-8ebd-7d37120632d4",
+      "id": "6dd361ef-3fdf-4151-ac46-a1bfd11d69bf",
+      "name": "POLICY",
+      "description": {
+        "content": "Routes for policy",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "c740e371-0861-4651-a73a-cbfc59ffdbe0",
+          "name": "Add Or Edit Policy",
+          "request": {
+            "description": {
+              "content": "Controller: addOrEditPolicy\nSchema: addOrEditPolicySchema\n\n### Validation Rules\n| Field | Type | Requirement |\n|---|---|---|\n| storeId | string | Required |\n| type | string | Required |\n| content | string | Optional |\n| isActive | boolean | Optional |\n",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "policy"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storeId\": \"sample_storeId\",\n  \"type\": \"sample_type\",\n  \"content\": \"sample_content\",\n  \"isActive\": true\n}"
+            }
+          },
+          "response": [],
+          "event": []
+        },
+        {
+          "id": "caa55731-68d4-45d4-acd1-b7c69eb89588",
+          "name": "Get Item",
+          "request": {
+            "description": {
+              "content": "Controller: getPolicies",
+              "type": "text/markdown"
+            },
+            "url": {
+              "path": [
+                "policy"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "GET",
+            "body": {}
+          },
+          "response": [],
+          "event": []
+        }
+      ],
+      "event": [],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "TOKEN",
+            "value": "{{TOKEN}}",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "id": "0972b0bc-c0da-4a43-bd04-8adb9a5b43b1",
       "name": "SITE",
       "description": {
         "content": "Routes for site",
@@ -2918,7 +2996,7 @@
       },
       "item": [
         {
-          "id": "0ee6338c-fbdf-41be-a849-8b032b91b851",
+          "id": "e1df883c-6380-47db-9f59-fd71222491dd",
           "name": "Get :storeSlug",
           "request": {
             "description": {
@@ -2953,7 +3031,7 @@
           "event": []
         },
         {
-          "id": "a058e1d9-e74c-49bf-827d-91b9a5067aea",
+          "id": "cc0c46c8-7a5a-448e-9ccf-a2ec4406d71b",
           "name": "Get :pageSlug",
           "request": {
             "description": {
@@ -3021,7 +3099,7 @@
     }
   ],
   "info": {
-    "_postman_id": "100d8971-2f3d-4cda-ba02-b9831da3ba65",
+    "_postman_id": "78c353ea-3fc3-4987-b390-51f2d53aba41",
     "name": "HKDigiverse API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": {

@@ -19,6 +19,7 @@ import { discountRouter } from "./discount";
 import { blogRouter } from "./blog";
 import storefrontRouter from "./storefront";
 import { customerRouter } from "./customer";
+import { policyRouter } from "./policy";
 const router = Router();
 
 router.use("/storefront", storefrontRouter);
@@ -41,6 +42,7 @@ router.use("/order", orderRouter);
 router.use("/discount", discountRouter);
 router.use("/blog", blogRouter);
 router.use("/customer", customerRouter);
+router.use("/policy", policyRouter);
 router.use("/site", siteRouter);
 
 
