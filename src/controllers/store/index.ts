@@ -20,7 +20,7 @@ export const createStore = async (req, res) => {
     const existingUser = await getFirstMatch(userModel, { _id: payload.userId, isDeleted: { $ne: true } }, {}, {});
     if (!existingUser) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, responseMessage.getDataNotFound("User"), {}, {}));
 
-    const storeLimitCheck = await checkStoreLimit(loggedInUser);
+    const storeLimitCheck = await checkStoreLimit(payload.userId);
     if (!storeLimitCheck.allowed) return res.status(HTTP_STATUS.PAYMENT_REQUIRED).json(apiResponse(HTTP_STATUS.PAYMENT_REQUIRED, storeLimitCheck.message, storeLimitCheck, {}));
 
     // Check Duplicates
@@ -127,7 +127,7 @@ export const getStores = async (req, res) => {
 
     const pagination = getPaginationState(totalCount, Number(page), Number(limit));
 
-    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Stores"), { stores, ...pagination, total_count: totalCount }, {}));
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Stores"), { stores, state: pagination, total_count: totalCount }, {}));
   } catch (error) {
     console.error(error);
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
@@ -153,3 +153,5 @@ export const getStoreById = async (req, res) => {
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }
 };
+
+

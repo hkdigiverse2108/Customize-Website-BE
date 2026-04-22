@@ -4,7 +4,15 @@ import { PAYMENT_METHOD } from "../../../common";
 
 const paymentSettingSchema = new Schema<IPaymentSetting>(
   {
-    storeId: { type: Schema.Types.ObjectId, ref: "store", required: true },
+    storeId: {
+      type: Schema.Types.ObjectId,
+      ref: "store",
+      default: null,
+      required: function (this: any) {
+        return !this.isGlobal;
+      }
+    },
+    isGlobal: { type: Boolean, default: false },
     razorpayApiKey: { type: String, trim: true, default: "" },
     razorpayApiSecret: { type: String, trim: true, default: "" },
     isRazorpay: { type: Boolean, default: false },
@@ -18,6 +26,10 @@ const paymentSettingSchema = new Schema<IPaymentSetting>(
   { timestamps: true, versionKey: false }
 );
 
-paymentSettingSchema.index({ storeId: 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });
+paymentSettingSchema.index({ isGlobal: 1 }, { unique: true, partialFilterExpression: { isDeleted: false, isGlobal: true } });
+paymentSettingSchema.index(
+  { storeId: 1 },
+  { unique: true, partialFilterExpression: { isDeleted: false, isGlobal: { $ne: true }, storeId: { $exists: true, $ne: null } } }
+);
 
 export const paymentSettingModel = model<IPaymentSetting>("paymentSetting", paymentSettingSchema);

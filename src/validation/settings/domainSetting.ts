@@ -3,12 +3,14 @@ import { objectId } from "../common";
 
 export const addDomainSettingSchema = Joi.object({
   storeId: objectId().required(),
+  themeId: objectId().optional(),
   domain: Joi.string().trim().lowercase().required(),
   isPrimary: Joi.boolean().default(false),
 });
 
 export const updateDomainSettingSchema = Joi.object({
   domainSettingId: objectId().required(),
+  themeId: objectId().optional(),
   isPrimary: Joi.boolean().optional(),
   status: Joi.string().valid("pending", "verified", "failed").optional(),
   sslEnabled: Joi.boolean().optional(),

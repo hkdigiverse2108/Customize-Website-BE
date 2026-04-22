@@ -4,6 +4,7 @@ import { IDomainSetting } from "../../../type/settings/domainSetting";
 const domainSettingSchema = new Schema<IDomainSetting>(
   {
     storeId: { type: Schema.Types.ObjectId, ref: "store", required: true },
+    themeId: { type: Schema.Types.ObjectId, ref: "theme", default: null },
     domain: { type: String, required: true, trim: true, lowercase: true },
     isPrimary: { type: Boolean, default: false },
     status: { type: String, enum: ["pending", "verified", "failed"], default: "pending" },
@@ -22,5 +23,6 @@ const domainSettingSchema = new Schema<IDomainSetting>(
 
 // Multiple domains per store, but domain names should be unique globally
 domainSettingSchema.index({ domain: 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });
+domainSettingSchema.index({ storeId: 1, isPrimary: 1 }, { unique: true, partialFilterExpression: { isDeleted: false, isPrimary: true } });
 
 export const domainSettingModel = model<IDomainSetting>("domainSetting", domainSettingSchema);

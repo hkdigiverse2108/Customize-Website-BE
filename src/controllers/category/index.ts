@@ -80,11 +80,13 @@ export const getCategories = async (req, res) => {
     const categories = await getData(categoryModel, criteria, {}, options);
     const total = await countData(categoryModel, criteria);
 
-    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Success", { categories, ...getPaginationState(total, page, limit), total_count: total }, {}));
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Success", { categories, state: getPaginationState(total, page, limit), total_count: total }, {}));
   } catch (error) {
     console.error(error);
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }
 };
+
+
 
 

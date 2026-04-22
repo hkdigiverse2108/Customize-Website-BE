@@ -102,24 +102,6 @@ export const checkThemeLimit = async (
   };
 };
 
-export const checkStoreLimit = async (user: any) => {
-  if (user?.role === ACCOUNT_TYPE.ADMIN) return { allowed: true };
-
-  // Hard limit: each vendor can only have 1 store
-  const storeCount = await storeModel.countDocuments({ userId: user._id, isDeleted: { $ne: true } });
-
-  if (storeCount >= 1) {
-    return {
-      allowed: false,
-      message: "You already have a store. Each vendor can only create 1 store.",
-      limit: 1,
-      current: storeCount
-    };
-  }
-
-  return { allowed: true };
-};
-
 export const checkBlogLimit = async (user: any, storeId: string) => {
   if (user?.role === ACCOUNT_TYPE.ADMIN) return { allowed: true };
 
@@ -136,6 +118,21 @@ export const checkBlogLimit = async (user: any, storeId: string) => {
       message: `Blog limit reached for this store. Your ${plan.name} plan allows up to ${plan.blogLimit} blogs per store. Please upgrade for more.`,
       limit: plan.blogLimit,
       current: blogCount
+    };
+  }
+
+  return { allowed: true };
+};
+
+export const checkStoreLimit = async (userId: string) => {
+  const storeCount = await storeModel.countDocuments({ userId, isDeleted: { $ne: true } });
+
+  if (storeCount >= 1) {
+    return {
+      allowed: false,
+      message: "Each vendor can only create 1 store.",
+      limit: 1,
+      current: storeCount,
     };
   }
 

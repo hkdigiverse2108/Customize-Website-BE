@@ -1,7 +1,7 @@
 import axios from "axios";
 import { HTTP_STATUS, PAYMENT_FOR, PAYMENT_METHOD, PAYMENT_STATUS } from "../../common";
 import { orderModel, paymentModel, planModel, paymentSettingModel } from "../../database";
-import { applySubscription, getFirstMatch, grantTheme, reqInfo, resolvePaymentContext, updateData, validate, verifyStoreAccess } from "../../helper";
+import { applySubscription, getFirstMatch, grantTheme, reqInfo, resolvePaymentContext, requiresGlobalPaymentSetting, updateData, validate, verifyStoreAccess } from "../../helper";
 import { apiResponse } from "../../type";
 import { createPhonePePaymentSchema } from "../../validation";
 
@@ -19,7 +19,11 @@ export const createPhonePeSubscriptionPayment = async (req, res) => {
     const paymentContext: any = await resolvePaymentContext(value, loggedInUser, res);
     if (paymentContext?.errorResponse) return paymentContext.errorResponse;
 
-    const setting = await resolvePhonePeSetting();
+    const setting = await resolvePhonePeSetting(
+      requiresGlobalPaymentSetting(paymentContext.paymentFor)
+        ? { isGlobal: true }
+        : { storeId: value.storeId || paymentContext.order?.storeId || null, allowGlobalFallback: true }
+    );
     if (!setting) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "PhonePe configuration missing.", {}, {}));
     }
@@ -105,8 +109,22 @@ export const phonePeCallback = async (req, res) => {
 
 /* --- Helpers --- */
 
-const resolvePhonePeSetting = async () => {
-    return getFirstMatch(paymentSettingModel, { isDeleted: { $ne: true }, phonePeApiKey: { $exists: true }, isPhonePe: true }, {}, { sort: { updatedAt: -1 } });
+const resolvePhonePeSetting = async (scope: { isGlobal?: boolean; storeId?: string | null; allowGlobalFallback?: boolean }) => {
+    const criteria: any = { isDeleted: { $ne: true }, phonePeApiKey: { $exists: true }, isPhonePe: true };
+
+    if (scope?.isGlobal) {
+        criteria.isGlobal = true;
+        return getFirstMatch(paymentSettingModel, criteria, {}, { sort: { updatedAt: -1 } });
+    }
+
+    if (scope?.storeId) {
+        const storeSetting = await getFirstMatch(paymentSettingModel, { ...criteria, storeId: scope.storeId }, {}, { sort: { updatedAt: -1 } });
+        if (storeSetting) return storeSetting;
+    }
+
+    if (!scope?.allowGlobalFallback) return null;
+
+    return getFirstMatch(paymentSettingModel, { ...criteria, isGlobal: true }, {}, { sort: { updatedAt: -1 } });
 };
 
 const getPhonePeAccessToken = async (setting: any) => {

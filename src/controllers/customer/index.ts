@@ -66,9 +66,11 @@ export const getStoreCustomers = async (req, res) => {
 
         const pagination = getPaginationState(total, Number(page), Number(limit));
 
-        return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Customers"), { customers, ...pagination, total_count: total }, {}));
+        return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Customers"), { customers, state: pagination, total_count: total }, {}));
     } catch (error) {
         console.error(error);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
     }
 };
+
+

@@ -92,13 +92,13 @@ export const getDiscounts = async (req, res) => {
     const user = req.headers.user as any;
     if (user?.role === ACCOUNT_TYPE.VENDOR) {
       const stores = await getStoreIds(user);
-      if (!stores.length) return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Success", { discounts: [], ...getPaginationState(0, page, limit), total_count: 0 }, {}));
+      if (!stores.length) return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Success", { discounts: [], state: getPaginationState(0, page, limit), total_count: 0 }, {}));
       criteria.storeId = { $in: stores };
     }
 
     const discounts = await getData(discountModel, criteria, {}, options);
     const total = await countData(discountModel, criteria);
-    const result = { discounts, ...getPaginationState(total, page, limit), total_count: total };
+    const result = { discounts, state: getPaginationState(total, page, limit), total_count: total };
 
     await cacheService.set(cacheKey, result, 300);
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Success", result, {}));
@@ -128,3 +128,7 @@ const getStoreIds = async (user: any) => {
   const stores = await getData(storeModel, { userId: user._id, isDeleted: { $ne: true } }, { _id: 1 }, {});
   return stores.map(s => String(s._id));
 };
+
+
+
+

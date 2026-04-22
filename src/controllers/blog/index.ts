@@ -97,7 +97,7 @@ export const getBlogs = async (req, res) => {
     const blogs = await getData(blogModel, criteria, {}, options);
     const total = await countData(blogModel, criteria);
 
-    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Success", { blogs, ...getPaginationState(total, page, limit), total_count: total }, {}));
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Success", { blogs, state: getPaginationState(total, page, limit), total_count: total }, {}));
   } catch (error) {
     console.error(error);
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
@@ -116,3 +116,5 @@ export const getBlogById = async (req, res) => {
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
     }
 };
+
+

@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { ACCOUNT_TYPE, HTTP_STATUS, PAYMENT_FOR, PAYMENT_METHOD, PAYMENT_STATUS, PLAN_DURATION, SUBSCRIPTION_STATUS } from "../../common";
 import { orderModel, paymentModel, planModel, paymentSettingModel, userModel } from "../../database";
-import { applySubscription, getFirstMatch, grantTheme, reqInfo, resolvePaymentContext, responseMessage, updateData, validate, verifyStoreAccess } from "../../helper";
+import { applySubscription, getFirstMatch, grantTheme, reqInfo, resolvePaymentContext, requiresGlobalPaymentSetting, responseMessage, updateData, validate, verifyStoreAccess } from "../../helper";
 import { apiResponse } from "../../type";
 import { createRazorpayPaymentSchema, razorpayPaymentVerifySchema } from "../../validation";
 export { createPhonePeSubscriptionPayment, phonePeCallback } from "../phonePe";
@@ -21,7 +21,11 @@ export const createRazorpaySubscriptionPayment = async (req, res) => {
     const paymentContext: any = await resolvePaymentContext(value, loggedInUser, res);
     if (paymentContext?.errorResponse) return paymentContext.errorResponse;
 
-    const setting = await resolveRazorpaySetting();
+    const setting = await resolveRazorpaySetting(
+      requiresGlobalPaymentSetting(paymentContext.paymentFor)
+        ? { isGlobal: true }
+        : { storeId: value.storeId || paymentContext.order?.storeId || null, allowGlobalFallback: true }
+    );
     if (!setting) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Razorpay config missing.", {}, {}));
 
     const Razorpay = getRazorpaySdk();
@@ -63,13 +67,18 @@ export const verifyRazorpaySubscriptionPayment = async (req, res) => {
     if (!value) return;
 
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = value;
-    const setting = await resolveRazorpaySetting();
+    const existingPayment: any = await getFirstMatch(paymentModel, { providerOrderId: razorpay_order_id }, {}, {});
+    if (!existingPayment) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Payment not found", {}, {}));
+
+    const setting = await resolveRazorpaySetting(
+      requiresGlobalPaymentSetting(existingPayment.paymentFor)
+        ? { isGlobal: true }
+        : { storeId: existingPayment.storeId, allowGlobalFallback: true }
+    );
+    if (!setting) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Razorpay config missing.", {}, {}));
     
     const expected = crypto.createHmac("sha256", setting.razorpayApiSecret).update(`${razorpay_order_id}|${razorpay_payment_id}`).digest("hex");
     if (expected !== razorpay_signature) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Invalid signature", {}, {}));
-
-    const existingPayment: any = await getFirstMatch(paymentModel, { providerOrderId: razorpay_order_id }, {}, {});
-    if (!existingPayment) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Payment not found", {}, {}));
 
     const paidAt = new Date();
     await updateData(paymentModel, { _id: existingPayment._id }, { status: PAYMENT_STATUS.SUCCESS, paidAt }, {});
@@ -91,5 +100,24 @@ export const verifyRazorpaySubscriptionPayment = async (req, res) => {
 
 /* --- Helpers --- */
 
-const resolveRazorpaySetting = async () => 
-  getFirstMatch(paymentSettingModel, { isDeleted: { $ne: true }, razorpayApiKey: { $exists: true }, isRazorpay: true }, {}, { sort: { updatedAt: -1 } });
+const resolveRazorpaySetting = async (scope: { isGlobal?: boolean; storeId?: string | null; allowGlobalFallback?: boolean }) => {
+  const criteria: any = {
+    isDeleted: { $ne: true },
+    razorpayApiKey: { $exists: true },
+    isRazorpay: true,
+  };
+
+  if (scope?.isGlobal) {
+    criteria.isGlobal = true;
+    return getFirstMatch(paymentSettingModel, criteria, {}, { sort: { updatedAt: -1 } });
+  }
+
+  if (scope?.storeId) {
+    const storeSetting = await getFirstMatch(paymentSettingModel, { ...criteria, storeId: scope.storeId }, {}, { sort: { updatedAt: -1 } });
+    if (storeSetting) return storeSetting;
+  }
+
+  if (!scope?.allowGlobalFallback) return null;
+
+  return getFirstMatch(paymentSettingModel, { ...criteria, isGlobal: true }, {}, { sort: { updatedAt: -1 } });
+};

@@ -159,7 +159,7 @@ export const getComponents = async (req, res) => {
     const user = req.headers.user as any;
     if (user?.role === ACCOUNT_TYPE.VENDOR) {
       const stores = await getVendorStoreIds(user);
-      if (!stores.length) return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Success", { components: [], ...getPaginationState(0, page, limit), total_count: 0 }, {}));
+      if (!stores.length) return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Success", { components: [], state: getPaginationState(0, page, limit), total_count: 0 }, {}));
       
       criteria.isActive = true;
       criteria.isDeprecated = { $ne: true };
@@ -170,7 +170,7 @@ export const getComponents = async (req, res) => {
 
     const components = await getData(componentModel, criteria, {}, options);
     const total = await countData(componentModel, criteria);
-    const result = { components, ...getPaginationState(total, page, limit), total_count: total };
+    const result = { components, state: getPaginationState(total, page, limit), total_count: total };
     
     await cacheService.set(cacheKey, result, 300);
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Success", result, {}));
@@ -229,3 +229,6 @@ const getOverridePayload = (val: any) => {
   const fields = ["name", "label", "icon", "previewImage", "configJSON", "defaultConfig", "configSchema", "supportedPages", "supportedThemes", "version", "isReusable", "isDeprecated", "isActive"];
   return fields.reduce((acc: any, f) => { if (val[f] !== undefined) acc[f] = val[f]; return acc; }, {});
 };
+
+
+

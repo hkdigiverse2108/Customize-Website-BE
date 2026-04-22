@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { getFirstMatch } from "../helper";
  import { userModel } from "../database";
 import { Types } from "mongoose";
+import { IPaginationState } from "../type";
 
 /* --------------------------------------
               OTP
@@ -111,12 +112,15 @@ export const resolvePagination = (page?: any, limit?: any) => {
   return { page: pageValue, limit: limitValue, skip, hasLimit };
 };
 
-export const getPaginationState = (totalCount: number, pageValue: number, limitValue: number) => {
-  const pageLimit = limitValue > 0 ? Math.ceil(totalCount / limitValue) || 1 : 1;
+export const getPaginationState = (totalCount: number, pageValue: number, limitValue: number): IPaginationState => {
+  const normalizedTotal = Number.isFinite(totalCount) && totalCount >= 0 ? Math.floor(totalCount) : 0;
+  const normalizedPage = Number.isFinite(pageValue) && pageValue > 0 ? Math.floor(pageValue) : 1;
+  const normalizedLimit = Number.isFinite(limitValue) && limitValue > 0 ? Math.floor(limitValue) : 0;
+  const pageLimit = normalizedLimit > 0 ? Math.ceil(normalizedTotal / normalizedLimit) || 1 : 1;
 
   return {
-    page: pageValue,
-    limit: limitValue > 0 ? limitValue : totalCount,
+    page: normalizedPage,
+    limit: normalizedLimit > 0 ? normalizedLimit : normalizedTotal,
     page_limit: pageLimit,
   };
 };

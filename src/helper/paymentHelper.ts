@@ -64,6 +64,10 @@ export const resolvePaymentContext = async (value: any, user: any, res: any) => 
     return { errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Invalid payment request: orderId or planId required", {}, {})) };
 };
 
+export const requiresGlobalPaymentSetting = (paymentFor: PAYMENT_FOR) => {
+    return paymentFor === PAYMENT_FOR.PLAN_SUBSCRIPTION || paymentFor === PAYMENT_FOR.THEME_PURCHASE;
+};
+
 export const applySubscription = async (userId: string, planId: string) => {
     const plan: any = await getFirstMatch(planModel, { _id: planId, isDeleted: { $ne: true } }, {}, {});
     if (!plan) return null;

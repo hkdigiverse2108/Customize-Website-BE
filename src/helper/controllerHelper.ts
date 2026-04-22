@@ -1,5 +1,5 @@
 import { HTTP_STATUS, ACCOUNT_TYPE } from "../common";
-import { apiResponse } from "../type";
+import { apiResponse, IAuthenticatedUser } from "../type";
 import { componentModel, storeModel } from "../database";
 import { getFirstMatch, logAudit, cacheService } from "../helper";
 
@@ -12,7 +12,7 @@ export const validate = (schema: any, data: any, res: any) => {
   return value;
 };
 
-export const verifyStoreAccess = async (user: any, storeId: string) => {
+export const verifyStoreAccess = async (user: IAuthenticatedUser, storeId: string) => {
   if (user.role === ACCOUNT_TYPE.ADMIN) return true;
   const store = await getFirstMatch(storeModel, { _id: storeId, userId: user._id, isDeleted: { $ne: true } }, {}, {});
   return !!store;

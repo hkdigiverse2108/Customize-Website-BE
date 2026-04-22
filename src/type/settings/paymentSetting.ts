@@ -2,7 +2,8 @@ import { Document, Types } from "mongoose";
 import { PAYMENT_METHOD } from "../../common";
 
 export interface IPaymentSettingType {
-  storeId: Types.ObjectId | string;
+  storeId?: Types.ObjectId | string | null;
+  isGlobal: boolean;
   razorpayApiKey?: string;
   razorpayApiSecret?: string;
   isRazorpay: boolean;

@@ -69,6 +69,7 @@ const orderFulfillmentSchema = new Schema(
 const orderSchema = new Schema<IOrder>(
   {
     storeId: { type: Schema.Types.ObjectId, ref: "store", required: true, index: true },
+    sourceDomain: { type: String, trim: true, lowercase: true, default: null },
     customerId: { type: Schema.Types.ObjectId, ref: "user", default: null, index: true },
     orderNumber: { type: Number, required: true, min: 1 },
     orderName: { type: String, required: true, trim: true },
@@ -143,6 +144,7 @@ orderSchema.pre("validate", function () {
 });
 
 orderSchema.index({ storeId: 1, orderNumber: 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });
+orderSchema.index({ storeId: 1, sourceDomain: 1, createdAt: -1 });
 orderSchema.index({ storeId: 1, customerId: 1, createdAt: -1 });
 orderSchema.index({ storeId: 1, status: 1, financialStatus: 1, fulfillmentStatus: 1, createdAt: -1 });
 orderSchema.index({ storeId: 1, isPaid: 1, isDelivered: 1, isCancelled: 1 });

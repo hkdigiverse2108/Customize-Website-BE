@@ -106,7 +106,7 @@ export const getPages = async (req, res) => {
     ]);
     
     const pagination = getPaginationState(totalCount, Number(page), Number(limit));
-    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Pages"), { pages, ...pagination, total_count: totalCount }, {}));
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Pages"), { pages, state: pagination, total_count: totalCount }, {}));
   } catch (error) {
     console.error(error);
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
@@ -152,3 +152,5 @@ const getVendorStoreIds = async (userId: string) => {
     const stores = await getData(storeModel, { userId, isDeleted: { $ne: true } }, { _id: 1 }, {});
     return { $in: stores.map((s) => s._id) };
 };
+
+

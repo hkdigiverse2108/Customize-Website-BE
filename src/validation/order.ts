@@ -60,6 +60,7 @@ const withOrderStateConsistency = (value, helpers) => {
 
 export const createOrderSchema = Joi.object({
   storeId: objectId().required().invalid(null),
+  sourceDomain: Joi.string().trim().lowercase().allow("", null).optional(),
   customerId: objectId().optional().allow(null),
   orderNumber: Joi.number().integer().min(1).optional(),
   orderName: Joi.string().trim().allow("").max(80).optional(),
@@ -142,6 +143,7 @@ export const getAllOrdersQuerySchema = Joi.object({
   storeId: objectId().optional(),
   customerId: objectId().optional(),
   orderNumber: Joi.number().integer().min(1).optional(),
+  sourceDomain: Joi.string().trim().lowercase().allow("", null).optional(),
   statusFilter: Joi.string().trim().lowercase().valid(...orderStatuses).optional(),
   financialStatusFilter: Joi.string().trim().lowercase().valid(...financialStatuses).optional(),
   fulfillmentStatusFilter: Joi.string().trim().lowercase().valid(...fulfillmentStatuses).optional(),

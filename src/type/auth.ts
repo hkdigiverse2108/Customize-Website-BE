@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { ACCOUNT_TYPE } from "../common";
 import { IUserSubscriptionType } from "./user";
 
@@ -44,4 +45,11 @@ export interface IAuthTokenPayload {
   _id: string;
   email: string;
   role: ACCOUNT_TYPE;
+}
+
+export interface IAuthenticatedUser {
+  _id: Types.ObjectId | string;
+  email?: string;
+  role: ACCOUNT_TYPE;
+  storeId?: Types.ObjectId | string | null;
 }

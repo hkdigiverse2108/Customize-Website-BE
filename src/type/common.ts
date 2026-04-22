@@ -1,18 +1,19 @@
-import Joi from "joi";
-import { Document, Schema } from "mongoose";
+export interface IPaginationState {
+  page: number;
+  limit: number;
+  page_limit: number;
+}
 
-
-type ApiResponse<T = any> = {
+type ApiResponse<T = unknown> = {
   status: number;
   message: string;
   data?: T;
-  error?: any;
+  error?: unknown;
 };
 
-export const apiResponse = <T>(status: number, message: string, data: T, error: any): ApiResponse<T> => ({
+export const apiResponse = <T>(status: number, message: string, data: T, error: unknown): ApiResponse<T> => ({
   status,
   message,
   data,
   error,
 });
-

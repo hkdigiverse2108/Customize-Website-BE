@@ -113,7 +113,7 @@ export const getPlans = async (req, res) => {
     ]);
 
     const pagination = getPaginationState(totalCount, Number(page), Number(limit));
-    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Plan"), { plans, ...pagination, total_count: totalCount }, {}));
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Plan"), { plans, state: pagination, total_count: totalCount }, {}));
   } catch (error) {
     console.error(error);
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
@@ -138,3 +138,5 @@ export const getPlanById = async (req, res) => {
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }
 };
+
+
