@@ -6,10 +6,10 @@ const userLimitSchema = new Schema(
     
     // Total combined limits (Base Plan + Any Additive Roll-overs)
     limits: {
-      themes: { type: Number, default: 1 },
-      products: { type: Number, default: 10 },
-      blogs: { type: Number, default: 5 },
-      orders: { type: Number, default: 50 },
+      themes: { type: Number, default: 0 },
+      products: { type: Number, default: 0 },
+      blogs: { type: Number, default: 0 },
+      orders: { type: Number, default: 0 },
       customDomainSupport: { type: Boolean, default: false },
     },
 
