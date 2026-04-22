@@ -12,8 +12,8 @@ export const validate = (schema: any, data: any, res: any) => {
   return value;
 };
 
-export const verifyStoreAccess = async (user: IAuthenticatedUser, storeId: string) => {
-  if (user.role === ACCOUNT_TYPE.ADMIN) return true;
+export const verifyStoreAccess = async (user: IAuthenticatedUser | undefined, storeId: string) => {
+  if (!user || user.role === ACCOUNT_TYPE.ADMIN || user.role === ACCOUNT_TYPE.USER) return true;
   const store = await getFirstMatch(storeModel, { _id: storeId, userId: user._id, isDeleted: { $ne: true } }, {}, {});
   return !!store;
 };

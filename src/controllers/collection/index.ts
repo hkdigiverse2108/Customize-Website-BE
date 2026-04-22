@@ -1,4 +1,4 @@
-import { ACCOUNT_TYPE, collectionTypes, getPaginationState, HTTP_STATUS, resolveSortAndFilter } from "../../common";
+import { ACCOUNT_TYPE, COLLECTION_TYPE, COLLECTION_STATUS, getPaginationState, HTTP_STATUS, resolveSortAndFilter } from "../../common";
 import { collectionModel, storeModel } from "../../database";
 import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, checkFieldDuplicate, verifyStoreAccess } from "../../helper";
 import { apiResponse } from "../../type";
@@ -14,8 +14,8 @@ export const createCollection = async (req, res) => {
     const isPublished = value?.isPublished === true;
     const payload: any = {
       ...value,
-      type: value?.type || collectionTypes.MANUAL,
-      status: value?.status || (isPublished ? "active" : "draft"),
+      type: value?.type || COLLECTION_TYPE.MANUAL,
+      status: value?.status || (isPublished ? COLLECTION_STATUS.ACTIVE : COLLECTION_STATUS.DRAFT),
       isPublished,
       publishedAt: isPublished ? (value?.publishedAt ? new Date(value.publishedAt) : new Date()) : null,
       productIds: Array.isArray(value?.productIds) ? value.productIds : [],
@@ -26,7 +26,7 @@ export const createCollection = async (req, res) => {
       isActive: value?.isActive !== false,
     };
 
-    if (payload.type === collectionTypes.SMART && !payload.rules.length) {
+    if (payload.type === COLLECTION_TYPE.SMART && !payload.rules.length) {
         return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Smart collection requires at least one rule", {}, {}));
     }
 
@@ -91,7 +91,7 @@ export const deleteCollection = async (req, res) => {
         return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Collection"), {}, {}));
     }
 
-    const deleted = await deleteData(collectionModel, { _id: value.id }, { isActive: false, status: "archived" }, {});
+    const deleted = await deleteData(collectionModel, { _id: value.id }, { isActive: false, status: COLLECTION_STATUS.ARCHIVED }, {});
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.deleteDataSuccess("Collection"), deleted, {}));
   } catch (error) {
     console.error(error);

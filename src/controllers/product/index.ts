@@ -1,6 +1,6 @@
-import { ACCOUNT_TYPE, getPaginationState, HTTP_STATUS, resolveSortAndFilter } from "../../common";
+import { ACCOUNT_TYPE, getPaginationState, HTTP_STATUS, PRODUCT_STATUS, resolveSortAndFilter } from "../../common";
 import { productModel, storeModel } from "../../database";
-import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, checkFieldDuplicate, verifyStoreAccess } from "../../helper";
+import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, checkFieldDuplicate, verifyStoreAccess, updateResourceUsage } from "../../helper";
 import { apiResponse } from "../../type";
 import { createProductSchema, getAllProductsQuerySchema, productIdSchema, updateProductSchema } from "../../validation";
 
@@ -21,7 +21,7 @@ export const createProduct = async (req, res) => {
       categoryIds: Array.isArray(value?.categoryIds) ? value.categoryIds : [],
       collectionIds: Array.isArray(value?.collectionIds) ? value.collectionIds : [],
       isActive: value?.isActive !== false,
-      publishedAt: value?.publishedAt ? new Date(value.publishedAt) : (value.status === "active" ? new Date() : null),
+      publishedAt: value?.publishedAt ? new Date(value.publishedAt) : (value.status === PRODUCT_STATUS.ACTIVE ? new Date() : null),
     };
 
     if (payload.hasVariants && (!payload.variants || payload.variants.length === 0)) {
@@ -37,6 +37,10 @@ export const createProduct = async (req, res) => {
     }
 
     const created = await new productModel(payload).save();
+
+    // Centralized Usage Tracking
+    await updateResourceUsage(String(user._id), 'products', 1);
+
     return res.status(HTTP_STATUS.CREATED).json(apiResponse(HTTP_STATUS.CREATED, responseMessage.addDataSuccess("Product"), created, {}));
   } catch (error) {
     console.error(error);
@@ -91,7 +95,11 @@ export const deleteProduct = async (req, res) => {
         return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Product"), {}, {}));
     }
 
-    const deleted = await deleteData(productModel, { _id: value.id }, { isActive: false, status: "archived" }, {});
+    const deleted = await deleteData(productModel, { _id: value.id }, { isActive: false, status: PRODUCT_STATUS.ARCHIVED }, {});
+
+    // Centralized Usage Tracking
+    await updateResourceUsage(String(user._id), 'products', -1);
+
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.deleteDataSuccess("Product"), deleted, {}));
   } catch (error) {
     console.error(error);

@@ -1,7 +1,5 @@
 import { Document, Types } from "mongoose";
-
-export type PAGE_TYPE = "home" | "product" | "category" | "custom";
-export type PAGE_VISIBILITY = "public" | "private" | "password";
+import { PAGE_TYPE, PAGE_VISIBILITY } from "../common";
 
 export interface IPageType {
   storeId: Types.ObjectId | string;

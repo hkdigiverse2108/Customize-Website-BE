@@ -1,26 +1,12 @@
 import Joi from "joi";
 import { objectId } from "./common";
+import { COLLECTION_TYPE, COLLECTION_STATUS, COLLECTION_RULE_CONDITION, COLLECTION_RULE_FIELD, COLLECTION_OPERATOR, COLLECTION_SORT_ORDER } from "../common";
 
 const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const collectionTypes = ["manual", "smart"];
-const collectionStatuses = ["draft", "active", "archived"];
-const collectionRuleConditions = ["AND", "OR"];
-const collectionRuleFields = ["price", "tag", "title", "vendor", "productType"];
-const collectionOperators = ["equals", "not_equals", "contains", "greater_than", "less_than"];
-const collectionSortOrders = [
-  "manual",
-  "best-selling",
-  "price-ascending",
-  "price-descending",
-  "title-ascending",
-  "title-descending",
-  "created-desc",
-  "created-asc",
-];
 
 const collectionRuleSchema = Joi.object({
-  field: Joi.string().trim().valid(...collectionRuleFields).required(),
-  operator: Joi.string().trim().valid(...collectionOperators).required(),
+  field: Joi.string().trim().valid(...Object.values(COLLECTION_RULE_FIELD)).required(),
+  operator: Joi.string().trim().valid(...Object.values(COLLECTION_OPERATOR)).required(),
   value: Joi.any().required(),
 });
 
@@ -57,15 +43,15 @@ export const createCollectionSchema = Joi.object({
   storeId: objectId().required().invalid(null),
   title: Joi.string().trim().min(2).max(180).required(),
   handle: handleSchema.default((parent) => parent?.title).optional(),
-  type: Joi.string().trim().lowercase().valid(...collectionTypes).optional(),
-  status: Joi.string().trim().lowercase().valid(...collectionStatuses).optional(),
+  type: Joi.string().trim().lowercase().valid(...Object.values(COLLECTION_TYPE)).optional(),
+  status: Joi.string().trim().lowercase().valid(...Object.values(COLLECTION_STATUS)).optional(),
   isPublished: Joi.boolean().optional(),
   publishedAt: Joi.date().allow(null).optional(),
   description: Joi.string().trim().allow("").optional(),
   productIds: Joi.array().items(objectId()).optional(),
   rules: Joi.array().items(collectionRuleSchema).optional(),
-  ruleCondition: Joi.string().trim().uppercase().valid(...collectionRuleConditions).optional(),
-  sortOrder: Joi.string().trim().valid(...collectionSortOrders).optional(),
+  ruleCondition: Joi.string().trim().uppercase().valid(...Object.values(COLLECTION_RULE_CONDITION)).optional(),
+  sortOrder: Joi.string().trim().valid(...Object.values(COLLECTION_SORT_ORDER)).optional(),
   image: collectionImageSchema.optional(),
   seo: collectionSeoSchema.optional(),
   tags: Joi.array().items(Joi.string().trim()).optional(),
@@ -76,15 +62,15 @@ export const updateCollectionSchema = Joi.object({
   storeId: objectId().optional(),
   title: Joi.string().trim().min(2).max(180).optional(),
   handle: handleSchema.optional(),
-  type: Joi.string().trim().lowercase().valid(...collectionTypes).optional(),
-  status: Joi.string().trim().lowercase().valid(...collectionStatuses).optional(),
+  type: Joi.string().trim().lowercase().valid(...Object.values(COLLECTION_TYPE)).optional(),
+  status: Joi.string().trim().lowercase().valid(...Object.values(COLLECTION_STATUS)).optional(),
   isPublished: Joi.boolean().optional(),
   publishedAt: Joi.date().allow(null).optional(),
   description: Joi.string().trim().allow("").optional(),
   productIds: Joi.array().items(objectId()).optional(),
   rules: Joi.array().items(collectionRuleSchema).optional(),
-  ruleCondition: Joi.string().trim().uppercase().valid(...collectionRuleConditions).optional(),
-  sortOrder: Joi.string().trim().valid(...collectionSortOrders).optional(),
+  ruleCondition: Joi.string().trim().uppercase().valid(...Object.values(COLLECTION_RULE_CONDITION)).optional(),
+  sortOrder: Joi.string().trim().valid(...Object.values(COLLECTION_SORT_ORDER)).optional(),
   image: collectionImageSchema.optional(),
   seo: collectionSeoSchema.optional(),
   tags: Joi.array().items(Joi.string().trim()).optional(),
@@ -101,8 +87,8 @@ export const getAllCollectionsQuerySchema = Joi.object({
   search: Joi.string().trim().allow("").optional(),
   activeFilter: Joi.boolean().optional(),
   storeId: objectId().optional(),
-  typeFilter: Joi.string().trim().lowercase().valid(...collectionTypes).optional(),
-  statusFilter: Joi.string().trim().lowercase().valid(...collectionStatuses).optional(),
+  typeFilter: Joi.string().trim().lowercase().valid(...Object.values(COLLECTION_TYPE)).optional(),
+  statusFilter: Joi.string().trim().lowercase().valid(...Object.values(COLLECTION_STATUS)).optional(),
   publishedFilter: Joi.boolean().optional(),
   tag: Joi.string().trim().optional(),
   sortFilter: Joi.string().valid("nameAsc", "nameDesc", "newest", "oldest").optional(),

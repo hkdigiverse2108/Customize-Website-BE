@@ -1,10 +1,11 @@
 import { Schema, model } from "mongoose";
 import { IMailSetting } from "../../../type/settings/mailSetting";
+import { EMAIL_PROVIDER } from "../../../common";
 
 const mailSettingSchema = new Schema<IMailSetting>(
   {
     storeId: { type: Schema.Types.ObjectId, ref: "store", required: true },
-    provider: { type: String, enum: ["gmail", "smtp", "resend", "sendgrid"], default: "smtp" },
+    provider: { type: String, enum: Object.values(EMAIL_PROVIDER), default: EMAIL_PROVIDER.SMTP },
     host: { type: String, trim: true },
     port: { type: Number },
     secure: { type: Boolean, default: true },

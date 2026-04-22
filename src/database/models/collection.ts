@@ -1,26 +1,11 @@
 import { Schema, model } from "mongoose";
 import { ICollection } from "../../type";
-
-const collectionTypes = ["manual", "smart"];
-const collectionStatuses = ["draft", "active", "archived"];
-const collectionRuleConditions = ["AND", "OR"];
-const collectionRuleFields = ["price", "tag", "title", "vendor", "productType"];
-const collectionOperators = ["equals", "not_equals", "contains", "greater_than", "less_than"];
-const collectionSortOrders = [
-  "manual",
-  "best-selling",
-  "price-ascending",
-  "price-descending",
-  "title-ascending",
-  "title-descending",
-  "created-desc",
-  "created-asc",
-];
+import { COLLECTION_TYPE, COLLECTION_STATUS, COLLECTION_RULE_CONDITION, COLLECTION_RULE_FIELD, COLLECTION_OPERATOR, COLLECTION_SORT_ORDER } from "../../common";
 
 const collectionRuleSchema = new Schema(
   {
-    field: { type: String, required: true, enum: collectionRuleFields, trim: true },
-    operator: { type: String, required: true, enum: collectionOperators, trim: true },
+    field: { type: String, required: true, enum: Object.values(COLLECTION_RULE_FIELD), trim: true },
+    operator: { type: String, required: true, enum: Object.values(COLLECTION_OPERATOR), trim: true },
     value: { type: Schema.Types.Mixed, required: true },
   },
   { _id: false }
@@ -47,15 +32,15 @@ const collectionSchema = new Schema<ICollection>(
     storeId: { type: Schema.Types.ObjectId, ref: "store", required: true, index: true },
     title: { type: String, required: true, trim: true },
     handle: { type: String, required: true, trim: true, lowercase: true },
-    type: { type: String, enum: collectionTypes, default: "manual", required: true },
-    status: { type: String, enum: collectionStatuses, default: "draft", required: true },
+    type: { type: String, enum: Object.values(COLLECTION_TYPE), default: COLLECTION_TYPE.MANUAL, required: true },
+    status: { type: String, enum: Object.values(COLLECTION_STATUS), default: COLLECTION_STATUS.DRAFT, required: true },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date, default: null },
     description: { type: String, default: "", trim: true },
     productIds: [{ type: Schema.Types.ObjectId, ref: "product" }],
     rules: { type: [collectionRuleSchema], default: [] },
-    ruleCondition: { type: String, enum: collectionRuleConditions, default: "AND" },
-    sortOrder: { type: String, enum: collectionSortOrders, default: "manual" },
+    ruleCondition: { type: String, enum: Object.values(COLLECTION_RULE_CONDITION), default: COLLECTION_RULE_CONDITION.AND },
+    sortOrder: { type: String, enum: Object.values(COLLECTION_SORT_ORDER), default: COLLECTION_SORT_ORDER.MANUAL },
     image: { type: collectionImageSchema, default: () => ({}) },
     seo: { type: collectionSeoSchema, default: () => ({}) },
     tags: { type: [String], default: [] },

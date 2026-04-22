@@ -1,17 +1,14 @@
 import { Schema, model } from "mongoose";
 import { IComponent } from "../../type";
-
-const componentTypes = ["header", "footer", "banner", "productGrid", "custom"];
-const componentCategories = ["layout", "marketing", "ecommerce"];
-const supportedPages = ["home", "product", "category", "cart", "checkout", "custom"];
+import { COMPONENT_TYPE, COMPONENT_CATEGORY, SUPPORTED_PAGE } from "../../common";
 
 const componentSchema = new Schema<IComponent>(
   {
     storeId: { type: Schema.Types.ObjectId, ref: "store", default: null, index: true },
     sourceComponentId: { type: Schema.Types.ObjectId, ref: "component", default: null, index: true },
     name: { type: String, required: true, trim: true },
-    type: { type: String, enum: componentTypes, required: true },
-    category: { type: String, enum: componentCategories, default: null },
+    type: { type: String, enum: Object.values(COMPONENT_TYPE), required: true },
+    category: { type: String, enum: Object.values(COMPONENT_CATEGORY), default: null },
     label: { type: String, default: "", trim: true },
     icon: { type: String, default: "", trim: true },
     previewImage: { type: String, default: "", trim: true },
@@ -20,7 +17,7 @@ const componentSchema = new Schema<IComponent>(
     configSchema: { type: Schema.Types.Mixed, default: {} },
     isReusable: { type: Boolean, default: true },
     isGlobal: { type: Boolean, default: false },
-    supportedPages: [{ type: String, enum: supportedPages }],
+    supportedPages: [{ type: String, enum: Object.values(SUPPORTED_PAGE) }],
     supportedThemes: [{ type: Schema.Types.ObjectId, ref: "theme" }],
     version: { type: String, default: "1.0.0", trim: true },
     isDeprecated: { type: Boolean, default: false },

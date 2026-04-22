@@ -1,5 +1,6 @@
 import { ACCOUNT_TYPE } from "../common";
-import { blogModel, orderModel, planModel, productModel, storeModel, userModel } from "../database";
+import { blogModel, orderModel, planModel, productModel, storeModel, userModel, userLimitModel } from "../database";
+import { syncUserUsage } from "./limitHelper";
 
 type ThemeLimitMode = "append" | "replace";
 
@@ -157,64 +158,44 @@ export const validatePlanSwitch = async (user: any, newPlanId: string) => {
   const newPlan: any = await planModel.findOne({ _id: newPlanId, isDeleted: { $ne: true } }, {}, { lean: true });
   if (!newPlan) return { allowed: false, message: "New plan not found." };
 
-  const stores: any[] = await storeModel.find(
-    { userId: user._id, isDeleted: { $ne: true } },
-    { name: 1, themeIds: 1 },
-    { lean: true }
-  );
-
-  // Check Theme Limit per store
-  if (newPlan.themeLimit !== -1) {
-    const violatingStore = stores.find((store) => normalizeThemeIds(store?.themeIds || []).length > newPlan.themeLimit);
-
-    if (violatingStore) {
-      const violatingCount = normalizeThemeIds(violatingStore?.themeIds || []).length;
-      return {
-        allowed: false,
-        message: `Cannot switch to ${newPlan.name}. Store "${violatingStore.name}" uses ${violatingCount} themes, but this plan only allows ${newPlan.themeLimit} per store.`,
-        type: "THEME_LIMIT_EXCEEDED"
-      };
-    }
+  // Sync usage before validating
+  let userLimits: any = await syncUserUsage(user._id);
+  if (!userLimits) {
+    userLimits = await userLimitModel.create({ userId: user._id });
   }
 
-  // Check Blog, Product, and Order Limits across all stores
-  for (const store of stores) {
-    // Blog limit
-    if (newPlan.blogLimit !== -1) {
-      const blogCount = await blogModel.countDocuments({ storeId: store._id, isDeleted: { $ne: true } });
-      if (blogCount > newPlan.blogLimit) {
-        return {
-          allowed: false,
-          message: `Cannot switch to ${newPlan.name}. Store "${store.name}" has ${blogCount} blogs, exceeding the limit of ${newPlan.blogLimit}.`,
-          type: "BLOG_LIMIT_EXCEEDED"
-        };
-      }
-    }
+  const { usage } = userLimits;
 
-    // Product limit
-    if (newPlan.productLimit !== -1) {
-      const productCount = await productModel.countDocuments({ storeId: store._id, isDeleted: { $ne: true } });
-      if (productCount > newPlan.productLimit) {
-        return {
-          allowed: false,
-          message: `Cannot switch to ${newPlan.name}. Store "${store.name}" has ${productCount} products, exceeding the limit of ${newPlan.productLimit}.`,
-          type: "PRODUCT_LIMIT_EXCEEDED"
-        };
-      }
-    }
+  // 1. Check Replacement Limits (Themes, Products, Blogs)
+  // These are not additive; the new plan's limit must be enough for current usage.
 
-    // Order limit (total orders for the store)
-    if (newPlan.orderLimit !== -1) {
-      const orderCount = await orderModel.countDocuments({ storeId: store._id, isDeleted: { $ne: true } });
-      if (orderCount > newPlan.orderLimit) {
-        return {
-          allowed: false,
-          message: `Cannot switch to ${newPlan.name}. Store "${store.name}" has ${orderCount} orders, exceeding the new plan's limit of ${newPlan.orderLimit}.`,
-          type: "ORDER_LIMIT_EXCEEDED"
-        };
-      }
-    }
+  if (newPlan.themeLimit !== -1 && usage.themes > newPlan.themeLimit) {
+    return {
+      allowed: false,
+      message: `Cannot switch to ${newPlan.name}. You are using ${usage.themes} themes, but this plan only allows ${newPlan.themeLimit}.`,
+      type: "THEME_LIMIT_EXCEEDED"
+    };
   }
+
+  if (newPlan.productLimit !== -1 && usage.products > newPlan.productLimit) {
+    return {
+      allowed: false,
+      message: `Cannot switch to ${newPlan.name}. You have ${usage.products} products, but this plan only allows ${newPlan.productLimit}.`,
+      type: "PRODUCT_LIMIT_EXCEEDED"
+    };
+  }
+
+  if (newPlan.blogLimit !== -1 && usage.blogs > newPlan.blogLimit) {
+    return {
+      allowed: false,
+      message: `Cannot switch to ${newPlan.name}. You have ${usage.blogs} blogs, but this plan only allows ${newPlan.blogLimit}.`,
+      type: "BLOG_LIMIT_EXCEEDED"
+    };
+  }
+
+  // 2. Additive Limits (Orders, Offers)
+  // These are always allowed because the new plan limit will be added to what's remaining.
+  // No validation needed for these during switch.
 
   return { allowed: true, plan: newPlan };
 };

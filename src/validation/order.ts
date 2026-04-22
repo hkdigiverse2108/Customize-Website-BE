@@ -61,6 +61,7 @@ const withOrderStateConsistency = (value, helpers) => {
 export const createOrderSchema = Joi.object({
   storeId: objectId().required().invalid(null),
   sourceDomain: Joi.string().trim().lowercase().allow("", null).optional(),
+  websiteId: objectId().optional().allow(null),
   customerId: objectId().optional().allow(null),
   orderNumber: Joi.number().integer().min(1).optional(),
   orderName: Joi.string().trim().allow("").max(80).optional(),
@@ -99,6 +100,7 @@ export const updateOrderSchema = Joi.object({
   orderName: Joi.string().trim().allow("").max(80).optional(),
   email: Joi.string().trim().email().optional(),
   phone: Joi.string().trim().min(6).max(20).optional(),
+  websiteId: objectId().optional().allow(null),
   status: Joi.string().trim().lowercase().valid(...orderStatuses).empty("").optional(),
   financialStatus: Joi.string().trim().lowercase().valid(...financialStatuses).empty("").optional(),
   fulfillmentStatus: Joi.string().trim().lowercase().valid(...fulfillmentStatuses).empty("").optional(),
@@ -144,6 +146,7 @@ export const getAllOrdersQuerySchema = Joi.object({
   customerId: objectId().optional(),
   orderNumber: Joi.number().integer().min(1).optional(),
   sourceDomain: Joi.string().trim().lowercase().allow("", null).optional(),
+  websiteId: objectId().optional(),
   statusFilter: Joi.string().trim().lowercase().valid(...orderStatuses).optional(),
   financialStatusFilter: Joi.string().trim().lowercase().valid(...financialStatuses).optional(),
   fulfillmentStatusFilter: Joi.string().trim().lowercase().valid(...fulfillmentStatuses).optional(),

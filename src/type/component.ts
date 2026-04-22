@@ -1,8 +1,5 @@
 import { Document, Types } from "mongoose";
-
-export type COMPONENT_TYPE = "header" | "footer" | "banner" | "productGrid" | "custom";
-export type COMPONENT_CATEGORY = "layout" | "marketing" | "ecommerce";
-export type COMPONENT_SUPPORTED_PAGE = "home" | "product" | "category" | "cart" | "checkout" | "custom";
+import { COMPONENT_TYPE, COMPONENT_CATEGORY, SUPPORTED_PAGE } from "../common";
 
 export interface IComponentType {
   storeId: Types.ObjectId | string | null;
@@ -20,7 +17,7 @@ export interface IComponentType {
   isReusable: boolean;
   isGlobal: boolean;
   isPublished: boolean;
-  supportedPages: COMPONENT_SUPPORTED_PAGE[];
+  supportedPages: SUPPORTED_PAGE[];
   supportedThemes: (Types.ObjectId | string)[];
   version: string;
   isDeprecated: boolean;
@@ -47,7 +44,7 @@ export interface ICreateComponentPayload {
   isReusable?: boolean;
   isGlobal?: boolean;
   isPublished?: boolean;
-  supportedPages?: COMPONENT_SUPPORTED_PAGE[];
+  supportedPages?: SUPPORTED_PAGE[];
   supportedThemes?: (Types.ObjectId | string)[];
   version?: string;
   isDeprecated?: boolean;
@@ -73,7 +70,7 @@ export interface IComponent extends Document {
   isReusable: boolean;
   isGlobal: boolean;
   isPublished: boolean;
-  supportedPages: COMPONENT_SUPPORTED_PAGE[];
+  supportedPages: SUPPORTED_PAGE[];
   supportedThemes: (Types.ObjectId | string)[];
   version: string;
   isDeprecated: boolean;

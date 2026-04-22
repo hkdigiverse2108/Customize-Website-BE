@@ -1,8 +1,9 @@
 import { Document, Types } from "mongoose";
+import { EMAIL_PROVIDER } from "../../common";
 
 export interface IMailSettingType {
   storeId: Types.ObjectId | string;
-  provider: "gmail" | "smtp" | "resend" | "sendgrid";
+  provider: EMAIL_PROVIDER;
   host?: string;
   port?: number;
   secure: boolean;

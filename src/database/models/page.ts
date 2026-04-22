@@ -1,8 +1,6 @@
 import { Schema, model } from "mongoose";
 import { IPage } from "../../type";
-
-const pageTypes = ["home", "product", "category", "custom"];
-const pageVisibilities = ["public", "private", "password"];
+import { PAGE_TYPE, PAGE_VISIBILITY } from "../../common";
 
 const pageSchema = new Schema<IPage>(
   {
@@ -10,7 +8,7 @@ const pageSchema = new Schema<IPage>(
     title: { type: String, required: true, trim: true },
     slug: { type: String, required: true, trim: true, lowercase: true },
     description: { type: String, default: "", trim: true },
-    type: { type: String, enum: pageTypes, default: "custom" },
+    type: { type: String, enum: Object.values(PAGE_TYPE), default: PAGE_TYPE.CUSTOM },
     layoutJSON: { type: Schema.Types.Mixed, required: true, default: {} },
     metaTitle: { type: String, default: "", trim: true },
     metaDescription: { type: String, default: "", trim: true },
@@ -19,7 +17,7 @@ const pageSchema = new Schema<IPage>(
     isHomePage: { type: Boolean, default: false },
     version: { type: Number, default: 1, min: 1 },
     isDraft: { type: Boolean, default: true },
-    visibility: { type: String, enum: pageVisibilities, default: "public" },
+    visibility: { type: String, enum: Object.values(PAGE_VISIBILITY), default: PAGE_VISIBILITY.PUBLIC },
     password: { type: String, default: "", trim: true },
     isDeleted: { type: Boolean, default: false },
   },

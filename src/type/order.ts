@@ -47,6 +47,7 @@ export interface IOrderFulfillmentType {
 export interface IOrderType {
   storeId: Types.ObjectId | string;
   sourceDomain?: string | null;
+  websiteId?: Types.ObjectId | string | null;
   customerId: Types.ObjectId | string | null;
   orderNumber: number;
   orderName: string;
@@ -82,6 +83,7 @@ export interface IOrderType {
 export interface ICreateOrderPayload {
   storeId: Types.ObjectId | string;
   sourceDomain?: string | null;
+  websiteId?: Types.ObjectId | string | null;
   customerId?: Types.ObjectId | string | null;
   orderNumber?: number;
   orderName?: string;
@@ -116,6 +118,7 @@ export interface IUpdateOrderPayload extends Partial<ICreateOrderPayload> {}
 export interface IOrder extends Document {
   storeId: Types.ObjectId | string;
   sourceDomain?: string | null;
+  websiteId?: Types.ObjectId | string | null;
   customerId: Types.ObjectId | string | null;
   orderNumber: number;
   orderName: string;

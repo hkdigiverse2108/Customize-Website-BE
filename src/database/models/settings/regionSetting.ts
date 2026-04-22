@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
 import { IRegionSetting } from "../../../type/settings/regionSetting";
+import { MEASUREMENT_SYSTEM } from "../../../common";
 
 const regionSettingSchema = new Schema<IRegionSetting>(
   {
@@ -7,7 +8,7 @@ const regionSettingSchema = new Schema<IRegionSetting>(
     currency: { type: String, default: "INR", trim: true },
     currencySymbol: { type: String, default: "₹", trim: true },
     timezone: { type: String, default: "Asia/Kolkata", trim: true },
-    unitSystem: { type: String, enum: ["metric", "imperial"], default: "metric" },
+    unitSystem: { type: String, enum: Object.values(MEASUREMENT_SYSTEM), default: MEASUREMENT_SYSTEM.METRIC },
     weightUnit: { type: String, default: "kg", trim: true },
     lengthUnit: { type: String, default: "cm", trim: true },
     isDeleted: { type: Boolean, default: false },

@@ -25,3 +25,4 @@ export * from "./settings/mailSetting";
 export * from "./settings/visualSetting";
 export * from "./settings/domainSetting";
 export * from "./settings/themeSetting";
+export * from "./userLimit";

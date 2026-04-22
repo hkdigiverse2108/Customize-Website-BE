@@ -1,13 +1,14 @@
 import { Document, Types } from "mongoose";
+import { AUTH_METHOD, SETTING_FIELD_STATUS, VISIBILITY_STATUS } from "../../common";
 
 export interface ICheckoutSettingType {
   storeId: Types.ObjectId | string;
-  customerAccounts: "disabled" | "optional" | "required";
-  contactMethod: "email" | "phone_or_email";
+  customerAccounts: SETTING_FIELD_STATUS;
+  contactMethod: AUTH_METHOD;
   allowGuestCheckout: boolean;
   requirePhoneNumber: boolean;
-  companyNameField: "hidden" | "optional" | "required";
-  addressLine2Field: "hidden" | "optional" | "required";
+  companyNameField: VISIBILITY_STATUS;
+  addressLine2Field: VISIBILITY_STATUS;
   orderProcessing: {
     useShippingAsBillingByDefault: boolean;
     enableAddressAutocompletion: boolean;

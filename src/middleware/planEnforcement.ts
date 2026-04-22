@@ -1,67 +1,72 @@
 import { HTTP_STATUS, SUBSCRIPTION_STATUS } from "../common";
-import { productModel, blogModel, orderModel, domainSettingModel, storeModel } from "../database";
+import { userLimitModel } from "../database";
 import { apiResponse } from "../type";
+import { syncUserUsage } from "../helper/limitHelper";
 
 export const checkPlanLimit = (resourceType: 'products' | 'blogs' | 'orders' | 'domains' | 'themes') => {
   return async (req: any, res: any, next: any) => {
     try {
       const user = req.headers.user as any;
-      if (!user || !user.subscription || !user.subscription.planId) {
-          // If no plan, only allow very basic access or default to free limits logic
-          // For now, assume planId is populated correctly in auth middleware
-          return next();
+
+      if (!user) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json(apiResponse(HTTP_STATUS.UNAUTHORIZED, "User not found.", {}, {}));
       }
 
-      const { planId, status } = user.subscription;
+      if (user.role === 'admin') return next();
+
+      const { status } = user.subscription;
       
       if (status !== SUBSCRIPTION_STATUS.ACTIVE) {
-          return res.status(HTTP_STATUS.PAYMENT_REQUIRED).json(apiResponse(HTTP_STATUS.PAYMENT_REQUIRED, "Your subscription is not active. Please renew your plan.", {}, {}));
+        return res.status(HTTP_STATUS.PAYMENT_REQUIRED).json(apiResponse(HTTP_STATUS.PAYMENT_REQUIRED, "Your subscription is not active. Please renew your plan.", {}, {}));
       }
 
-      const plan = user.subscription.planId as any; // Populated in auth middleware
-      const storeId = req.body.storeId || req.query.storeId || req.params.storeId;
+      // Fetch centralized limits and usage
+      let userLimits: any = await userLimitModel.findOne({ userId: user._id });
 
-      if (!storeId) return next();
+      // Fallback: Sync usage and limits if not found
+      if (!userLimits) {
+        userLimits = await syncUserUsage(user._id);
+      }
+
+      if (!userLimits) return next();
 
       let currentCount = 0;
       let limit = 0;
 
+      // Use cached usage data from UserLimit model (Scalable & Efficient)
       switch (resourceType) {
         case 'products':
-          currentCount = await productModel.countDocuments({ storeId, isDeleted: false });
-          limit = plan.productLimit;
+          currentCount = userLimits.usage?.products || 0;
+          limit = userLimits.limits?.products ?? 0;
           break;
         case 'blogs':
-          currentCount = await blogModel.countDocuments({ storeId, isDeleted: false });
-          limit = plan.blogLimit;
+          currentCount = userLimits.usage?.blogs || 0;
+          limit = userLimits.limits?.blogs ?? 0;
           break;
         case 'orders':
-          // Usually orders are not blocked from being created, but maybe limited in some SaaS
-          currentCount = await orderModel.countDocuments({ storeId, isDeleted: false });
-          limit = plan.orderLimit;
+          currentCount = userLimits.usage?.orders || 0;
+          limit = userLimits.limits?.orders ?? 0;
           break;
         case 'domains':
-          if (!plan.customDomainSupport) {
-              return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, "Your current plan does not support custom domains. Please upgrade.", {}, {}));
+          if (!userLimits.limits?.customDomainSupport) {
+            return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, "Your current plan does not support custom domains. Please upgrade.", {}, {}));
           }
           return next();
         case 'themes':
-          const storeForThemes: any = await storeModel.findOne({ _id: storeId, isDeleted: { $ne: true } }, { themeIds: 1 }, { lean: true });
-          currentCount = Array.isArray(storeForThemes?.themeIds)
-            ? new Set(storeForThemes.themeIds.map((themeId: any) => String(themeId))).size
-            : 0;
-          limit = plan.themeLimit;
+          currentCount = userLimits.usage?.themes || 0;
+          limit = userLimits.limits?.themes ?? 0;
           break;
       }
 
       if (limit !== -1 && currentCount >= limit) {
-        return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, `You have reached the ${resourceType} limit for your plan (${limit}). Please upgrade to add more.`, {}, {}));
+        return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, `Limit reached for ${resourceType}. Please upgrade your plan.`, {}, {}));
       }
 
-      next();
+      return next();
     } catch (error) {
-      console.error("Plan limit check failed:", error);
-      return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, "Error checking plan limits", {}, error));
+      console.error("Plan Enforcement Error:", error);
+      return next();
     }
   };
 };
+

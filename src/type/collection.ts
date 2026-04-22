@@ -1,23 +1,9 @@
 import { Document, Types } from "mongoose";
-
-export type COLLECTION_TYPE = "manual" | "smart";
-export type COLLECTION_STATUS = "draft" | "active" | "archived";
-export type COLLECTION_RULE_CONDITION = "AND" | "OR";
-export type COLLECTION_RULE_FIELD = "price" | "tag" | "title" | "vendor" | "productType";
-export type COLLECTION_RULE_OPERATOR = "equals" | "not_equals" | "contains" | "greater_than" | "less_than";
-export type COLLECTION_SORT_ORDER =
-  | "manual"
-  | "best-selling"
-  | "price-ascending"
-  | "price-descending"
-  | "title-ascending"
-  | "title-descending"
-  | "created-desc"
-  | "created-asc";
+import { COLLECTION_TYPE, COLLECTION_STATUS, COLLECTION_RULE_CONDITION, COLLECTION_RULE_FIELD, COLLECTION_OPERATOR, COLLECTION_SORT_ORDER } from "../common";
 
 export interface ICollectionRuleType {
   field: COLLECTION_RULE_FIELD;
-  operator: COLLECTION_RULE_OPERATOR;
+  operator: COLLECTION_OPERATOR;
   value: any;
 }
 

@@ -33,7 +33,7 @@ export const createPlan = async (req, res) => {
     const existingPlan = await getFirstMatch(planModel, { name: value.name, duration: value.duration, isDeleted: { $ne: true } }, {}, {});
 
     if (existingPlan) return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("plan"), {}, {}));
-    
+
     // Auto-build features from limits and merge with any manually provided features
     const autoFeatures = buildFeaturesFromLimits(value);
     const manualFeatures = (value.features || []).filter(
@@ -55,17 +55,17 @@ export const updatePlan = async (req, res) => {
     const { id, ...updatePayload } = req.body;
     const idValue = validate(planIdSchema, { id }, res);
     if (!idValue) return;
-    
+
     const bodyValue = validate(updatePlanSchema, updatePayload, res);
     if (!bodyValue) return;
-    
+
     const existingPlan = await getFirstMatch(planModel, { _id: idValue.id, isDeleted: { $ne: true } }, {}, {});
     if (!existingPlan) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Plan"), {}, {}));
-    
+
     const nextName = bodyValue?.name || existingPlan.name;
     const nextDuration = bodyValue?.duration || existingPlan.duration;
 
-    const duplicatePlan = await getFirstMatch(planModel,{ _id: { $ne: idValue.id }, name: nextName, duration: nextDuration, isDeleted: { $ne: true } },{},{});
+    const duplicatePlan = await getFirstMatch(planModel, { _id: { $ne: idValue.id }, name: nextName, duration: nextDuration, isDeleted: { $ne: true } }, {}, {});
     if (duplicatePlan) return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("plan"), {}, {}));
 
     // Rebuild features from merged limits (existing + incoming)

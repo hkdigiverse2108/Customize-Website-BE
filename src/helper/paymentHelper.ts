@@ -1,5 +1,5 @@
 import { HTTP_STATUS, PAYMENT_FOR, PLAN_DURATION, SUBSCRIPTION_STATUS } from "../common";
-import { orderModel, planModel, storeModel, themeModel, userModel } from "../database";
+import { orderModel, planModel, storeModel, themeModel, userModel, userLimitModel, productModel, blogModel, discountModel } from "../database";
 import { checkThemeLimit, getFirstMatch, updateData, verifyStoreAccess, validatePlanSwitch } from "../helper";
 import { apiResponse } from "../type";
 
@@ -33,7 +33,7 @@ export const resolvePaymentContext = async (value: any, user: any, res: any) => 
         if (!value.storeId) {
             return { errorResponse: res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "storeId is required for theme purchase", {}, {})) };
         }
-        
+
         if (!await verifyStoreAccess(user, value.storeId)) {
             return { errorResponse: res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, "Access denied to store", {}, {})) };
         }
@@ -68,6 +68,8 @@ export const requiresGlobalPaymentSetting = (paymentFor: PAYMENT_FOR) => {
     return paymentFor === PAYMENT_FOR.PLAN_SUBSCRIPTION || paymentFor === PAYMENT_FOR.THEME_PURCHASE;
 };
 
+import { syncUserUsage } from "./limitHelper";
+
 export const applySubscription = async (userId: string, planId: string) => {
     const plan: any = await getFirstMatch(planModel, { _id: planId, isDeleted: { $ne: true } }, {}, {});
     if (!plan) return null;
@@ -89,6 +91,31 @@ export const applySubscription = async (userId: string, planId: string) => {
         autoRenew: true
     };
 
+    // 1. Sync usage before calculating new limits
+    let userLimits: any = await syncUserUsage(userId);
+    if (!userLimits) {
+        userLimits = await userLimitModel.create({ userId });
+    }
+
+    // 2. Prepare new limits based on additive vs replacement rules
+    const newLimitsData: any = {
+        // Replacement (Reset to Plan Value)
+        "limits.themes": plan.themeLimit,
+        "limits.products": plan.productLimit,
+        "limits.blogs": plan.blogLimit,
+        "limits.customDomainSupport": plan.customDomainSupport,
+
+        // Additive (Remaining + New)
+        "limits.orders": plan.orderLimit === -1 ? -1 : (Math.max(0, userLimits.limits.orders - userLimits.usage.orders) + plan.orderLimit),
+    };
+
+    // Handle Unlimited Cases
+    if (plan.productLimit === -1) newLimitsData["limits.products"] = -1;
+    if (plan.blogLimit === -1) newLimitsData["limits.blogs"] = -1;
+    if (plan.themeLimit === -1) newLimitsData["limits.themes"] = -1;
+
+    await userLimitModel.findOneAndUpdate({ userId }, { $set: newLimitsData }, { upsert: true, new: true });
+
     return await updateData(userModel, { _id: userId }, { subscription }, { new: true });
 };
 
@@ -96,7 +123,7 @@ export const grantTheme = async (storeId: string, themeId: string) => {
     if (!storeId || !themeId) return null;
 
     return await storeModel.updateOne(
-        { _id: storeId, isDeleted: { $ne: true } }, 
+        { _id: storeId, isDeleted: { $ne: true } },
         { $addToSet: { themeIds: themeId } }
     );
 };

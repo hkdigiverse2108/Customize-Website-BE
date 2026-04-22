@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { ACCOUNT_TYPE, getPaginationState, HTTP_STATUS, resolveSortAndFilter } from "../../common";
-import { orderModel, storeModel, userModel } from "../../database";
-import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, verifyStoreAccess, checkFieldDuplicate, normalizeDomain, resolveRequestDomain } from "../../helper";
+import { orderModel, storeModel, userModel, domainSettingModel } from "../../database";
+import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, verifyStoreAccess, checkFieldDuplicate, normalizeDomain, resolveRequestDomain, resolveWebsiteStore, updateResourceUsage } from "../../helper";
 import { apiResponse, IAuthenticatedUser, ICreateOrderPayload, IOrder, IUser } from "../../type";
 import { createOrderSchema, getAllOrdersQuerySchema, orderIdSchema, updateOrderSchema } from "../../validation";
 
@@ -11,8 +11,16 @@ export const createOrder = async (req, res) => {
     const value = validate(createOrderSchema, req.body, res) as ICreateOrderPayload | null;
     if (!value) return;
 
+    const { domain: sourceDomain, website, store: resolvedStore } = await resolveWebsiteStore(req, value.sourceDomain);
+    let websiteId: Types.ObjectId | string | null = value.websiteId || (website?._id || null);
+    let storeId: Types.ObjectId | string = value.storeId || (resolvedStore?._id || null);
+
+    if (!storeId) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Store could not be identified for this domain", {}, {}));
+    }
+
     const user = req.headers.user as IAuthenticatedUser;
-    if (!await verifyStoreAccess(user, String(value.storeId))) {
+    if (!await verifyStoreAccess(user, String(storeId))) {
         return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Store"), {}, {}));
     }
 
@@ -25,7 +33,7 @@ export const createOrder = async (req, res) => {
           email: value.email.toLowerCase(),
           phone: value.phone,
           role: ACCOUNT_TYPE.USER,
-          storeId: value.storeId,
+          storeId: storeId,
           firstName: value?.shippingAddress?.firstName || "",
           lastName: value?.shippingAddress?.lastName || ""
         }).save();
@@ -33,18 +41,24 @@ export const createOrder = async (req, res) => {
       targetCustomerId = existingUser._id;
     }
 
-    const orderNumber = value?.orderNumber || (await getNextOrderNumber(String(value.storeId)));
-    if (await checkFieldDuplicate(orderModel, "orderNumber", orderNumber, undefined, { storeId: value.storeId })) {
+    const orderNumber = value?.orderNumber || (await getNextOrderNumber(String(storeId)));
+    if (await checkFieldDuplicate(orderModel, "orderNumber", orderNumber, undefined, { storeId: storeId })) {
         return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, "Order number already exists for this store", {}, {}));
     }
 
     const finalPayload = buildPayload(value, true, orderNumber);
+    finalPayload.storeId = storeId;
+    finalPayload.websiteId = websiteId;
     finalPayload.customerId = targetCustomerId;
-    const sourceDomain = resolveRequestDomain(req, value.sourceDomain, { includeHost: false });
     if (sourceDomain) finalPayload.sourceDomain = sourceDomain;
 
     const order = (await new orderModel(finalPayload).save()) as IOrder;
+
+    // Centralized Usage Tracking
+    await updateResourceUsage(String(user._id), 'orders', 1);
+
     return res.status(HTTP_STATUS.CREATED).json(apiResponse(HTTP_STATUS.CREATED, responseMessage.addDataSuccess("Order"), order, {}));
+
   } catch (error) {
     console.error(error);
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
@@ -99,6 +113,10 @@ export const deleteOrder = async (req, res) => {
     const deleted = await deleteData(orderModel, { _id: value.id }, {
         isActive: false, status: "cancelled", isCancelled: true, cancelledAt: new Date(), cancelReason: "Order deleted"
     });
+
+    // Centralized Usage Tracking
+    await updateResourceUsage(String(user._id), 'orders', -1);
+
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.deleteDataSuccess("Order"), deleted, {}));
   } catch (error) {
     console.error(error);
@@ -123,6 +141,7 @@ export const getOrders = async (req, res) => {
     if (value?.financialStatusFilter) criteria.financialStatus = value.financialStatusFilter;
     if (value?.fulfillmentStatusFilter) criteria.fulfillmentStatus = value.fulfillmentStatusFilter;
     if (value?.sourceDomain) criteria.sourceDomain = normalizeDomain(value.sourceDomain);
+    if (value?.websiteId) criteria.websiteId = value.websiteId;
 
     const [orders, count] = await Promise.all([
         getData(orderModel, criteria, {}, options),
@@ -176,7 +195,6 @@ const buildPayload = (data: Partial<ICreateOrderPayload>, isCreate = false, orde
     payload.orderNumber = orderNumber;
     payload.orderName = data?.orderName || `#${orderNumber}`;
   }
-  // Normalization logic (Simplified for space)
   return payload;
 };
 

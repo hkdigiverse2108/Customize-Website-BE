@@ -1,14 +1,15 @@
 import Joi from "joi";
 import { objectId } from "../common";
+import { AUTH_METHOD, SETTING_FIELD_STATUS, VISIBILITY_STATUS } from "../../common";
 
 export const upsertCheckoutSettingSchema = Joi.object({
   storeId: objectId().required(),
-  customerAccounts: Joi.string().valid("disabled", "optional", "required").default("optional"),
-  contactMethod: Joi.string().valid("email", "phone_or_email").default("email"),
+  customerAccounts: Joi.string().valid(...Object.values(SETTING_FIELD_STATUS)).default(SETTING_FIELD_STATUS.OPTIONAL),
+  contactMethod: Joi.string().valid(...Object.values(AUTH_METHOD)).default(AUTH_METHOD.EMAIL),
   allowGuestCheckout: Joi.boolean().default(true),
   requirePhoneNumber: Joi.boolean().default(false),
-  companyNameField: Joi.string().valid("hidden", "optional", "required").default("optional"),
-  addressLine2Field: Joi.string().valid("hidden", "optional", "required").default("optional"),
+  companyNameField: Joi.string().valid(...Object.values(VISIBILITY_STATUS)).default(VISIBILITY_STATUS.OPTIONAL),
+  addressLine2Field: Joi.string().valid(...Object.values(VISIBILITY_STATUS)).default(VISIBILITY_STATUS.OPTIONAL),
   orderProcessing: Joi.object({
     useShippingAsBillingByDefault: Joi.boolean().default(true),
     enableAddressAutocompletion: Joi.boolean().default(false),

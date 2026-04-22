@@ -70,6 +70,7 @@ const orderSchema = new Schema<IOrder>(
   {
     storeId: { type: Schema.Types.ObjectId, ref: "store", required: true, index: true },
     sourceDomain: { type: String, trim: true, lowercase: true, default: null },
+    websiteId: { type: Schema.Types.ObjectId, ref: "domainSetting", default: null, index: true },
     customerId: { type: Schema.Types.ObjectId, ref: "user", default: null, index: true },
     orderNumber: { type: Number, required: true, min: 1 },
     orderName: { type: String, required: true, trim: true },

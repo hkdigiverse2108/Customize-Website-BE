@@ -56,4 +56,27 @@ export const resolveRequestDomain = (req: RequestLike, explicitDomain?: string |
   return "";
 };
 
+export const resolveWebsiteStore = async (req: any, explicitDomain?: string | null) => {
+  const domain = resolveRequestDomain(req, explicitDomain, { includeHost: true });
+  if (!domain) return { domain: "", website: null, store: null };
+
+  // We need to import models here to avoid circular dependencies if any
+  const { domainSettingModel, storeModel } = require("../database");
+
+  const website = await domainSettingModel.findOne({ domain, isDeleted: false }).populate("themeId");
+  if (website) {
+    const store = await storeModel.findOne({ _id: website.storeId, isDeleted: false });
+    return { domain, website, store };
+  }
+
+  // Fallback to subdomain check (e.g. store1.platform.com)
+  const parts = domain.split('.');
+  if (parts.length > 1) {
+    const store = await storeModel.findOne({ subdomain: parts[0], isDeleted: false });
+    if (store) return { domain, website: null, store };
+  }
+
+  return { domain, website: null, store: null };
+};
+
 export const normalizeDomain = normalizeDomainValue;

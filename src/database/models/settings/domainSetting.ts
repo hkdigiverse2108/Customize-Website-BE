@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
 import { IDomainSetting } from "../../../type/settings/domainSetting";
+import { VERIFICATION_STATUS } from "../../../common";
 
 const domainSettingSchema = new Schema<IDomainSetting>(
   {
@@ -7,7 +8,7 @@ const domainSettingSchema = new Schema<IDomainSetting>(
     themeId: { type: Schema.Types.ObjectId, ref: "theme", default: null },
     domain: { type: String, required: true, trim: true, lowercase: true },
     isPrimary: { type: Boolean, default: false },
-    status: { type: String, enum: ["pending", "verified", "failed"], default: "pending" },
+    status: { type: String, enum: Object.values(VERIFICATION_STATUS), default: VERIFICATION_STATUS.PENDING },
     sslEnabled: { type: Boolean, default: false },
     dnsRecords: [
       {
