@@ -1,8 +1,8 @@
-import { HTTP_STATUS } from "../../common";
-import { deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData } from "../../helper";
+import { getPaginationState, HTTP_STATUS, resolveSortAndFilter } from "../../common";
 import { planModel } from "../../database";
 import { apiResponse } from "../../type";
-import { createPlanSchema, planIdSchema, updatePlanSchema } from "../../validation";
+import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate } from "../../helper";
+import { createPlanSchema, getAllPlansQuerySchema, planIdSchema, updatePlanSchema } from "../../validation";
 
 const buildFeaturesFromLimits = (data: any): string[] => {
   const features: string[] = [];
@@ -28,8 +28,8 @@ const buildFeaturesFromLimits = (data: any): string[] => {
 export const createPlan = async (req, res) => {
   reqInfo(req);
   try {
-    const { error, value } = createPlanSchema.validate(req.body);
-    if (error) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
+    const value = validate(createPlanSchema, req.body, res);
+    if (!value) return;
     const existingPlan = await getFirstMatch(planModel, { name: value.name, duration: value.duration, isDeleted: { $ne: true } }, {}, {});
 
     if (existingPlan) return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("plan"), {}, {}));
@@ -53,11 +53,11 @@ export const updatePlan = async (req, res) => {
   reqInfo(req);
   try {
     const { id, ...updatePayload } = req.body;
-    const { error: idError, value: idValue } = planIdSchema.validate({ id });
-    if (idError) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, idError?.details[0]?.message, {}, {}));
+    const idValue = validate(planIdSchema, { id }, res);
+    if (!idValue) return;
     
-    const { error: bodyError, value: bodyValue } = updatePlanSchema.validate(updatePayload);
-    if (bodyError) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, bodyError?.details[0]?.message, {}, {}));
+    const bodyValue = validate(updatePlanSchema, updatePayload, res);
+    if (!bodyValue) return;
     
     const existingPlan = await getFirstMatch(planModel, { _id: idValue.id, isDeleted: { $ne: true } }, {}, {});
     if (!existingPlan) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Plan"), {}, {}));
@@ -87,8 +87,8 @@ export const updatePlan = async (req, res) => {
 export const deletePlan = async (req, res) => {
   reqInfo(req);
   try {
-    const { error, value } = planIdSchema.validate(req.params);
-    if (error)  return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
+    const value = validate(planIdSchema, req.params, res);
+    if (!value) return;
     const deletedPlan = await deleteData(planModel, { _id: value.id, isDeleted: { $ne: true } }, { isActive: false }, { new: true });
 
     if (!deletedPlan) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Plan"), {}, {}));
@@ -103,8 +103,17 @@ export const deletePlan = async (req, res) => {
 export const getPlans = async (req, res) => {
   reqInfo(req);
   try {
-    const plans = await getData(planModel, { isDeleted: { $ne: true } }, {}, { sort: { createdAt: -1 } });
-    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Plan"), plans, {}));
+    const value = validate(getAllPlansQuerySchema, req.query, res);
+    if (!value) return;
+
+    const { criteria, options, page, limit } = resolveSortAndFilter(value, ["name", "duration", "features"]);
+    const [plans, totalCount] = await Promise.all([
+      getData(planModel, criteria, {}, options),
+      countData(planModel, criteria),
+    ]);
+
+    const pagination = getPaginationState(totalCount, Number(page), Number(limit));
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Plan"), { plans, ...pagination, total_count: totalCount }, {}));
   } catch (error) {
     console.error(error);
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
@@ -114,10 +123,8 @@ export const getPlans = async (req, res) => {
 export const getPlanById = async (req, res) => {
   reqInfo(req);
   try {
-    const { error, value } = planIdSchema.validate(req.params);
-    if (error) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, error?.details[0]?.message, {}, {}));
-    }
+    const value = validate(planIdSchema, req.params, res);
+    if (!value) return;
 
     const plan = await getFirstMatch(planModel, { _id: value.id, isDeleted: { $ne: true } }, {}, {});
 

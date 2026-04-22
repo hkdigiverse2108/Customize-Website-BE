@@ -31,3 +31,11 @@ export const updatePlanSchema = Joi.object({
 export const planIdSchema = Joi.object({
   id: objectId().required(),
 });
+
+export const getAllPlansQuerySchema = Joi.object({
+  page: Joi.number().integer().min(1).optional(),
+  limit: Joi.number().integer().min(1).optional(),
+  search: Joi.string().trim().allow("").optional(),
+  activeFilter: Joi.boolean().optional(),
+  sortFilter: Joi.string().valid("nameAsc", "nameDesc", "newest", "oldest").optional(),
+});

@@ -1,17 +1,8 @@
-import { ACCOUNT_TYPE, HTTP_STATUS } from "../../common";
+import { ACCOUNT_TYPE, HTTP_STATUS, getPaginationState, resolveSortAndFilter } from "../../common";
 import { userModel } from "../../database";
-import { countData, getFirstMatch, reqInfo, responseMessage, validate, verifyStoreAccess } from "../../helper";
+import { countData, getData, getFirstMatch, reqInfo, responseMessage, validate, verifyStoreAccess } from "../../helper";
 import { apiResponse } from "../../type";
-import Joi from "joi";
-import { objectId } from "../../validation/common";
-
-const addCustomerSchema = Joi.object({
-  firstName: Joi.string().trim().required(),
-  lastName: Joi.string().trim().required(),
-  email: Joi.string().trim().email().lowercase().required(),
-  phone: Joi.string().trim().allow("").optional(),
-  storeId: objectId().required(),
-});
+import { addCustomerSchema, getStoreCustomersQuerySchema } from "../../validation";
 
 export const addCustomerByVendor = async (req, res) => {
   reqInfo(req);
@@ -56,17 +47,26 @@ export const addCustomerByVendor = async (req, res) => {
 export const getStoreCustomers = async (req, res) => {
     reqInfo(req);
     try {
-        const { storeId } = req.params;
+        const value = validate(getStoreCustomersQuerySchema, { ...req.query, storeId: req.params.storeId }, res);
+        if (!value) return;
         const loggedInUser = req.headers.user as any;
 
-        if (!await verifyStoreAccess(loggedInUser, storeId)) {
+        if (!await verifyStoreAccess(loggedInUser, value.storeId)) {
             return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
         }
 
-        const customers = await userModel.find({ storeId, role: ACCOUNT_TYPE.USER, isDeleted: { $ne: true } }).sort({ createdAt: -1 });
-        const total = await countData(userModel, { storeId, role: ACCOUNT_TYPE.USER, isDeleted: { $ne: true } });
+        const { criteria, options, page, limit } = resolveSortAndFilter(value, ["firstName", "lastName", "email", "phone"]);
+        criteria.storeId = value.storeId;
+        criteria.role = ACCOUNT_TYPE.USER;
 
-        return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Customers"), { customers, total_count: total }, {}));
+        const [customers, total] = await Promise.all([
+          getData(userModel, criteria, {}, options),
+          countData(userModel, criteria),
+        ]);
+
+        const pagination = getPaginationState(total, Number(page), Number(limit));
+
+        return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Customers"), { customers, ...pagination, total_count: total }, {}));
     } catch (error) {
         console.error(error);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
