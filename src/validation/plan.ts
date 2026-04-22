@@ -7,7 +7,6 @@ export const createPlanSchema = Joi.object({
   price: Joi.number().min(0).required(),
   duration: Joi.string().trim().lowercase().valid(...Object.values(PLAN_DURATION)).required(),
   themeLimit: Joi.number().integer().min(1).default(1),
-  storeLimit: Joi.number().integer().min(1).default(1),
   productLimit: Joi.number().integer().min(-1).default(10), // -1 = unlimited
   blogLimit: Joi.number().integer().min(-1).default(5),
   orderLimit: Joi.number().integer().min(-1).default(50),
@@ -21,7 +20,6 @@ export const updatePlanSchema = Joi.object({
   price: Joi.number().min(0).optional(),
   duration: Joi.string().trim().lowercase().valid(...Object.values(PLAN_DURATION)).optional(),
   themeLimit: Joi.number().integer().min(1).optional(),
-  storeLimit: Joi.number().integer().min(1).optional(),
   productLimit: Joi.number().integer().min(-1).optional(),
   blogLimit: Joi.number().integer().min(-1).optional(),
   orderLimit: Joi.number().integer().min(-1).optional(),

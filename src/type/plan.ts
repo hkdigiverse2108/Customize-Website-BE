@@ -5,7 +5,6 @@ export interface IPlanType {
   name: SUBSCRIPTION_TYPE;
   price: number;
   duration: PLAN_DURATION;
-  storeLimit: number;
   themeLimit: number;
   productLimit: number;
   blogLimit: number;
@@ -22,7 +21,6 @@ export interface ICreatePlanPayload {
   name: SUBSCRIPTION_TYPE;
   price: number;
   duration: PLAN_DURATION;
-  storeLimit: number;
   themeLimit: number;
   productLimit: number;
   blogLimit: number;
@@ -38,7 +36,6 @@ export interface IPlan extends Document {
   name: SUBSCRIPTION_TYPE;
   price: number;
   duration: PLAN_DURATION;
-  storeLimit: number;
   themeLimit: number;
   productLimit: number;
   blogLimit: number;

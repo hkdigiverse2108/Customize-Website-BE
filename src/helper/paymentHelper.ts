@@ -1,5 +1,5 @@
 import { HTTP_STATUS, PAYMENT_FOR, PLAN_DURATION, SUBSCRIPTION_STATUS } from "../common";
-import { orderModel, planModel, themeModel, userModel } from "../database";
+import { orderModel, planModel, storeModel, themeModel, userModel } from "../database";
 import { checkThemeLimit, getFirstMatch, updateData, verifyStoreAccess, validatePlanSwitch } from "../helper";
 import { apiResponse } from "../type";
 
@@ -38,11 +38,22 @@ export const resolvePaymentContext = async (value: any, user: any, res: any) => 
             return { errorResponse: res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, "Access denied to store", {}, {})) };
         }
 
+        const store: any = await getFirstMatch(storeModel, { _id: value.storeId, isDeleted: { $ne: true } }, {}, {});
+        if (!store) {
+            return { errorResponse: res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Store not found", {}, {})) };
+        }
+
         const theme: any = await getFirstMatch(themeModel, { _id: value.themeId, isDeleted: { $ne: true } }, {}, {});
         if (!theme) {
             return { errorResponse: res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Theme not found", {}, {})) };
         }
-        const themeCheck = await checkThemeLimit(user, [value.themeId]);
+
+        const alreadyOwned = Array.isArray(store.themeIds) && store.themeIds.some((id: any) => String(id) === String(value.themeId));
+        if (alreadyOwned) {
+            return { errorResponse: res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, "This store already owns this theme.", {}, {})) };
+        }
+
+        const themeCheck = await checkThemeLimit(user, [value.themeId], { storeId: value.storeId, mode: "append" });
         if (themeCheck.allowed === false) {
             return { errorResponse: res.status(HTTP_STATUS.PAYMENT_REQUIRED).json(apiResponse(HTTP_STATUS.PAYMENT_REQUIRED, themeCheck.message, themeCheck, {})) };
         }
@@ -78,9 +89,10 @@ export const applySubscription = async (userId: string, planId: string) => {
 };
 
 export const grantTheme = async (storeId: string, themeId: string) => {
-    const { storeModel } = await import("../database");
+    if (!storeId || !themeId) return null;
+
     return await storeModel.updateOne(
-        { _id: storeId }, 
+        { _id: storeId, isDeleted: { $ne: true } }, 
         { $addToSet: { themeIds: themeId } }
     );
 };

@@ -93,7 +93,7 @@ export const phonePeCallback = async (req, res) => {
         }
 
         if (status === PAYMENT_STATUS.SUCCESS && existingPayment.themeId) {
-            await grantTheme(existingPayment.storeId || existingPayment.userId, existingPayment.themeId);
+            await grantTheme(existingPayment.storeId, existingPayment.themeId);
         }
 
         return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Processed", updated, {}));
@@ -118,4 +118,3 @@ const getPhonePeAccessToken = async (setting: any) => {
     const resp = await axios.post(PHONEPE_AUTH_URL, params.toString(), { headers: { "Content-Type": "application/x-www-form-urlencoded" } });
     return resp.data.access_token;
 };
-

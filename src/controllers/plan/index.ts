@@ -7,9 +7,6 @@ import { createPlanSchema, planIdSchema, updatePlanSchema } from "../../validati
 const buildFeaturesFromLimits = (data: any): string[] => {
   const features: string[] = [];
 
-  if (data.storeLimit !== undefined)
-    features.push(data.storeLimit === -1 ? "Unlimited Stores" : `${data.storeLimit} Store${data.storeLimit > 1 ? 's' : ''}`);
-
   if (data.productLimit !== undefined)
     features.push(data.productLimit === -1 ? "Unlimited Products" : `${data.productLimit} Products`);
 

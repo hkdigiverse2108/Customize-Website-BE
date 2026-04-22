@@ -1,5 +1,5 @@
 import { HTTP_STATUS, SUBSCRIPTION_STATUS } from "../common";
-import { productModel, blogModel, orderModel, domainSettingModel, themeSettingModel } from "../database";
+import { productModel, blogModel, orderModel, domainSettingModel, storeModel } from "../database";
 import { apiResponse } from "../type";
 
 export const checkPlanLimit = (resourceType: 'products' | 'blogs' | 'orders' | 'domains' | 'themes') => {
@@ -46,7 +46,10 @@ export const checkPlanLimit = (resourceType: 'products' | 'blogs' | 'orders' | '
           }
           return next();
         case 'themes':
-          currentCount = await themeSettingModel.countDocuments({ storeId, isDeleted: false });
+          const storeForThemes: any = await storeModel.findOne({ _id: storeId, isDeleted: { $ne: true } }, { themeIds: 1 }, { lean: true });
+          currentCount = Array.isArray(storeForThemes?.themeIds)
+            ? new Set(storeForThemes.themeIds.map((themeId: any) => String(themeId))).size
+            : 0;
           limit = plan.themeLimit;
           break;
       }

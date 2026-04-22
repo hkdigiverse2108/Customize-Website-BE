@@ -33,7 +33,7 @@ export const createStore = async (req, res) => {
     if (payload?.customDomain && await checkFieldDuplicate(storeModel, "customDomain", payload.customDomain))
       return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("custom domain"), {}, {}));
 
-    const themeCheck = await checkThemeLimit(loggedInUser, payload.themeIds);
+    const themeCheck = await checkThemeLimit(loggedInUser, payload.themeIds, { mode: "replace" });
     if (!themeCheck.allowed) return res.status(HTTP_STATUS.PAYMENT_REQUIRED).json(apiResponse(HTTP_STATUS.PAYMENT_REQUIRED, themeCheck.message, themeCheck, {}));
 
     const createdStore = await new storeModel(payload).save();
@@ -73,7 +73,7 @@ export const updateStore = async (req, res) => {
       return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("subdomain"), {}, {}));
 
     if (payload.themeIds) {
-      const themeCheck = await checkThemeLimit(loggedInUser, payload.themeIds);
+      const themeCheck = await checkThemeLimit(loggedInUser, payload.themeIds, { storeId: idValue.id, mode: "replace" });
       if (!themeCheck.allowed) return res.status(HTTP_STATUS.PAYMENT_REQUIRED).json(apiResponse(HTTP_STATUS.PAYMENT_REQUIRED, themeCheck.message, themeCheck, {}));
     }
 

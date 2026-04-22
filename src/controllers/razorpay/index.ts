@@ -79,7 +79,7 @@ export const verifyRazorpaySubscriptionPayment = async (req, res) => {
     }
 
     if (existingPayment.themeId) {
-        await grantTheme(existingPayment.storeId || existingPayment.userId, existingPayment.themeId);
+        await grantTheme(existingPayment.storeId, existingPayment.themeId);
     }
 
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Verified", { verified: true }, {}));
@@ -93,4 +93,3 @@ export const verifyRazorpaySubscriptionPayment = async (req, res) => {
 
 const resolveRazorpaySetting = async () => 
   getFirstMatch(paymentSettingModel, { isDeleted: { $ne: true }, razorpayApiKey: { $exists: true }, isRazorpay: true }, {}, { sort: { updatedAt: -1 } });
-
