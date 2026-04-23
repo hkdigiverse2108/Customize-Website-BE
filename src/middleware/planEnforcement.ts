@@ -1,4 +1,4 @@
-import { HTTP_STATUS, SUBSCRIPTION_STATUS } from "../common";
+import { HTTP_STATUS, SUBSCRIPTION_STATUS, ACCOUNT_TYPE } from "../common";
 import { userLimitModel } from "../database";
 import { apiResponse } from "../type";
 import { syncUserUsage } from "../helper/limitHelper";
@@ -12,7 +12,7 @@ export const checkPlanLimit = (resourceType: 'products' | 'blogs' | 'orders' | '
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(apiResponse(HTTP_STATUS.UNAUTHORIZED, "User not found.", {}, {}));
       }
 
-      if (user.role === 'admin') return next();
+      if (user.role === ACCOUNT_TYPE.ADMIN) return next();
 
       const { status } = user.subscription;
       
