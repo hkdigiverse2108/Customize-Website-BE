@@ -27,9 +27,6 @@ const verifyGoogleIdToken = async (token: string) => {
       payload = response?.data || {};
     }
 
-    console.log("--- Google Token Payload ---");
-    console.log(JSON.stringify(payload, null, 2));
-
     const email = String(payload?.email || "").trim().toLowerCase();
     const firstName = String(payload?.given_name || payload?.first_name || "").trim();
     const lastName = String(payload?.family_name || payload?.last_name || "").trim();
@@ -44,8 +41,7 @@ const verifyGoogleIdToken = async (token: string) => {
     if (!isAccessToken) {
       const audience = String(payload?.aud || "").trim();
       const googleClientId = resolveGoogleClientId();
-      console.log("Expected Client ID:", googleClientId);
-      console.log("Token Audience:", audience);
+    
 
       if (!googleClientId) throw new Error("GOOGLE_CLIENT_ID_MISSING");
       if (audience !== googleClientId) {
