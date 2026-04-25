@@ -69,7 +69,8 @@ export const updatePlan = async (req, res) => {
     if (duplicatePlan) return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("plan"), {}, {}));
 
     // Rebuild features from merged limits (existing + incoming)
-    const mergedData = { ...existingPlan.toObject(), ...bodyValue };
+    const existingPlanData = existingPlan?.toObject?.() ?? existingPlan;
+    const mergedData = { ...existingPlanData, ...bodyValue };
     const autoFeatures = buildFeaturesFromLimits(mergedData);
     const manualFeatures = (bodyValue.features || []).filter(
       (f: string) => !autoFeatures.some(af => af.toLowerCase().includes(f.toLowerCase()))
@@ -138,5 +139,3 @@ export const getPlanById = async (req, res) => {
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
   }
 };
-
-
