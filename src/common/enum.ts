@@ -10,6 +10,12 @@ export enum SUBSCRIPTION_TYPE {
     PRO = "pro"
 }
 
+export enum THEME_TYPE {
+    FREE = "free",
+    BASIC = "basic",
+    PREMIUM = "premium"
+}
+
 export enum SUBSCRIPTION_STATUS {
     ACTIVE = "active",
     EXPIRED = "expired",
@@ -229,6 +235,16 @@ export enum PAGE_TYPE {
     PRODUCT = "product",
     CATEGORY = "category",
     CUSTOM = "custom"
+}
+
+export enum THEME_SUPPORTED_PAGE {
+    HOME = "home",
+    PRODUCT = "product",
+    CATEGORY = "category",
+    CART = "cart",
+    CHECKOUT = "checkout",
+    CUSTOM = "custom",
+    COLLECTION = "collection"
 }
 
 export enum PAGE_VISIBILITY {

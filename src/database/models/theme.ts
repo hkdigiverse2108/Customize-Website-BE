@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { ITheme, THEME_SUPPORTED_PAGES } from "../../type/theme";
+import { ITheme, THEME_SUPPORTED_PAGES, THEME_TYPES } from "../../type/theme";
 
 const themeStylesSchema = new Schema(
   {
@@ -48,6 +48,7 @@ const themeSchema = new Schema<ITheme>(
     previewImage: { type: String, default: "", trim: true },
     category: { type: String, default: "", trim: true },
     tags: { type: [String], default: [] },
+    type: { type: String, enum: THEME_TYPES, default: "free", trim: true, lowercase: true },
     isPremium: { type: Boolean, default: false },
     price: { type: Number, default: 0, min: 0 },
     storeId: { type: Schema.Types.ObjectId, ref: "store", default: null },
@@ -77,6 +78,7 @@ themeSchema.index({ slug: 1 }, { unique: true, partialFilterExpression: { isDele
 themeSchema.index({ storeId: 1, isDeleted: 1 });
 themeSchema.index({ createdBy: 1, isDeleted: 1 });
 themeSchema.index({ supportedPages: 1, isDeleted: 1 });
+themeSchema.index({ type: 1, isDeleted: 1 });
 themeSchema.index({ isPremium: 1, isDeleted: 1 });
 
 export const themeModel = model<ITheme>("theme", themeSchema);

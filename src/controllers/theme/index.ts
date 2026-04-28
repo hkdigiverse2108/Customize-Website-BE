@@ -2,8 +2,26 @@ import { ACCOUNT_TYPE, getPaginationState, HTTP_STATUS, resolveSortAndFilter } f
 import { themeModel } from "../../database";
 import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, checkFieldDuplicate } from "../../helper";
 import { apiResponse } from "../../type";
-import { THEME_SUPPORTED_PAGES } from "../../type/theme";
+import { THEME_SUPPORTED_PAGES, THEME_TYPES } from "../../type/theme";
 import { createThemeSchema, getAllThemesQuerySchema, themeIdSchema, updateThemeSchema } from "../../validation";
+
+const normalizeThemeType = (payload: any) => {
+  if (!payload || typeof payload !== "object") return;
+
+  const hasType = Object.prototype.hasOwnProperty.call(payload, "type");
+  const hasIsPremium = Object.prototype.hasOwnProperty.call(payload, "isPremium");
+
+  if (hasType) {
+    const normalizedType = String(payload.type || "").trim().toLowerCase();
+    payload.type = THEME_TYPES.includes(normalizedType as any) ? normalizedType : "free";
+    payload.isPremium = payload.type !== "free";
+    return;
+  }
+
+  if (hasIsPremium) {
+    payload.type = payload.isPremium ? "premium" : "free";
+  }
+};
 
 const normalizeThemeSupportedPages = (payload: any) => {
   const hasSupportedPages = Object.prototype.hasOwnProperty.call(payload, "supportedPages");
@@ -33,6 +51,7 @@ export const createTheme = async (req, res) => {
     const payload: any = { ...value };
 
     if (!payload.createdBy && loggedInUser?.role === ACCOUNT_TYPE.ADMIN) payload.createdBy = loggedInUser?._id;
+    normalizeThemeType(payload);
     normalizeThemeSupportedPages(payload);
 
     if (await checkFieldDuplicate(themeModel, "slug", payload.slug)) {
@@ -64,6 +83,7 @@ export const updateTheme = async (req, res) => {
         return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
     }
 
+    normalizeThemeType(bodyValue);
     normalizeThemeSupportedPages(bodyValue);
 
     const updatedTheme = await updateData(themeModel, { _id: idValue.id, isDeleted: { $ne: true } }, bodyValue, {});
@@ -103,6 +123,7 @@ export const getThemes = async (req, res) => {
     if (value?.category) criteria.category = value.category;
     if (value?.tag) criteria.tags = { $in: [value.tag] };
     if (value?.supportedPage) criteria.supportedPages = { $in: [value.supportedPage] };
+    if (value?.typeFilter) criteria.type = value.typeFilter;
     if (value?.createdBy) criteria.createdBy = value.createdBy;
 
     const loggedInUser = req.headers.user as any;

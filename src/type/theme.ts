@@ -1,9 +1,12 @@
 import { Document, Types } from "mongoose";
+import { THEME_SUPPORTED_PAGE as THEME_SUPPORTED_PAGE_ENUM, THEME_TYPE as THEME_TYPE_ENUM } from "../common/enum";
 
-export const THEME_SUPPORTED_PAGES = ["home", "product", "category", "cart", "checkout", "custom", "collection"] as const;
-export type THEME_SUPPORTED_PAGE = (typeof THEME_SUPPORTED_PAGES)[number];
 export const THEME_GLOBAL_LAYOUT_SECTIONS = ["header", "footer"] as const;
 export type THEME_GLOBAL_LAYOUT_SECTION = (typeof THEME_GLOBAL_LAYOUT_SECTIONS)[number];
+export type THEME_SUPPORTED_PAGE = `${THEME_SUPPORTED_PAGE_ENUM}`;
+export const THEME_SUPPORTED_PAGES = Object.values(THEME_SUPPORTED_PAGE_ENUM) as THEME_SUPPORTED_PAGE[];
+export type THEME_TYPE = `${THEME_TYPE_ENUM}`;
+export const THEME_TYPES = Object.values(THEME_TYPE_ENUM) as THEME_TYPE[];
 
 export interface IThemeStyles {
   colors: {
@@ -62,6 +65,7 @@ export interface IThemeType {
   previewImage: string;
   category: string;
   tags: string[];
+  type: THEME_TYPE;
   isPremium: boolean;
   price: number;
   styles: IThemeStyles;

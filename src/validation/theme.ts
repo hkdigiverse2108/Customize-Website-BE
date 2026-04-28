@@ -1,6 +1,6 @@
 import Joi from "joi";
 import { objectId } from "./common";
-import { THEME_SUPPORTED_PAGES } from "../type/theme";
+import { THEME_SUPPORTED_PAGES, THEME_TYPES } from "../type/theme";
 
 const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -80,6 +80,7 @@ const themeSharedFields = {
   demoUrl: Joi.string().trim().uri().allow("").optional(),
   category: Joi.string().trim().allow("").optional(),
   tags: Joi.array().items(Joi.string().trim().min(1)).optional(),
+  type: Joi.string().trim().lowercase().valid(...THEME_TYPES).optional(),
   storeId: objectId().allow(null).optional(),
   isGlobal: Joi.boolean().optional(),
   isPremium: Joi.boolean().optional(),
@@ -134,6 +135,7 @@ export const getAllThemesQuerySchema = Joi.object({
     .lowercase()
     .valid(...THEME_SUPPORTED_PAGES)
     .optional(),
+  typeFilter: Joi.string().trim().lowercase().valid(...THEME_TYPES).optional(),
   createdBy: objectId().optional(),
   sortFilter: Joi.string().valid("nameAsc", "nameDesc", "newest", "oldest").optional(),
   startDateFilter: Joi.date().optional(),
