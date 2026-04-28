@@ -23,12 +23,6 @@ export const addressSchema = Joi.object({
   landmark: Joi.string().trim().allow("").optional(),
 });
 
-export const themeConfigSchema = Joi.object({
-  colors: Joi.object().unknown(true).optional(),
-  fonts: Joi.object().unknown(true).optional(),
-  spacing: Joi.object().unknown(true).optional(),
-}).unknown(true).optional();
-
 export const createStoreSchema = Joi.object({
   name: Joi.string().trim().min(2).max(120).required(),
   slug: Joi.string().trim().lowercase().pattern(slugRegex).required(),
@@ -36,7 +30,6 @@ export const createStoreSchema = Joi.object({
   logo: Joi.string().trim().allow(null, "").optional(),
   banner: Joi.string().trim().allow(null, "").optional(),
   themeIds: Joi.array().items(objectId()).unique().optional(),
-  themeConfig: themeConfigSchema,
   userId: objectId().optional(),
   subdomain: Joi.string().trim().lowercase().pattern(subdomainRegex).optional(),
   customDomain: Joi.string().trim().lowercase().pattern(domainRegex).allow(null, "").optional(),
@@ -65,7 +58,6 @@ export const updateStoreSchema = Joi.object({
   logo: Joi.string().trim().allow(null, "").optional(),
   banner: Joi.string().trim().allow(null, "").optional(),
   themeIds: Joi.array().items(objectId()).unique().optional(),
-  themeConfig: themeConfigSchema,
   userId: objectId().optional(),
   subdomain: Joi.string().trim().lowercase().pattern(subdomainRegex).optional(),
   customDomain: Joi.string().trim().lowercase().pattern(domainRegex).allow(null, "").optional(),

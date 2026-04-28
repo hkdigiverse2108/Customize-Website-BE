@@ -28,11 +28,6 @@ const storeSchema = new Schema<IStore>(
     logo: { type: String, default: null, trim: true },
     banner: { type: String, default: null, trim: true },
     themeIds: [{ type: Schema.Types.ObjectId, ref: "theme", required: true, default: [] }],
-    themeConfig: {
-      colors: { type: Schema.Types.Mixed, default: {} },
-      fonts: { type: Schema.Types.Mixed, default: {} },
-      spacing: { type: Schema.Types.Mixed, default: {} },
-    },
     userId: { type: Schema.Types.ObjectId, ref: "user", required: true },
     subdomain: { type: String, required: true, trim: true, lowercase: true },
     customDomain: { type: String, default: null, trim: true, lowercase: true },
