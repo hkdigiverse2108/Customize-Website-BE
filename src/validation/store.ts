@@ -2,11 +2,6 @@ import Joi from "joi";
 import { KYC_DOCUMENT_TYPE, KYC_STATUS } from "../common";
 import { objectId } from "./common";
 
-const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const domainRegex = /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
-const subdomainRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
-
 const externalScriptSchema = Joi.object({
   name: Joi.string().trim().allow("").optional(),
   src: Joi.string().trim().allow("").optional(),
@@ -40,21 +35,21 @@ export const addressSchema = Joi.object({
 
 export const createStoreSchema = Joi.object({
   name: Joi.string().trim().min(2).max(120).required(),
-  slug: Joi.string().trim().lowercase().pattern(slugRegex).required(),
+  slug: Joi.string().trim().lowercase().required(),
   description: Joi.string().trim().allow("").optional(),
   logo: Joi.string().trim().allow(null, "").optional(),
   banner: Joi.string().trim().allow(null, "").optional(),
   themeIds: Joi.array().items(objectId()).unique().optional(),
   userId: objectId().optional(),
-  subdomain: Joi.string().trim().lowercase().pattern(subdomainRegex).required(),
-  customDomain: Joi.string().trim().lowercase().pattern(domainRegex).allow(null, "").optional(),
+  subdomain: Joi.string().trim().lowercase().required(),
+  customDomain: Joi.string().trim().lowercase().allow(null, "").optional(),
   domainVerified: Joi.boolean().optional(),
   isActive: Joi.boolean().optional(),
   isPublished: Joi.boolean().optional(),
   businessName: Joi.string().trim().min(2).max(150).required(),
   businessType: Joi.string().trim().required(),
   gstNumber: Joi.string().trim().allow("").optional(),
-  panNumber: Joi.string().trim().uppercase().pattern(panRegex).allow("").optional(),
+  panNumber: Joi.string().trim().uppercase().allow("").optional(),
   kycStatus: Joi.string().trim().lowercase().valid(...Object.values(KYC_STATUS)).optional(),
   kycDocuments: Joi.array().items(kycDocumentSchema).optional(),
   address: addressSchema.optional(),
@@ -69,21 +64,21 @@ export const createStoreSchema = Joi.object({
 
 export const updateStoreSchema = Joi.object({
   name: Joi.string().trim().min(2).max(120).optional(),
-  slug: Joi.string().trim().lowercase().pattern(slugRegex).optional(),
+  slug: Joi.string().trim().lowercase().optional(),
   description: Joi.string().trim().allow("").optional(),
   logo: Joi.string().trim().allow(null, "").optional(),
   banner: Joi.string().trim().allow(null, "").optional(),
   themeIds: Joi.array().items(objectId()).unique().optional(),
   userId: objectId().optional(),
-  subdomain: Joi.string().trim().lowercase().pattern(subdomainRegex).optional(),
-  customDomain: Joi.string().trim().lowercase().pattern(domainRegex).allow(null, "").optional(),
+  subdomain: Joi.string().trim().lowercase().optional(),
+  customDomain: Joi.string().trim().lowercase().allow(null, "").optional(),
   domainVerified: Joi.boolean().optional(),
   isActive: Joi.boolean().optional(),
   isPublished: Joi.boolean().optional(),
   businessName: Joi.string().trim().min(2).max(150).optional(),
   businessType: Joi.string().trim().optional(),
   gstNumber: Joi.string().trim().allow("").optional(),
-  panNumber: Joi.string().trim().uppercase().pattern(panRegex).allow("").optional(),
+  panNumber: Joi.string().trim().uppercase().allow("").optional(),
   kycStatus: Joi.string().trim().lowercase().valid(...Object.values(KYC_STATUS)).optional(),
   kycDocuments: Joi.array().items(kycDocumentSchema).optional(),
   address: addressSchema.optional(),
