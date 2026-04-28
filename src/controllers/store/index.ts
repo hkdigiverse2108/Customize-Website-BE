@@ -114,7 +114,6 @@ export const getStores = async (req, res) => {
     const { criteria, options, page, limit } = resolveSortAndFilter(value, ["name", "slug", "businessName", "email", "phone"]);
 
     if (value?.isPublishedFilter !== undefined) criteria.isPublished = value.isPublishedFilter;
-    if (value?.isBlockedFilter !== undefined) criteria.isBlocked = value.isBlockedFilter;
     if (value?.kycStatusFilter) criteria.kycStatus = value.kycStatusFilter;
 
     const loggedInUser = req.headers.user as any;

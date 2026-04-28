@@ -45,7 +45,6 @@ export interface IStoreType {
   domainVerified: boolean;
   isActive: boolean;
   isPublished: boolean;
-  isBlocked: boolean;
   businessName: string;
   businessType: string;
   gstNumber: string;
@@ -78,7 +77,6 @@ export interface ICreateStorePayload {
   domainVerified?: boolean;
   isActive?: boolean;
   isPublished?: boolean;
-  isBlocked?: boolean;
   businessName: string;
   businessType: string;
   gstNumber?: string;
@@ -88,6 +86,8 @@ export interface ICreateStorePayload {
   address: IStoreAddress;
   email: string;
   phone: string;
+  externalScripts?: IStoreExternalScript[];
+  socialLinks?: IStoreSocialLinks;
 }
 
 export interface IUpdateStorePayload extends Partial<ICreateStorePayload> {}
@@ -105,7 +105,6 @@ export interface IStore extends Document {
   domainVerified: boolean;
   isActive: boolean;
   isPublished: boolean;
-  isBlocked: boolean;
   businessName: string;
   businessType: string;
   gstNumber: string;

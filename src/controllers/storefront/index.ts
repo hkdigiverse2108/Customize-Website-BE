@@ -1,9 +1,9 @@
 import { HTTP_STATUS } from "../../common";
-import { 
-  componentModel, 
+import {
+  componentModel,
   domainSettingModel,
-  storeModel, 
-  storeSettingModel, 
+  storeModel,
+  storeSettingModel,
   themeSettingModel, 
   seoSettingModel, 
   visualSettingModel, 
@@ -11,12 +11,13 @@ import {
 } from "../../database";
 import { cacheService, getFirstMatch, getData, reqInfo, responseMessage, resolveRequestDomain, trackEvent, validate } from "../../helper";
 import { apiResponse } from "../../type";
+import { THEME_GLOBAL_LAYOUT_SECTIONS, THEME_SUPPORTED_PAGES } from "../../type/theme";
 import Joi from "joi";
 
 const storefrontPageQuerySchema = Joi.object({
   slug: Joi.string().trim().lowercase().optional(),
   domain: Joi.string().trim().lowercase().optional(),
-  page: Joi.string().valid("home", "product", "cart", "collection").default("home"),
+  page: Joi.string().valid(...THEME_SUPPORTED_PAGES).default("home"),
   isPreview: Joi.boolean().default(false), // Preview mode for builders
 }).custom((value, helpers) => {
   if (!value.slug && !value.domain) {
@@ -38,6 +39,11 @@ const getThemeSettingForStore = async (storeId: string, themeId?: string | null)
 
   return themeSettingModel.findOne(filter).populate("themeId");
 };
+
+const sortLayoutItems = (items: any[] = []) =>
+  [...items].sort((a, b) => Number(a?.order ?? 0) - Number(b?.order ?? 0));
+
+const getLayoutItems = (layout: any, key: string) => sortLayoutItems(Array.isArray(layout?.[key]) ? layout[key] : []);
 
 const resolveStoreWebsite = async (req: any, val: any) => {
   const requestDomain = resolveRequestDomain(req, val.domain, { includeHost: true });
@@ -100,22 +106,22 @@ export const getStorefrontPage = async (req, res) => {
     ]);
     
     // 3. Get Layout Structure (Live vs Draft)
-    let pageLayout = [];
-    if (isPreview && theme.draftLayoutJSON) {
-        pageLayout = theme.draftLayoutJSON[val.page] || [];
-    } else {
-        pageLayout = (theme.layoutJSON && theme.layoutJSON[val.page]) || [];
-    }
-    
-    if (!pageLayout.length) {
-      return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Page empty", { 
-        themeStyles: theme.styles, 
+    const layoutSource = isPreview && theme.draftLayoutJSON ? theme.draftLayoutJSON : theme.layoutJSON;
+    const [headerSection, footerSection] = THEME_GLOBAL_LAYOUT_SECTIONS;
+    const headerLayout = getLayoutItems(layoutSource, headerSection);
+    const pageLayout = getLayoutItems(layoutSource, val.page);
+    const footerLayout = getLayoutItems(layoutSource, footerSection);
+    const layoutItems = [...headerLayout, ...pageLayout, ...footerLayout];
+
+    if (!layoutItems.length) {
+      return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Page empty", {
+        themeStyles: theme.styles,
         themeConfig: themeSetting.themeConfig || {},
-        components: [] 
+        components: []
       }, {}));
     }
 
-    const componentIds = pageLayout.map((item: any) => item.componentId);
+    const componentIds = [...new Set(layoutItems.map((item: any) => item.componentId).filter(Boolean))];
 
     // 4. Fetch Base Components & Vendor Overrides
     const [baseCompData, overrideData]: [any[], any[]] = await Promise.all([
@@ -126,7 +132,7 @@ export const getStorefrontPage = async (req, res) => {
     const overrideMap = new Map(overrideData.map((o: any) => [String(o.sourceComponentId), o]));
 
     // 5. Resolve Final Payload
-    const finalComponents = pageLayout.map((layoutItem: any) => {
+    const resolveLayoutItem = (layoutItem: any) => {
       const baseComp = baseCompData.find((c: any) => String(c._id) === String(layoutItem.componentId));
       const overrideComp = overrideMap.get(String(layoutItem.componentId));
 
@@ -149,7 +155,13 @@ export const getStorefrontPage = async (req, res) => {
           ...(layoutItem.config || {})
         }
       };
-    }).filter(Boolean);
+    };
+
+    const finalComponents = [
+      ...headerLayout.map(resolveLayoutItem),
+      ...pageLayout.map(resolveLayoutItem),
+      ...footerLayout.map(resolveLayoutItem),
+    ].filter(Boolean);
 
     const result = {
       store: {
@@ -188,7 +200,7 @@ export const getStorefrontPage = async (req, res) => {
         passwordProtection: visualSetting?.passwordProtection || { enabled: false },
       },
       socialLinks: storeSetting?.socialLinks || store.socialLinks || {},
-      components: finalComponents.sort((a: any, b: any) => a.order - b.order),
+      components: finalComponents,
       isPreview
     };
 

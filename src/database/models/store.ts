@@ -34,7 +34,6 @@ const storeSchema = new Schema<IStore>(
     domainVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     isPublished: { type: Boolean, default: false },
-    isBlocked: { type: Boolean, default: false },
     businessName: { type: String, required: true, trim: true },
     businessType: { type: String, required: true, trim: true },
     gstNumber: { type: String, default: "", trim: true },
