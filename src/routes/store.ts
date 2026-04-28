@@ -5,7 +5,7 @@ import { allowRoles, requireAuth } from "../middleware";
 
 const router = Router();
 
-router.post("/", requireAuth, allowRoles(ACCOUNT_TYPE.VENDOR), storeController.createStore);
+router.post("/", requireAuth, allowRoles(ACCOUNT_TYPE.VENDOR,ACCOUNT_TYPE.ADMIN), storeController.createStore);
 router.put("/", requireAuth, allowRoles(ACCOUNT_TYPE.ADMIN, ACCOUNT_TYPE.VENDOR), storeController.updateStore);
 router.delete("/:id", requireAuth, allowRoles(ACCOUNT_TYPE.ADMIN), storeController.deleteStore);
 router.get("/", requireAuth, allowRoles(ACCOUNT_TYPE.ADMIN), storeController.getStores);
