@@ -8,11 +8,14 @@ const router = Router();
 const upload = multer({ storage: fileStorage, fileFilter }).fields([
   { name: "images", maxCount: 20 },
   { name: "pdf", maxCount: 20 },
+  { name: "file", maxCount: 20 },
+  { name: "files", maxCount: 20 },
 ]);
 
 router.post("/", upload, uploadController.uploadFile);
 router.delete("/delete", uploadController.deleteUploadedFile);
 router.get("/images", uploadController.getAllImages);
 router.get("/pdfs", uploadController.getAllPdfs);
+router.get("/files", uploadController.getAllFiles);
 
 export { router as uploadRouter };
