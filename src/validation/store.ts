@@ -2,13 +2,6 @@ import Joi from "joi";
 import { KYC_DOCUMENT_TYPE, KYC_STATUS } from "../common";
 import { objectId } from "./common";
 
-const externalScriptSchema = Joi.object({
-  name: Joi.string().trim().allow("").optional(),
-  src: Joi.string().trim().allow("").optional(),
-  position: Joi.string().trim().lowercase().valid("head", "body_start", "body_end").optional(),
-  isActive: Joi.boolean().optional(),
-}).unknown(true);
-
 const socialLinksSchema = Joi.object({
   facebook: Joi.string().trim().allow("").optional(),
   instagram: Joi.string().trim().allow("").optional(),
@@ -51,9 +44,8 @@ export const createStoreSchema = Joi.object({
   gstNumber: Joi.string().trim().allow("").optional(),
   panNumber: Joi.string().trim().uppercase().allow("").optional(),
   kycStatus: Joi.string().trim().lowercase().valid(...Object.values(KYC_STATUS)).optional(),
-  kycDocuments: Joi.array().items(kycDocumentSchema).optional(),
+  kycDocuments: kycDocumentSchema.optional(),
   address: addressSchema.optional(),
-  externalScripts: Joi.array().items(externalScriptSchema).optional(),
   socialLinks: socialLinksSchema.optional(),
   email: Joi.string().trim().email().lowercase().required(),
   phone: Joi.string().trim().min(6).max(20).required(),
@@ -80,9 +72,8 @@ export const updateStoreSchema = Joi.object({
   gstNumber: Joi.string().trim().allow("").optional(),
   panNumber: Joi.string().trim().uppercase().allow("").optional(),
   kycStatus: Joi.string().trim().lowercase().valid(...Object.values(KYC_STATUS)).optional(),
-  kycDocuments: Joi.array().items(kycDocumentSchema).optional(),
+  kycDocuments: kycDocumentSchema.optional(),
   address: addressSchema.optional(),
-  externalScripts: Joi.array().items(externalScriptSchema).optional(),
   socialLinks: socialLinksSchema.optional(),
   email: Joi.string().trim().email().lowercase().optional(),
   phone: Joi.string().trim().min(6).max(20).optional(),

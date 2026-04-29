@@ -39,7 +39,7 @@ const storeSchema = new Schema<IStore>(
     gstNumber: { type: String, default: "", trim: true },
     panNumber: { type: String, default: "", trim: true, uppercase: true },
     kycStatus: { type: String, enum: Object.values(KYC_STATUS), default: KYC_STATUS.PENDING },
-    kycDocuments: { type: [storeKycDocumentSchema], default: [] },
+    kycDocuments: { type: storeKycDocumentSchema, default: null },
     address: { type: storeAddressSchema, default: () => ({}) },
     email: { type: String, required: true, trim: true, lowercase: true },
     phone: { type: String, required: true, trim: true },
@@ -47,13 +47,6 @@ const storeSchema = new Schema<IStore>(
     totalOrders: { type: Number, default: 0, min: 0 },
     totalRevenue: { type: Number, default: 0, min: 0 },
     
-    // 🌐 Ecosystem & Marketing (Shopify style)
-    externalScripts: [{
-      name: String,
-      src: String,
-      position: { type: String, enum: ['head', 'body_start', 'body_end'], default: 'head' },
-      isActive: { type: Boolean, default: true }
-    }],
     socialLinks: {
       facebook: String,
       instagram: String,

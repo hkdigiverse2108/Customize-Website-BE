@@ -1,13 +1,6 @@
 import { Document, Types } from "mongoose";
 import { KYC_DOCUMENT_TYPE, KYC_STATUS } from "../common";
 
-export interface IStoreExternalScript {
-  name: string;
-  src: string;
-  position: 'head' | 'body_start' | 'body_end';
-  isActive: boolean;
-}
-
 export interface IStoreSocialLinks {
   facebook?: string;
   instagram?: string;
@@ -50,14 +43,13 @@ export interface IStoreType {
   gstNumber: string;
   panNumber: string;
   kycStatus: KYC_STATUS;
-  kycDocuments: IStoreKycDocument[];
+  kycDocuments: IStoreKycDocument;
   address: IStoreAddress;
   email: string;
   phone: string;
   totalProducts: number;
   totalOrders: number;
   totalRevenue: number;
-  externalScripts: IStoreExternalScript[];
   socialLinks: IStoreSocialLinks;
   isDeleted: boolean;
   createdAt: Date;
@@ -82,11 +74,10 @@ export interface ICreateStorePayload {
   gstNumber?: string;
   panNumber?: string;
   kycStatus?: KYC_STATUS;
-  kycDocuments?: IStoreKycDocument[];
+  kycDocuments?: IStoreKycDocument;
   address: IStoreAddress;
   email: string;
   phone: string;
-  externalScripts?: IStoreExternalScript[];
   socialLinks?: IStoreSocialLinks;
 }
 
@@ -96,7 +87,7 @@ export interface IStore extends Document {
   name: string;
   slug: string;
   description: string;
-  logo: string | null;
+  logo: string | null ;
   banner: string | null;
   themeIds: (Types.ObjectId | string)[];
   userId: Types.ObjectId | string;
@@ -110,14 +101,13 @@ export interface IStore extends Document {
   gstNumber: string;
   panNumber: string;
   kycStatus: KYC_STATUS;
-  kycDocuments: IStoreKycDocument[];
+  kycDocuments: IStoreKycDocument;
   address: IStoreAddress;
   email: string;
   phone: string;
   totalProducts: number;
   totalOrders: number;
   totalRevenue: number;
-  externalScripts: IStoreExternalScript[];
   socialLinks: IStoreSocialLinks;
   isDeleted: boolean;
   createdAt: Date;

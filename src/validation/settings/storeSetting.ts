@@ -7,6 +7,7 @@ export const upsertStoreSettingSchema = Joi.object({
   email: Joi.string().email().lowercase().trim().required(),
   phone: Joi.string().trim().required(),
   logo: Joi.string().trim().allow("").default(""),
+  banner: Joi.string().trim().allow("").default(""),
   favicon: Joi.string().trim().allow("").default(""),
   address: Joi.object({
     line1: Joi.string().trim().allow("").default(""),

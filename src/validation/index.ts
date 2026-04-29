@@ -16,3 +16,4 @@ export * from "./order";
 export * from "./blog";
 export * from "./customer";
 export * from "./policy";
+export * from "./storefront";

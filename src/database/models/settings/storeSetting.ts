@@ -8,6 +8,7 @@ const storeSettingSchema = new Schema<IStoreSetting>(
     email: { type: String, lowercase: true, trim: true },
     phone: { type: String, trim: true },
     logo: { type: String, trim: true },
+    banner: { type: String, trim: true },
     favicon: { type: String, trim: true },
     address: {
       line1: { type: String, trim: true },

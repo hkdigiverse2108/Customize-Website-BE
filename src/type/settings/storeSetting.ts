@@ -6,6 +6,7 @@ export interface IStoreSettingType {
   email: string;
   phone: string;
   logo?: string;
+  banner?: string;
   favicon?: string;
   address?: {
     line1?: string;

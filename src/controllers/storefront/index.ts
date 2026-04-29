@@ -11,23 +11,9 @@ import {
 } from "../../database";
 import { cacheService, getFirstMatch, getData, reqInfo, responseMessage, resolveRequestDomain, trackEvent, validate } from "../../helper";
 import { apiResponse } from "../../type";
-import { THEME_GLOBAL_LAYOUT_SECTIONS, THEME_SUPPORTED_PAGES } from "../../type/theme";
-import Joi from "joi";
+import { storefrontPageQuerySchema } from "../../validation";
+import { THEME_GLOBAL_LAYOUT_SECTIONS } from "../../type/theme";
 
-const storefrontPageQuerySchema = Joi.object({
-  slug: Joi.string().trim().lowercase().optional(),
-  domain: Joi.string().trim().lowercase().optional(),
-  page: Joi.string().valid(...THEME_SUPPORTED_PAGES).default("home"),
-  isPreview: Joi.boolean().default(false), // Preview mode for builders
-}).custom((value, helpers) => {
-  if (!value.slug && !value.domain) {
-    return helpers.error("any.invalid");
-  }
-
-  return value;
-}).messages({
-  "any.invalid": "slug or domain is required",
-});
 
 const getThemeSettingForStore = async (storeId: string, themeId?: string | null) => {
   const filter: any = { storeId, isDeleted: false };
@@ -168,6 +154,7 @@ export const getStorefrontPage = async (req, res) => {
         id: storeId,
         name: storeSetting?.name || store.name,
         logo: storeSetting?.logo || store.logo,
+        banner: storeSetting?.banner || store.banner,
         favicon: visualSetting?.favicon || storeSetting?.favicon,
       },
       website: {
