@@ -244,7 +244,8 @@ export enum THEME_SUPPORTED_PAGE {
     CART = "cart",
     CHECKOUT = "checkout",
     CUSTOM = "custom",
-    COLLECTION = "collection"
+    COLLECTION = "collection",
+    BLOG = "blog"
 }
 
 export enum PAGE_VISIBILITY {

@@ -53,6 +53,7 @@ export interface IThemeLayoutJSON {
   checkout?: IPageLayoutItem[];
   custom?: IPageLayoutItem[];
   collection?: IPageLayoutItem[];
+  blog?: IPageLayoutItem[];
   footer?: IPageLayoutItem[];
   [key: string]: IPageLayoutItem[] | undefined;
 }

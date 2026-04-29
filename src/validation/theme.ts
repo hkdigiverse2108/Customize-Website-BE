@@ -47,6 +47,7 @@ const themeLayoutSchema = Joi.object({
   checkout: themeLayoutPageSchema,
   custom: themeLayoutPageSchema,
   collection: themeLayoutPageSchema,
+  blog: themeLayoutPageSchema,
 }).optional();
 
 const defaultConfigSchema = Joi.object({

@@ -1,5 +1,5 @@
 import { ACCOUNT_TYPE, getPaginationState, HTTP_STATUS, resolveSortAndFilter } from "../../common";
-import { themeModel } from "../../database";
+import { themeModel, componentModel } from "../../database";
 import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, checkFieldDuplicate } from "../../helper";
 import { apiResponse } from "../../type";
 import { THEME_SUPPORTED_PAGES, THEME_TYPES } from "../../type/theme";
@@ -41,6 +41,41 @@ const normalizeThemeSupportedPages = (payload: any) => {
   payload.supportedPages = [...new Set([...explicitPages, ...layoutPages].map((page) => String(page).trim()).filter(Boolean))];
 };
 
+const validateThemeComponents = async (payload: any) => {
+  const layoutJSON = payload.layoutJSON || {};
+  const draftLayoutJSON = payload.draftLayoutJSON || {};
+
+  const componentIds = new Set<string>();
+  const collectIds = (layout: any) => {
+    Object.values(layout).forEach((page: any) => {
+      if (Array.isArray(page)) {
+        page.forEach((item: any) => {
+          if (item?.componentId) componentIds.add(String(item.componentId));
+        });
+      }
+    });
+  };
+
+  collectIds(layoutJSON);
+  collectIds(draftLayoutJSON);
+
+  if (componentIds.size === 0) return { allowed: true };
+
+  const uniqueIds = Array.from(componentIds);
+  const validComponents = await componentModel.find({
+    _id: { $in: uniqueIds },
+    isDeleted: false,
+  }).select("_id").lean();
+
+  if (validComponents.length !== uniqueIds.length) {
+    const validIdStrings = validComponents.map((c) => String(c._id));
+    const missingIds = uniqueIds.filter((id) => !validIdStrings.includes(id));
+    return { allowed: false, missingIds };
+  }
+
+  return { allowed: true };
+};
+
 export const createTheme = async (req, res) => {
   reqInfo(req);
   try {
@@ -53,6 +88,11 @@ export const createTheme = async (req, res) => {
     if (!payload.createdBy && loggedInUser?.role === ACCOUNT_TYPE.ADMIN) payload.createdBy = loggedInUser?._id;
     normalizeThemeType(payload);
     normalizeThemeSupportedPages(payload);
+
+    const componentCheck = await validateThemeComponents(payload);
+    if (!componentCheck.allowed) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "One or more components in layout are invalid or deleted", { missingIds: componentCheck.missingIds }, {}));
+    }
 
     if (await checkFieldDuplicate(themeModel, "slug", payload.slug)) {
         return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
@@ -85,6 +125,11 @@ export const updateTheme = async (req, res) => {
 
     normalizeThemeType(bodyValue);
     normalizeThemeSupportedPages(bodyValue);
+
+    const componentCheck = await validateThemeComponents(bodyValue);
+    if (!componentCheck.allowed) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "One or more components in layout are invalid or deleted", { missingIds: componentCheck.missingIds }, {}));
+    }
 
     const updatedTheme = await updateData(themeModel, { _id: idValue.id, isDeleted: { $ne: true } }, bodyValue, {});
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.updateDataSuccess("Theme"), updatedTheme, {}));
