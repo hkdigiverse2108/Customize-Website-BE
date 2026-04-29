@@ -12,7 +12,7 @@ const socialLinksSchema = Joi.object({
 
 export const kycDocumentSchema = Joi.object({
   type: Joi.string().trim().lowercase().valid(...Object.values(KYC_DOCUMENT_TYPE)).required(),
-  documentUrl: Joi.string().trim().uri().required(),
+  documentUrl: Joi.string().trim().required(),
   verified: Joi.boolean().optional(),
 });
 
