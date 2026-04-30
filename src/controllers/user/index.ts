@@ -1,4 +1,4 @@
-import { getPaginationState, HTTP_STATUS, resolveSortAndFilter, sanitizeUser } from "../../common";
+import { getPaginationState, HTTP_STATUS, resolveSortAndFilter, sanitizeUser, SUBSCRIPTION_STATUS } from "../../common";
 import { userModel } from "../../database";
 import { countData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, checkFieldDuplicate } from "../../helper";
 import { apiResponse } from "../../type";
@@ -73,4 +73,30 @@ export const getUserById = async (req, res) => {
   }
 };
 
+export const updateUserSubscription = async (req, res) => {
+  reqInfo(req);
+  try {
+    const { planId } = req.body;
+    const user = req.headers.user as any;
+    const userId = user?._id;
 
+    if (!planId) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "Plan ID is required", {}, {}));
+    }
+
+    const updatedUser: any = await updateData(userModel, { _id: userId }, { 
+      "subscription.planId": planId,
+      "subscription.status": SUBSCRIPTION_STATUS.ACTIVE,
+      "subscription.startDate": new Date(),
+    }, {});
+
+    if (!updatedUser) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("User"), {}, {}));
+    }
+
+    return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Subscription updated successfully", sanitizeUser(updatedUser), {}));
+  } catch (error) {
+    console.error(error);
+    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(apiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, responseMessage.internalServerError, {}, error));
+  }
+};

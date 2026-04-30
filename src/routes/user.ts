@@ -8,5 +8,6 @@ const router = Router();
 router.get("/", requireAuth, allowRoles(ACCOUNT_TYPE.ADMIN), userController.getAllUsers);
 router.get("/:id", requireAuth, userController.getUserById);
 router.put("/:id", requireAuth, allowRoles(ACCOUNT_TYPE.ADMIN), userController.updateUser);
+router.post("/subscribe", requireAuth, allowRoles(ACCOUNT_TYPE.VENDOR), userController.updateUserSubscription);
 
 export { router as userRouter };
