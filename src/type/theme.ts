@@ -19,7 +19,13 @@ export interface IThemeSettingItem {
 export type IThemeStyles = IThemeSettingItem[];
 
 
-export type IThemeBreakpoints = IThemeSettingItem[];
+export interface IThemeBreakpoints {
+  mobile?: number;
+  tablet?: number;
+  desktop?: number;
+  [key: string]: number | undefined;
+}
+
 
 
 export interface IThemeChangelogItem {

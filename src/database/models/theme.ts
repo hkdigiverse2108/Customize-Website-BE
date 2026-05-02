@@ -58,9 +58,19 @@ export const themePageLayoutSchema = new Schema(
   { _id: false }
 );
 
+const themeBreakpointsSchema = new Schema(
+  {
+    mobile: { type: Number, default: 320 },
+    tablet: { type: Number, default: 768 },
+    desktop: { type: Number, default: 1024 },
+  },
+  { _id: false }
+);
+
 const themeSchema = new Schema<ITheme>(
   {
     name: { type: String, required: true, trim: true },
+
     slug: { type: String, required: true, trim: true, lowercase: true },
     description: { type: String, default: "", trim: true },
     demoUrl: { type: String, default: "", trim: true },
@@ -82,7 +92,8 @@ const themeSchema = new Schema<ITheme>(
     supportedComponents: { type: [String], default: [] },
     supportedPages: { type: [{ type: String, enum: THEME_SUPPORTED_PAGES }], default: [] },
     isResponsive: { type: Boolean, default: false },
-    breakpoints: { type: [themeSettingItemSchema], default: [] },
+    breakpoints: { type: themeBreakpointsSchema, default: () => ({}) },
+
 
     seoFriendly: { type: Boolean, default: false },
     performanceScore: { type: Number, default: null, min: 0, max: 100 },

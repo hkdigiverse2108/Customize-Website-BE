@@ -232,9 +232,9 @@ export const getStorefrontPage = async (req, res) => {
         config: mergeSettings(theme.defaultConfig || [], themeSetting.customSettings || []),
         stylesMap: mapSettingsToObject(mergeSettings(theme.styles || [], themeSetting.customStyles || [])),
         configMap: mapSettingsToObject(mergeSettings(theme.defaultConfig || [], themeSetting.customSettings || [])),
-        breakpoints: theme.breakpoints || [],
-        breakpointsMap: mapSettingsToObject(theme.breakpoints || []),
+
       },
+      breakpoints: theme.breakpoints || {},
 
 
       seo: {

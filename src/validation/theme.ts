@@ -30,7 +30,14 @@ const defaultConfigSchema = Joi.array().items(settingItemSchema).optional();
 
 
 
-const breakpointsSchema = Joi.array().items(settingItemSchema).optional();
+const breakpointsSchema = Joi.object({
+  mobile: Joi.number().min(0).optional(),
+  tablet: Joi.number().min(0).optional(),
+  desktop: Joi.number().min(0).optional(),
+})
+  .unknown(true)
+  .optional();
+
 
 const changelogSchema = Joi.object({
   version: Joi.string().trim().allow("").optional(),
