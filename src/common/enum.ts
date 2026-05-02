@@ -281,6 +281,7 @@ export enum THEME_SETTING_TYPE {
 
 export enum THEME_SETTING_GROUP {
     GENERAL = "general",
+    CONTENT = "content",
     COLORS = "colors",
     TYPOGRAPHY = "typography",
     LAYOUT = "layout",
@@ -288,4 +289,5 @@ export enum THEME_SETTING_GROUP {
     FOOTER = "footer",
     ADVANCED = "advanced"
 }
+
 

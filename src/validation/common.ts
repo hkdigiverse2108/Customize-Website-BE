@@ -36,17 +36,17 @@ export const settingItemSchema = Joi.object({
 
 export const schemaItemSchema = Joi.object({
   key: Joi.string().trim().required(),
-  type: Joi.string().trim().required(),
+  type: Joi.string().trim().valid(...Object.values(THEME_SETTING_TYPE)).required(),
   label: Joi.string().trim().allow("").optional(),
   default: Joi.any().optional(),
   options: Joi.array().items(Joi.any()).optional(),
-  group: Joi.string().trim().allow("").optional(),
+  group: Joi.string().trim().valid(...Object.values(THEME_SETTING_GROUP)).allow("").optional(),
   placeholder: Joi.string().trim().allow("").optional(),
   validation: Joi.object().unknown(true).optional(),
 });
 
-export const CommonFieldSchema = {
 
+export const CommonFieldSchema = {
 
   page: Joi.number().optional(),
   limit: Joi.number().optional(),
