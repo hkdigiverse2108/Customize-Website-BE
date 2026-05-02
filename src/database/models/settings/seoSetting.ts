@@ -1,16 +1,15 @@
 import { Schema, model } from "mongoose";
 import { ISEOSetting } from "../../../type/settings/seoSetting";
+import { themeSettingItemSchema } from "../theme";
+
 
 const seoSettingSchema = new Schema<ISEOSetting>(
   {
     storeId: { type: Schema.Types.ObjectId, ref: "store", required: true },
-    metaTitle: { type: String, trim: true, default: "" },
-    metaDescription: { type: String, trim: true, default: "" },
-    metaKeywords: { type: [String], default: [] },
-    googleAnalyticsId: { type: String, trim: true, default: "" },
-    facebookPixelId: { type: String, trim: true, default: "" },
+    settings: { type: [themeSettingItemSchema], default: [] },
     isDeleted: { type: Boolean, default: false },
   },
+
   { timestamps: true, versionKey: false }
 );
 

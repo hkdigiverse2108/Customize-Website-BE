@@ -1,5 +1,7 @@
 import Joi from "joi";
-import { objectId } from "./common";
+import { objectId, settingItemSchema, schemaItemSchema } from "./common";
+
+
 import { COMPONENT_TYPE, COMPONENT_CATEGORY, SUPPORTED_PAGE } from "../common";
 
 export const createComponentSchema = Joi.object({
@@ -11,9 +13,11 @@ export const createComponentSchema = Joi.object({
   label: Joi.string().trim().allow("").optional(),
   icon: Joi.string().trim().allow("").optional(),
   previewImage: Joi.string().trim().allow("").optional(),
-  configJSON: Joi.object().unknown(true).optional(),
-  defaultConfig: Joi.object().unknown(true).optional(),
-  configSchema: Joi.object().unknown(true).optional(),
+  configJSON: Joi.array().items(settingItemSchema).optional(),
+  defaultConfig: Joi.array().items(settingItemSchema).optional(),
+  configSchema: Joi.array().items(schemaItemSchema).optional(),
+
+
   isReusable: Joi.boolean().optional(),
   isGlobal: Joi.boolean().optional(),
   supportedPages: Joi.array().items(Joi.string().trim().valid(...Object.values(SUPPORTED_PAGE))).optional(),
@@ -32,9 +36,11 @@ export const updateComponentSchema = Joi.object({
   label: Joi.string().trim().allow("").optional(),
   icon: Joi.string().trim().allow("").optional(),
   previewImage: Joi.string().trim().allow("").optional(),
-  configJSON: Joi.object().unknown(true).optional(),
-  defaultConfig: Joi.object().unknown(true).optional(),
-  configSchema: Joi.object().unknown(true).optional(),
+  configJSON: Joi.array().items(settingItemSchema).optional(),
+  defaultConfig: Joi.array().items(settingItemSchema).optional(),
+  configSchema: Joi.array().items(schemaItemSchema).optional(),
+
+
   isReusable: Joi.boolean().optional(),
   isGlobal: Joi.boolean().optional(),
   supportedPages: Joi.array().items(Joi.string().trim().valid(...Object.values(SUPPORTED_PAGE))).optional(),
@@ -61,9 +67,11 @@ export const customizeComponentSchema = Joi.object({
   label: Joi.string().trim().allow("").optional(),
   icon: Joi.string().trim().allow("").optional(),
   previewImage: Joi.string().trim().allow("").optional(),
-  configJSON: Joi.object().unknown(true).optional(),
-  defaultConfig: Joi.object().unknown(true).optional(),
-  configSchema: Joi.object().unknown(true).optional(),
+  configJSON: Joi.array().items(settingItemSchema).optional(),
+  defaultConfig: Joi.array().items(settingItemSchema).optional(),
+  configSchema: Joi.array().items(schemaItemSchema).optional(),
+
+
   supportedPages: Joi.array().items(Joi.string().trim().valid(...Object.values(SUPPORTED_PAGE))).optional(),
   supportedThemes: Joi.array().items(objectId()).optional(),
   version: Joi.string().trim().allow("").optional(),

@@ -1,6 +1,8 @@
 import { Schema, model } from "mongoose";
 import { IComponent } from "../../type";
 import { COMPONENT_TYPE, COMPONENT_CATEGORY, SUPPORTED_PAGE } from "../../common";
+import { themeSettingItemSchema, themeSchemaItemSchema } from "./theme";
+
 
 const componentSchema = new Schema<IComponent>(
   {
@@ -12,9 +14,10 @@ const componentSchema = new Schema<IComponent>(
     label: { type: String, default: "", trim: true },
     icon: { type: String, default: "", trim: true },
     previewImage: { type: String, default: "", trim: true },
-    configJSON: { type: Schema.Types.Mixed, default: {} },
-    defaultConfig: { type: Schema.Types.Mixed, default: {} },
-    configSchema: { type: Schema.Types.Mixed, default: {} },
+    configJSON: { type: [themeSettingItemSchema], default: [] },
+    draftConfigJSON: { type: [themeSettingItemSchema], default: null },
+    defaultConfig: { type: [themeSettingItemSchema], default: [] },
+    configSchema: { type: [themeSchemaItemSchema], default: [] },
     isReusable: { type: Boolean, default: true },
     isGlobal: { type: Boolean, default: false },
     supportedPages: [{ type: String, enum: Object.values(SUPPORTED_PAGE) }],

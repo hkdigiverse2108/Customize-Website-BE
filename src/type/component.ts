@@ -1,5 +1,8 @@
 import { Document, Types } from "mongoose";
 import { COMPONENT_TYPE, COMPONENT_CATEGORY, SUPPORTED_PAGE } from "../common";
+import { IThemeSettingItem, IThemeSchemaItem } from "./theme";
+
+
 
 export interface IComponentType {
   storeId: Types.ObjectId | string | null;
@@ -10,10 +13,12 @@ export interface IComponentType {
   label: string;
   icon: string;
   previewImage: string;
-  configJSON: Record<string, any>;
-  draftConfigJSON: Record<string, any> | null;
-  defaultConfig: Record<string, any>;
-  configSchema: Record<string, any>;
+  configJSON: IThemeSettingItem[];
+  draftConfigJSON: IThemeSettingItem[] | null;
+  defaultConfig: IThemeSettingItem[];
+  configSchema: IThemeSchemaItem[];
+
+
   isReusable: boolean;
   isGlobal: boolean;
   isPublished: boolean;
@@ -37,10 +42,12 @@ export interface ICreateComponentPayload {
   label?: string;
   icon?: string;
   previewImage?: string;
-  configJSON?: Record<string, any>;
-  draftConfigJSON?: Record<string, any> | null;
-  defaultConfig?: Record<string, any>;
-  configSchema?: Record<string, any>;
+  configJSON?: IThemeSettingItem[];
+  draftConfigJSON?: IThemeSettingItem[] | null;
+  defaultConfig?: IThemeSettingItem[];
+
+  configSchema?: IThemeSchemaItem[];
+
   isReusable?: boolean;
   isGlobal?: boolean;
   isPublished?: boolean;
@@ -63,10 +70,12 @@ export interface IComponent extends Document {
   label: string;
   icon: string;
   previewImage: string;
-  configJSON: Record<string, any>;
-  draftConfigJSON: Record<string, any> | null;
-  defaultConfig: Record<string, any>;
-  configSchema: Record<string, any>;
+  configJSON: IThemeSettingItem[];
+  draftConfigJSON: IThemeSettingItem[] | null;
+  defaultConfig: IThemeSettingItem[];
+
+  configSchema: IThemeSchemaItem[];
+
   isReusable: boolean;
   isGlobal: boolean;
   isPublished: boolean;

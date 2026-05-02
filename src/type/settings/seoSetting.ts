@@ -1,13 +1,12 @@
 import { Document, Types } from "mongoose";
 
+import { IThemeSettingItem } from "../theme";
+
 export interface ISEOSettingType {
   storeId: Types.ObjectId | string;
-  metaTitle: string;
-  metaDescription: string;
-  metaKeywords: string[];
-  googleAnalyticsId?: string;
-  facebookPixelId?: string;
+  settings: IThemeSettingItem[];
   isDeleted: boolean;
 }
+
 
 export interface ISEOSetting extends ISEOSettingType, Document {}

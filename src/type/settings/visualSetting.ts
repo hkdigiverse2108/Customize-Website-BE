@@ -1,21 +1,12 @@
 import { Document, Types } from "mongoose";
 
+import { IThemeSettingItem } from "../theme";
+
 export interface IVisualSettingType {
   storeId: Types.ObjectId | string;
-  favicon?: string;
-  customCSS?: string;
-  customJS?: string;
-  passwordProtection: {
-    enabled: boolean;
-    password?: string;
-    message?: string;
-  };
-  checkoutPage: {
-    banner?: string;
-    logo?: string;
-    accentColor?: string;
-  };
+  settings: IThemeSettingItem[];
   isDeleted: boolean;
 }
+
 
 export interface IVisualSetting extends IVisualSettingType, Document {}

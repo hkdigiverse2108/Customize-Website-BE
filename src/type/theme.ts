@@ -8,29 +8,19 @@ export const THEME_SUPPORTED_PAGES = Object.values(THEME_SUPPORTED_PAGE_ENUM) as
 export type THEME_TYPE = `${THEME_TYPE_ENUM}`;
 export const THEME_TYPES = Object.values(THEME_TYPE_ENUM) as THEME_TYPE[];
 
-export interface IThemeStyles {
-  colors: {
-    primary: string;
-    secondary: string;
-    background: string;
-    text: string;
-  };
-  fonts: {
-    heading: string;
-    body: string;
-  };
-  layout: {
-    containerWidth: "full" | "boxed";
-    spacing: string;
-  };
+export interface IThemeSettingItem {
+  key: string;
+  value: any;
+  type?: string;
+  label?: string;
+  group?: string;
 }
 
-export interface IThemeBreakpoints {
-  mobile?: number;
-  tablet?: number;
-  desktop?: number;
-  [key: string]: number | undefined;
-}
+export type IThemeStyles = IThemeSettingItem[];
+
+
+export type IThemeBreakpoints = IThemeSettingItem[];
+
 
 export interface IThemeChangelogItem {
   version?: string;
@@ -41,21 +31,27 @@ export interface IThemeChangelogItem {
 export interface IPageLayoutItem {
   componentId: string;
   order: number;
-  config: Record<string, any>;
+  config: IThemeSettingItem[];
 }
 
-export interface IThemeLayoutJSON {
-  header?: IPageLayoutItem[];
-  home?: IPageLayoutItem[];
-  product?: IPageLayoutItem[];
-  category?: IPageLayoutItem[];
-  cart?: IPageLayoutItem[];
-  checkout?: IPageLayoutItem[];
-  custom?: IPageLayoutItem[];
-  collection?: IPageLayoutItem[];
-  blog?: IPageLayoutItem[];
-  footer?: IPageLayoutItem[];
-  [key: string]: IPageLayoutItem[] | undefined;
+
+export interface IPageLayout {
+  page: string;
+  sections: IPageLayoutItem[];
+}
+
+export type IThemeLayoutJSON = IPageLayout[];
+
+
+export interface IThemeSchemaItem {
+  key: string;
+  type: string;
+  label?: string;
+  default?: any;
+  options?: any[]; // For select/radio types
+  group?: string;
+  placeholder?: string;
+  validation?: any;
 }
 
 export interface IThemeType {
@@ -72,7 +68,11 @@ export interface IThemeType {
   styles: IThemeStyles;
   layoutJSON: IThemeLayoutJSON;
   draftLayoutJSON: IThemeLayoutJSON;
-  defaultConfig: Record<string, any>;
+  componentSchema: IThemeSchemaItem[];
+  settingsSchema: IThemeSchemaItem[];
+
+  defaultConfig: IThemeSettingItem[];
+
   supportedComponents: string[];
   supportedPages: THEME_SUPPORTED_PAGE[];
   isResponsive: boolean;

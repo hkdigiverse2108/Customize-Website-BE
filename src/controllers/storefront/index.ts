@@ -15,6 +15,49 @@ import { storefrontPageQuerySchema } from "../../validation";
 import { THEME_GLOBAL_LAYOUT_SECTIONS } from "../../type/theme";
 
 
+const mergeSettings = (base: any[] = [], custom: any[] = []) => {
+  const merged = new Map();
+  
+  // Add base settings
+  base.forEach(item => {
+    if (item && item.key) merged.set(item.key, item);
+  });
+  
+  // Add/Override with custom settings
+  custom.forEach(item => {
+    if (item && item.key) {
+      const existing = merged.get(item.key);
+      // If setting exists, merge properties (value, label, etc.), custom overrides base
+      merged.set(item.key, existing ? { ...existing, ...item } : item);
+    }
+  });
+  
+  return Array.from(merged.values());
+};
+
+const mapSettingsToObject = (settings: any[] = []) => {
+  const obj: any = {};
+  settings.forEach(item => {
+    if (item && item.key) {
+      // Handle nested keys like "colors.primary"
+      const keys = item.key.split('.');
+      let current = obj;
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        if (i === keys.length - 1) {
+          current[key] = item.value;
+        } else {
+          current[key] = current[key] || {};
+          current = current[key];
+        }
+      }
+    }
+  });
+  return obj;
+};
+
+
+
 const getThemeSettingForStore = async (storeId: string, themeId?: string | null) => {
   const filter: any = { storeId, isDeleted: false };
   if (themeId) {
@@ -29,7 +72,11 @@ const getThemeSettingForStore = async (storeId: string, themeId?: string | null)
 const sortLayoutItems = (items: any[] = []) =>
   [...items].sort((a, b) => Number(a?.order ?? 0) - Number(b?.order ?? 0));
 
-const getLayoutItems = (layout: any, key: string) => sortLayoutItems(Array.isArray(layout?.[key]) ? layout[key] : []);
+const getLayoutItems = (layout: any[] = [], key: string) => {
+  const pageLayout = (layout || []).find((p: any) => p.page === key);
+  return sortLayoutItems(Array.isArray(pageLayout?.sections) ? pageLayout.sections : []);
+};
+
 
 const resolveStoreWebsite = async (req: any, val: any) => {
   const requestDomain = resolveRequestDomain(req, val.domain, { includeHost: true });
@@ -91,21 +138,34 @@ export const getStorefrontPage = async (req, res) => {
       regionSettingModel.findOne({ storeId, isDeleted: false }),
     ]);
     
-    // 3. Get Layout Structure (Live vs Draft)
-    const layoutSource = isPreview && theme.draftLayoutJSON ? theme.draftLayoutJSON : theme.layoutJSON;
+    // 3. Get Layout Structure (Inheritance: Base Theme -> Vendor Custom Layout)
+    const baseLayout = (isPreview && theme.draftLayoutJSON?.length) ? theme.draftLayoutJSON : (theme.layoutJSON || []);
+    const vendorLayout = (isPreview && themeSetting.draftLayoutJSON?.length) ? themeSetting.draftLayoutJSON : (themeSetting.customLayoutJSON || []);
+    
+    // Merge Layout: Vendor layout takes priority if it exists for the page
+    const hasVendorPage = Array.isArray(vendorLayout) && vendorLayout.some((p: any) => p.page === val.page);
+    const layoutSource = hasVendorPage ? vendorLayout : baseLayout;
+
     const [headerSection, footerSection] = THEME_GLOBAL_LAYOUT_SECTIONS;
     const headerLayout = getLayoutItems(layoutSource, headerSection);
     const pageLayout = getLayoutItems(layoutSource, val.page);
     const footerLayout = getLayoutItems(layoutSource, footerSection);
     const layoutItems = [...headerLayout, ...pageLayout, ...footerLayout];
 
+
     if (!layoutItems.length) {
+      const mergedStyles = mergeSettings(theme.styles || [], themeSetting.customStyles || []);
+      const mergedConfig = mergeSettings(theme.defaultConfig || [], themeSetting.customSettings || []);
+
       return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Page empty", {
-        themeStyles: theme.styles,
-        themeConfig: themeSetting.themeConfig || {},
+        themeStyles: mergedStyles,
+        themeConfig: mergedConfig,
+        themeStylesMap: mapSettingsToObject(mergedStyles),
+        themeConfigMap: mapSettingsToObject(mergedConfig),
         components: []
       }, {}));
     }
+
 
     const componentIds = [...new Set(layoutItems.map((item: any) => item.componentId).filter(Boolean))];
 
@@ -128,19 +188,20 @@ export const getStorefrontPage = async (req, res) => {
       const override = overrideComp || {};
 
       // If preview mode, prefer draftConfigJSON
-      const baseConfig = (isPreview && base.draftConfigJSON) ? base.draftConfigJSON : (base.configJSON || {});
-      const overrideConfig = (isPreview && override.draftConfigJSON) ? override.draftConfigJSON : (override.configJSON || {});
+      const baseConfig = (isPreview && base.draftConfigJSON) ? base.draftConfigJSON : (base.defaultConfig || []);
+      const overrideConfig = (isPreview && override.draftConfigJSON) ? override.draftConfigJSON : (override.configJSON || []);
+      const layoutConfig = layoutItem.config || [];
+
+      const mergedConfig = mergeSettings(mergeSettings(baseConfig, overrideConfig), layoutConfig);
 
       return {
         ...base,
         ...override,
         order: layoutItem.order,
-        configJSON: {
-          ...baseConfig,
-          ...overrideConfig,
-          ...(layoutItem.config || {})
-        }
+        config: mergedConfig,
+        configMap: mapSettingsToObject(mergedConfig)
       };
+
     };
 
     const finalComponents = [
@@ -155,8 +216,9 @@ export const getStorefrontPage = async (req, res) => {
         name: storeSetting?.name || store.name,
         logo: storeSetting?.logo || store.logo,
         banner: storeSetting?.banner || store.banner,
-        favicon: visualSetting?.favicon || storeSetting?.favicon,
+        favicon: mapSettingsToObject(visualSetting?.settings || []).favicon || storeSetting?.favicon || store.logo,
       },
+
       website: {
         domain: domainSetting?.domain || requestDomain || null,
         isPrimary: domainSetting?.isPrimary || false,
@@ -166,15 +228,19 @@ export const getStorefrontPage = async (req, res) => {
       theme: {
         id: theme._id,
         name: theme.name,
-        styles: theme.styles,
-        config: themeSetting.themeConfig || {},
+        styles: mergeSettings(theme.styles || [], themeSetting.customStyles || []),
+        config: mergeSettings(theme.defaultConfig || [], themeSetting.customSettings || []),
+        stylesMap: mapSettingsToObject(mergeSettings(theme.styles || [], themeSetting.customStyles || [])),
+        configMap: mapSettingsToObject(mergeSettings(theme.defaultConfig || [], themeSetting.customSettings || [])),
+        breakpoints: theme.breakpoints || [],
+        breakpointsMap: mapSettingsToObject(theme.breakpoints || []),
       },
+
+
       seo: {
-        metaTitle: seoSetting?.metaTitle || store.name,
-        metaDescription: seoSetting?.metaDescription || store.description,
-        metaKeywords: seoSetting?.metaKeywords || [],
-        googleAnalyticsId: seoSetting?.googleAnalyticsId || "",
-        facebookPixelId: seoSetting?.facebookPixelId || "",
+        ...mapSettingsToObject(seoSetting?.settings || []),
+        metaTitle: mapSettingsToObject(seoSetting?.settings || []).metaTitle || store.name,
+        metaDescription: mapSettingsToObject(seoSetting?.settings || []).metaDescription || store.description,
       },
       region: {
         currency: regionSetting?.currency || "INR",
@@ -182,10 +248,9 @@ export const getStorefrontPage = async (req, res) => {
         timezone: regionSetting?.timezone || "Asia/Kolkata",
       },
       visual: {
-        customCSS: visualSetting?.customCSS || "",
-        customJS: visualSetting?.customJS || "",
-        passwordProtection: visualSetting?.passwordProtection || { enabled: false },
+        ...mapSettingsToObject(visualSetting?.settings || []),
       },
+
       socialLinks: storeSetting?.socialLinks || store.socialLinks || {},
       components: finalComponents,
       isPreview
