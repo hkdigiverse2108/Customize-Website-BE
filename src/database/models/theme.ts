@@ -1,17 +1,19 @@
 import { Schema, model } from "mongoose";
 import { ITheme, THEME_SUPPORTED_PAGES, THEME_TYPES } from "../../type/theme";
+import { THEME_SETTING_TYPE, THEME_SETTING_GROUP } from "../../common/enum";
 
-export const  themeSettingItemSchema = new Schema(
 
+export const themeSettingItemSchema = new Schema(
   {
     key: { type: String, required: true },
     value: { type: Schema.Types.Mixed, default: null },
-    type: { type: String, default: "text" },
+    type: { type: String, enum: Object.values(THEME_SETTING_TYPE), default: THEME_SETTING_TYPE.TEXT },
     label: { type: String, default: "" },
-    group: { type: String, default: "" },
+    group: { type: String, enum: Object.values(THEME_SETTING_GROUP), default: THEME_SETTING_GROUP.GENERAL },
   },
   { _id: false }
 );
+
 
 
 

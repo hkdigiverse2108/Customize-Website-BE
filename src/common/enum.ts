@@ -265,3 +265,27 @@ export enum BLOG_STATUS {
     ACTIVE = "active",
     ARCHIVED = "archived"
 }
+
+export enum THEME_SETTING_TYPE {
+    TEXT = "text",
+    NUMBER = "number",
+    BOOLEAN = "boolean",
+    COLOR = "color",
+    IMAGE = "image",
+    SELECT = "select",
+    SLIDER = "slider",
+    FONT = "font",
+    TEXTAREA = "textarea",
+    JSON = "json"
+}
+
+export enum THEME_SETTING_GROUP {
+    GENERAL = "general",
+    COLORS = "colors",
+    TYPOGRAPHY = "typography",
+    LAYOUT = "layout",
+    HEADER = "header",
+    FOOTER = "footer",
+    ADVANCED = "advanced"
+}
+

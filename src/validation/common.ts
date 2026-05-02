@@ -1,5 +1,7 @@
 import Joi from "joi";
 import mongoose from "mongoose";
+import { THEME_SETTING_TYPE, THEME_SETTING_GROUP } from "../common/enum";
+
 
 export const objectId = () =>
   Joi.string()
@@ -20,13 +22,17 @@ export const commonIdSchema = Joi.object({
   id: objectId().required(),
 });
 
+
+
+
 export const settingItemSchema = Joi.object({
   key: Joi.string().trim().required(),
   value: Joi.any().optional(),
-  type: Joi.string().trim().optional(),
+  type: Joi.string().trim().valid(...Object.values(THEME_SETTING_TYPE)).optional(),
   label: Joi.string().trim().optional(),
-  group: Joi.string().trim().optional(),
+  group: Joi.string().trim().valid(...Object.values(THEME_SETTING_GROUP)).optional(),
 });
+
 
 export const schemaItemSchema = Joi.object({
   key: Joi.string().trim().required(),
