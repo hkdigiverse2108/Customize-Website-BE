@@ -6,7 +6,7 @@ import { THEME_SETTING_TYPE, THEME_SETTING_GROUP } from "../../common/enum";
 export const themeSettingItemSchema = new Schema(
   {
     key: { type: String, required: true },
-    value: { type: Schema.Types.Mixed, default: null },
+    value: { type: Schema.Types.Mixed },
     type: { type: String, enum: Object.values(THEME_SETTING_TYPE), default: THEME_SETTING_TYPE.TEXT },
     label: { type: String, default: "" },
     group: { type: String, enum: Object.values(THEME_SETTING_GROUP), default: THEME_SETTING_GROUP.GENERAL },
@@ -32,7 +32,6 @@ export const themeSchemaItemSchema = new Schema(
     key: { type: String, required: true },
     type: { type: String, required: true },
     label: { type: String, default: "" },
-    default: { type: Schema.Types.Mixed, default: null },
     options: { type: [Schema.Types.Mixed], default: [] },
     group: { type: String, default: "" },
     placeholder: { type: String, default: "" },
@@ -84,7 +83,7 @@ const themeSchema = new Schema<ITheme>(
     price: { type: Number, default: 0, min: 0 },
     storeId: { type: Schema.Types.ObjectId, ref: "store", default: null },
     createdBy: { type: Schema.Types.ObjectId, ref: "user", default: null },
-    isGlobal: { type: Boolean, default: true }, 
+    isGlobal: { type: Boolean, default: true },
     styles: { type: [themeSettingItemSchema], default: [] },
     layoutJSON: { type: [themePageLayoutSchema], default: [] },
     draftLayoutJSON: { type: [themePageLayoutSchema], default: [] },
