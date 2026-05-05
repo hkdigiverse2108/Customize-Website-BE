@@ -1,6 +1,6 @@
 import { ACCOUNT_TYPE, getPaginationState, HTTP_STATUS, resolveSortAndFilter } from "../../common";
 import { componentHistoryModel, componentModel, storeModel } from "../../database";
-import { cacheService, checkDuplicateComponent, countData, deleteData, getData, getFirstMatch, handlePostUpdate, reqInfo, responseMessage, updateData, validate, verifyStoreAccess } from "../../helper";
+import { cacheService, checkBlogLimit, checkDuplicateComponent, countData, deleteData, getData, getFirstMatch, handlePostUpdate, reqInfo, responseMessage, updateData, validate, verifyStoreAccess } from "../../helper";
 import { apiResponse } from "../../type";
 import { componentIdSchema, createComponentSchema, customizeComponentSchema, getAllComponentsQuerySchema, rollbackComponentSchema, updateComponentSchema } from "../../validation";
 
@@ -15,7 +15,7 @@ export const createComponent = async (req, res) => {
 
     if (user.role === ACCOUNT_TYPE.VENDOR) {
       if (!payload.storeId) return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "storeId is required", {}, {}));
-      if (!await verifyStoreAccess(user, payload.storeId)) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
+      if (!(await verifyStoreAccess(user, payload.storeId))) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
     }
 
     if (await checkDuplicateComponent(payload)) return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("component"), {}, {}));
@@ -44,7 +44,7 @@ export const updateComponent = async (req, res) => {
 
     if (existing.isReadOnly && user.role !== ACCOUNT_TYPE.ADMIN) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, "Component is read-only", {}, {}));
 
-    if (await checkDuplicateComponent({ ...existing.toObject(), ...bodyVal, storeId: bodyVal.storeId ?? existing.storeId }, idVal.id)) {
+    if (await checkDuplicateComponent({ ...existing, ...bodyVal, storeId: bodyVal.storeId ?? existing.storeId }, idVal.id)) {
       return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("component"), {}, {}));
     }
 
@@ -54,7 +54,6 @@ export const updateComponent = async (req, res) => {
 
     const updated = await updateData(componentModel, { _id: idVal.id }, bodyVal, {});
     await handlePostUpdate({ user, action: "update", resourceType: "component", resourceId: idVal.id, oldData: existing, newData: updated, storeId: String(existing.storeId || ""), isGlobal: existing.isGlobal || updated?.isGlobal, req });
-
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.updateDataSuccess("Component"), updated, {}));
   } catch (error) {
     console.error(error);
@@ -69,7 +68,7 @@ export const customizeComponent = async (req, res) => {
     if (!val) return;
 
     const user = req.headers.user as any;
-    if (!await verifyStoreAccess(user, val.storeId)) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
+    if (!(await verifyStoreAccess(user, val.storeId))) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
 
     const base: any = await getFirstMatch(componentModel, { _id: val.componentId, isDeleted: { $ne: true }, isActive: true, isDeprecated: { $ne: true } }, {}, {});
     if (!base) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Component"), {}, {}));
@@ -106,7 +105,7 @@ export const rollbackComponent = async (req, res) => {
     if (!comp || !hist) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Not found", {}, {}));
 
     const user = req.headers.user as any;
-    if (comp.storeId && !await verifyStoreAccess(user, String(comp.storeId))) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
+    if (comp.storeId && !(await verifyStoreAccess(user, String(comp.storeId)))) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
 
     await new componentHistoryModel({ componentId: comp._id, storeId: comp.storeId, version: comp.version, configJSON: comp.configJSON, updatedBy: user._id, changeSummary: `Rollback to ${hist.version}` }).save();
 
@@ -131,7 +130,7 @@ export const deleteComponent = async (req, res) => {
 
     const user = req.headers.user as any;
     if (existing.isReadOnly && user.role !== ACCOUNT_TYPE.ADMIN) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, "Read-only", {}, {}));
-    if (existing.storeId && !await verifyStoreAccess(user, String(existing.storeId))) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
+    if (existing.storeId && !(await verifyStoreAccess(user, String(existing.storeId)))) return res.status(HTTP_STATUS.FORBIDDEN).json(apiResponse(HTTP_STATUS.FORBIDDEN, responseMessage.accessDenied, {}, {}));
 
     const deleted = await deleteData(componentModel, { _id: val.id }, { isActive: false }, {});
     await handlePostUpdate({ user, action: "delete", resourceType: "component", resourceId: val.id, oldData: existing, storeId: String(existing.storeId || ""), isGlobal: existing.isGlobal, req });
@@ -149,10 +148,6 @@ export const getComponents = async (req, res) => {
     const val = validate(getAllComponentsQuerySchema, req.query, res);
     if (!val) return;
 
-    const cacheKey = `components_${JSON.stringify(req.query)}`;
-    const cached = await cacheService.get(cacheKey);
-    if (cached) return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Success", cached, {}));
-
     const { criteria, options, page, limit } = resolveSortAndFilter(val, ["name", "label"]);
     applyFilters(criteria, val);
 
@@ -160,19 +155,17 @@ export const getComponents = async (req, res) => {
     if (user?.role === ACCOUNT_TYPE.VENDOR) {
       const stores = await getVendorStoreIds(user);
       if (!stores.length) return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Success", { components: [], state: getPaginationState(0, page, limit), total_count: 0 }, {}));
-      
+
       criteria.isActive = true;
       criteria.isDeprecated = { $ne: true };
       const allowed = val.storeId && stores.includes(String(val.storeId)) ? [String(val.storeId)] : stores;
       delete criteria.storeId;
       criteria.$and = [...(criteria.$and || []), { $or: [{ storeId: null }, { storeId: { $in: allowed } }] }];
     }
-
     const components = await getData(componentModel, criteria, {}, options);
     const total = await countData(componentModel, criteria);
     const result = { components, state: getPaginationState(total, page, limit), total_count: total };
-    
-    await cacheService.set(cacheKey, result, 300);
+
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Success", result, {}));
   } catch (error) {
     console.error(error);
@@ -192,7 +185,7 @@ export const getComponentById = async (req, res) => {
 
     if (user?.role === ACCOUNT_TYPE.VENDOR) {
       if (!comp.isActive || comp.isDeprecated) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Not found", {}, {}));
-      if (comp.storeId && !await verifyStoreAccess(user, String(comp.storeId))) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Not found", {}, {}));
+      if (comp.storeId && !(await verifyStoreAccess(user, String(comp.storeId)))) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, "Not found", {}, {}));
     }
 
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, "Success", comp, {}));
@@ -210,7 +203,9 @@ const applyFilters = (criteria: any, val: any) => {
   if (val.themeId) criteria.supportedThemes = { $in: [val.themeId] };
   if (val.storeId) criteria.storeId = val.storeId;
   const mappings = { reusableFilter: "isReusable", globalFilter: "isGlobal", deprecatedFilter: "isDeprecated" };
-  Object.entries(mappings).forEach(([key, field]) => { if (val[key] !== undefined) criteria[field] = val[key]; });
+  Object.entries(mappings).forEach(([key, field]) => {
+    if (val[key] !== undefined) criteria[field] = val[key];
+  });
 };
 
 const getVendorStoreIds = async (user: any) => {
@@ -219,16 +214,27 @@ const getVendorStoreIds = async (user: any) => {
 };
 
 const getBaseOverridePayload = (base: any) => ({
-  name: base.name, type: base.type, category: base.category, label: base.label, icon: base.icon,
-  previewImage: base.previewImage, configJSON: base.configJSON, defaultConfig: base.defaultConfig,
-  configSchema: base.configSchema, isReusable: base.isReusable, supportedPages: base.supportedPages,
-  supportedThemes: base.supportedThemes, version: base.version, isDeprecated: base.isDeprecated, isActive: base.isActive
+  name: base.name,
+  type: base.type,
+  category: base.category,
+  label: base.label,
+  icon: base.icon,
+  previewImage: base.previewImage,
+  configJSON: base.configJSON,
+  defaultConfig: base.defaultConfig,
+  configSchema: base.configSchema,
+  isReusable: base.isReusable,
+  supportedPages: base.supportedPages,
+  supportedThemes: base.supportedThemes,
+  version: base.version,
+  isDeprecated: base.isDeprecated,
+  isActive: base.isActive,
 });
 
 const getOverridePayload = (val: any) => {
   const fields = ["name", "label", "icon", "previewImage", "configJSON", "defaultConfig", "configSchema", "supportedPages", "supportedThemes", "version", "isReusable", "isDeprecated", "isActive"];
-  return fields.reduce((acc: any, f) => { if (val[f] !== undefined) acc[f] = val[f]; return acc; }, {});
+  return fields.reduce((acc: any, f) => {
+    if (val[f] !== undefined) acc[f] = val[f];
+    return acc;
+  }, {});
 };
-
-
-

@@ -9,5 +9,6 @@ router.get("/", categoryController.getCategories);
 router.post("/", requireAuth, allowRoles(ACCOUNT_TYPE.ADMIN, ACCOUNT_TYPE.VENDOR), categoryController.createCategory);
 router.put("/", requireAuth, allowRoles(ACCOUNT_TYPE.ADMIN, ACCOUNT_TYPE.VENDOR), categoryController.updateCategory);
 router.delete("/:id", requireAuth, allowRoles(ACCOUNT_TYPE.ADMIN, ACCOUNT_TYPE.VENDOR), categoryController.deleteCategory);
+router.get("/:id", requireAuth, allowRoles(ACCOUNT_TYPE.ADMIN, ACCOUNT_TYPE.VENDOR), categoryController.getCategoryById);
 
 export { router as categoryRouter };

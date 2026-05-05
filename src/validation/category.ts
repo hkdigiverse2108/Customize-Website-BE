@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { objectId } from "./common";
 
 export const createCategorySchema = Joi.object({
   storeId: Joi.string().required(),
@@ -24,7 +25,12 @@ export const getAllCategoriesQuerySchema = Joi.object({
   storeId: Joi.string(),
   page: Joi.number().min(1),
   limit: Joi.number().min(1).max(100),
+  activeFilter: Joi.boolean().optional(),
   search: Joi.string().allow(""),
   sort: Joi.string(),
   order: Joi.string().valid("asc", "desc"),
+});
+
+export const categoryIdSchema = Joi.object({
+  id: objectId().required(),
 });

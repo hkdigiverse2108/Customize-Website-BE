@@ -1,24 +1,14 @@
 import Joi from "joi";
-import { objectId, settingItemSchema } from "../common";
-import { themeLayoutSchema } from "../theme";
-
-
-
-
-
-
-
-
+import { objectId, schemaItemSchema, settingItemSchema } from "../common";
 
 export const upsertThemeSettingSchema = Joi.object({
   storeId: objectId().required(),
   themeId: objectId().required(),
-  customLayoutJSON: themeLayoutSchema,
-  draftLayoutJSON: themeLayoutSchema,
+  customLayoutJSON: Joi.array().items(schemaItemSchema).optional(),
+  draftLayoutJSON: Joi.array().items(schemaItemSchema).optional(),
 
   customStyles: Joi.array().items(settingItemSchema).optional(),
   customSettings: Joi.array().items(settingItemSchema).optional(),
-
 
   baseVersion: Joi.string().trim().optional(),
 });
