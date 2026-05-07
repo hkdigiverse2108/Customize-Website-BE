@@ -20,14 +20,12 @@ const pageSchema = new Schema<IPage>(
     visibility: { type: String, enum: Object.values(PAGE_VISIBILITY), default: PAGE_VISIBILITY.PUBLIC },
     password: { type: String, default: "", trim: true },
     isDeleted: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true },
   },
-  { timestamps: true, versionKey: false }
+  { timestamps: true, versionKey: false },
 );
 
 pageSchema.index({ storeId: 1, slug: 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });
-pageSchema.index(
-  { storeId: 1, isHomePage: 1 },
-  { unique: true, partialFilterExpression: { isHomePage: true, isDeleted: false } }
-);
+pageSchema.index({ storeId: 1, isHomePage: 1 }, { unique: true, partialFilterExpression: { isHomePage: true, isDeleted: false } });
 
 export const pageModel = model<IPage>("page", pageSchema);

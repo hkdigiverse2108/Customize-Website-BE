@@ -10,7 +10,8 @@ export const createPageSchema = Joi.object({
   slug: Joi.string().trim().lowercase().pattern(slugRegex).required(),
   description: Joi.string().trim().allow("").optional(),
   type: Joi.string().trim().lowercase().valid(...Object.values(PAGE_TYPE)).optional(),
-  layoutJSON: Joi.object().unknown(true).required(),
+  // layoutJSON: Joi.object().unknown(true).required(),
+  layoutJSON: Joi.object().unknown(true).optional(),
   metaTitle: Joi.string().trim().allow("").optional(),
   metaDescription: Joi.string().trim().allow("").optional(),
   metaKeywords: Joi.array().items(Joi.string().trim().min(1)).optional(),
@@ -20,6 +21,7 @@ export const createPageSchema = Joi.object({
   isDraft: Joi.boolean().optional(),
   visibility: Joi.string().trim().lowercase().valid(...Object.values(PAGE_VISIBILITY)).optional(),
   password: Joi.string().trim().allow("").optional(),
+  isActive: Joi.boolean().optional(),
 });
 
 export const updatePageSchema = Joi.object({
@@ -37,6 +39,7 @@ export const updatePageSchema = Joi.object({
   isDraft: Joi.boolean().optional(),
   visibility: Joi.string().trim().lowercase().valid(...Object.values(PAGE_VISIBILITY)).optional(),
   password: Joi.string().trim().allow("").optional(),
+  isActive: Joi.boolean().optional(),   
 }).min(1);
 
 export const pageIdSchema = Joi.object({

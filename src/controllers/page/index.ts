@@ -1,6 +1,6 @@
 import { ACCOUNT_TYPE, getPaginationState, HTTP_STATUS, resolveSortAndFilter } from "../../common";
 import { pageModel, storeModel } from "../../database";
-import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, verifyStoreAccess, checkFieldDuplicate } from "../../helper";
+import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, verifyStoreAccess, checkFieldDuplicate, findAllAndPopulate } from "../../helper";
 import { apiResponse } from "../../type";
 import { createPageSchema, getAllPagesQuerySchema, pageIdSchema, updatePageSchema } from "../../validation";
 
@@ -11,12 +11,12 @@ export const createPage = async (req, res) => {
     if (!value) return;
 
     const loggedInUser = req.headers.user as any;
-    if (!await verifyStoreAccess(loggedInUser, value.storeId)) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Store"), {}, {}));
+    if (!(await verifyStoreAccess(loggedInUser, value.storeId))) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Store"), {}, {}));
     }
 
     if (await checkFieldDuplicate(pageModel, "slug", value.slug, undefined, { storeId: value.storeId })) {
-        return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
+      return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
     }
 
     const payload: any = { ...value };
@@ -45,12 +45,12 @@ export const updatePage = async (req, res) => {
     const existingPage: any = await getFirstMatch(pageModel, { _id: idValue.id, isDeleted: { $ne: true } }, {}, {});
     if (!existingPage) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Page"), {}, {}));
 
-    if (!await verifyStoreAccess(loggedInUser, String(existingPage.storeId))) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Page"), {}, {}));
+    if (!(await verifyStoreAccess(loggedInUser, String(existingPage.storeId)))) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Page"), {}, {}));
     }
 
-    if (bodyValue.slug && await checkFieldDuplicate(pageModel, "slug", bodyValue.slug, idValue.id, { storeId: existingPage.storeId })) {
-        return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
+    if (bodyValue.slug && (await checkFieldDuplicate(pageModel, "slug", bodyValue.slug, idValue.id, { storeId: existingPage.storeId }))) {
+      return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
     }
 
     const payload: any = { ...bodyValue };
@@ -75,8 +75,8 @@ export const deletePage = async (req, res) => {
     if (!existingPage) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Page"), {}, {}));
 
     const loggedInUser = req.headers.user as any;
-    if (!await verifyStoreAccess(loggedInUser, String(existingPage.storeId))) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Page"), {}, {}));
+    if (!(await verifyStoreAccess(loggedInUser, String(existingPage.storeId)))) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Page"), {}, {}));
     }
 
     const deletedPage = await deleteData(pageModel, { _id: value.id, isDeleted: { $ne: true } }, { isPublished: false, isHomePage: false, isDraft: true }, {});
@@ -99,12 +99,10 @@ export const getPages = async (req, res) => {
     if (loggedInUser?.role === ACCOUNT_TYPE.VENDOR) {
       criteria.storeId = await getVendorStoreIds(loggedInUser._id);
     }
+    const populate = [{ path: "storeId", select: "_id name" }];
 
-    const [pages, totalCount] = await Promise.all([
-        getData(pageModel, criteria, {}, options),
-        countData(pageModel, criteria)
-    ]);
-    
+    const [pages, totalCount] = await Promise.all([findAllAndPopulate(pageModel, criteria, {}, options, populate), countData(pageModel, criteria)]);
+
     const pagination = getPaginationState(totalCount, Number(page), Number(limit));
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Pages"), { pages, state: pagination, total_count: totalCount }, {}));
   } catch (error) {
@@ -123,8 +121,8 @@ export const getPageById = async (req, res) => {
     if (!page) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Page"), {}, {}));
 
     const loggedInUser = req.headers.user as any;
-    if (!await verifyStoreAccess(loggedInUser, String(page.storeId))) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Page"), {}, {}));
+    if (!(await verifyStoreAccess(loggedInUser, String(page.storeId)))) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Page"), {}, {}));
     }
 
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Page"), page, {}));
@@ -144,13 +142,11 @@ const validatePageLogic = (payload: any, existingPage?: any) => {
   const password = payload.password !== undefined ? payload.password : existingPage?.password;
 
   if (visibility === "password" && !password) return "password is required when visibility is password";
-  
+
   return null;
 };
 
 const getVendorStoreIds = async (userId: string) => {
-    const stores = await getData(storeModel, { userId, isDeleted: { $ne: true } }, { _id: 1 }, {});
-    return { $in: stores.map((s) => s._id) };
+  const stores = await getData(storeModel, { userId, isDeleted: { $ne: true } }, { _id: 1 }, {});
+  return { $in: stores.map((s) => s._id) };
 };
-
-

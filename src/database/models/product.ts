@@ -10,7 +10,7 @@ const productOptionSchema = new Schema(
     name: { type: String, required: true, trim: true },
     values: { type: [String], default: [] },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const productOptionValueSchema = new Schema(
@@ -18,7 +18,7 @@ const productOptionValueSchema = new Schema(
     name: { type: String, required: true, trim: true },
     value: { type: String, required: true, trim: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const productInventorySchema = new Schema(
@@ -28,7 +28,7 @@ const productInventorySchema = new Schema(
     allowBackorder: { type: Boolean, default: false },
     lowStockThreshold: { type: Number, default: 5, min: 0 },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const productVariantSchema = new Schema(
@@ -44,7 +44,7 @@ const productVariantSchema = new Schema(
     inventory: { type: productInventorySchema, default: () => ({}) },
     isActive: { type: Boolean, default: true },
   },
-  { _id: true }
+  { _id: false },
 );
 
 const productMediaSchema = new Schema(
@@ -54,7 +54,7 @@ const productMediaSchema = new Schema(
     alt: { type: String, default: "", trim: true },
     position: { type: Number, default: 0, min: 0 },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const productSeoSchema = new Schema(
@@ -62,7 +62,7 @@ const productSeoSchema = new Schema(
     title: { type: String, default: "", trim: true },
     description: { type: String, default: "", trim: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const productSchema = new Schema<IProduct>(
@@ -94,7 +94,7 @@ const productSchema = new Schema<IProduct>(
     isDeleted: { type: Boolean, default: false },
     publishedAt: { type: Date, default: null },
   },
-  { timestamps: true, versionKey: false }
+  { timestamps: true, versionKey: false },
 );
 
 productSchema.index({ storeId: 1, slug: 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });

@@ -59,6 +59,7 @@ export interface IPage extends Document {
   visibility: PAGE_VISIBILITY;
   password: string;
   isDeleted: boolean;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

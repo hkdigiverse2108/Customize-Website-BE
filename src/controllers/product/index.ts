@@ -1,6 +1,6 @@
 import { ACCOUNT_TYPE, getPaginationState, HTTP_STATUS, PRODUCT_STATUS, resolveSortAndFilter } from "../../common";
 import { productModel, storeModel } from "../../database";
-import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, checkFieldDuplicate, verifyStoreAccess, updateResourceUsage } from "../../helper";
+import { countData, deleteData, getData, getFirstMatch, reqInfo, responseMessage, updateData, validate, checkFieldDuplicate, verifyStoreAccess, updateResourceUsage, findAllAndPopulate } from "../../helper";
 import { apiResponse } from "../../type";
 import { createProductSchema, getAllProductsQuerySchema, productIdSchema, updateProductSchema } from "../../validation";
 
@@ -21,25 +21,25 @@ export const createProduct = async (req, res) => {
       categoryIds: Array.isArray(value?.categoryIds) ? value.categoryIds : [],
       collectionIds: Array.isArray(value?.collectionIds) ? value.collectionIds : [],
       isActive: value?.isActive !== false,
-      publishedAt: value?.publishedAt ? new Date(value.publishedAt) : (value.status === PRODUCT_STATUS.ACTIVE ? new Date() : null),
+      publishedAt: value?.publishedAt ? new Date(value.publishedAt) : value.status === PRODUCT_STATUS.ACTIVE ? new Date() : null,
     };
 
     if (payload.hasVariants && (!payload.variants || payload.variants.length === 0)) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "variants are required when hasVariants is true", {}, {}));
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(apiResponse(HTTP_STATUS.BAD_REQUEST, "variants are required when hasVariants is true", {}, {}));
     }
 
-    if (!await verifyStoreAccess(user, payload.storeId)) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Store"), {}, {}));
+    if (!(await verifyStoreAccess(user, payload.storeId))) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Store"), {}, {}));
     }
 
     if (await checkFieldDuplicate(productModel, "slug", payload.slug)) {
-        return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
+      return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
     }
 
     const created = await new productModel(payload).save();
 
     // Centralized Usage Tracking
-    await updateResourceUsage(String(user._id), 'products', 1);
+    await updateResourceUsage(String(user._id), "products", 1);
 
     return res.status(HTTP_STATUS.CREATED).json(apiResponse(HTTP_STATUS.CREATED, responseMessage.addDataSuccess("Product"), created, {}));
   } catch (error) {
@@ -62,15 +62,15 @@ export const updateProduct = async (req, res) => {
     if (!existing) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Product"), {}, {}));
 
     const user = req.headers.user as any;
-    if (!await verifyStoreAccess(user, String(existing.storeId))) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Product"), {}, {}));
+    if (!(await verifyStoreAccess(user, String(existing.storeId)))) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Product"), {}, {}));
     }
 
     const payload: any = { ...value };
     if (payload?.tags) payload.tags = normalizeStringArray(payload.tags);
 
-    if (payload.slug && await checkFieldDuplicate(productModel, "slug", payload.slug, idValue.id)) {
-        return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
+    if (payload.slug && (await checkFieldDuplicate(productModel, "slug", payload.slug, idValue.id))) {
+      return res.status(HTTP_STATUS.CONFLICT).json(apiResponse(HTTP_STATUS.CONFLICT, responseMessage.dataAlreadyExist("slug"), {}, {}));
     }
 
     const updated = await updateData(productModel, { _id: idValue.id, isDeleted: { $ne: true } }, payload, {});
@@ -91,14 +91,14 @@ export const deleteProduct = async (req, res) => {
     if (!existing) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Product"), {}, {}));
 
     const user = req.headers.user as any;
-    if (!await verifyStoreAccess(user, String(existing.storeId))) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Product"), {}, {}));
+    if (!(await verifyStoreAccess(user, String(existing.storeId)))) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Product"), {}, {}));
     }
 
     const deleted = await deleteData(productModel, { _id: value.id }, { isActive: false, status: PRODUCT_STATUS.ARCHIVED }, {});
 
     // Centralized Usage Tracking
-    await updateResourceUsage(String(user._id), 'products', -1);
+    await updateResourceUsage(String(user._id), "products", -1);
 
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.deleteDataSuccess("Product"), deleted, {}));
   } catch (error) {
@@ -120,11 +120,23 @@ export const getProducts = async (req, res) => {
       criteria.storeId = await getVendorStoreIds(user._id);
     }
 
-    const [products, total] = await Promise.all([
-        getData(productModel, criteria, {}, options),
-        countData(productModel, criteria)
-    ]);
-    
+    const populate = [
+      {
+        path: "storeId",
+        select: "_id name",
+      },
+      {
+        path: "categoryIds",
+        select: "_id name",
+      },
+      {
+        path: "collectionIds",
+        select: "_id name",
+      },
+    ];
+
+    const [products, total] = await Promise.all([findAllAndPopulate(productModel, criteria, {}, options, populate), countData(productModel, criteria)]);
+
     const pagination = getPaginationState(total, Number(page), Number(limit));
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Products"), { products, state: pagination, total_count: total }, {}));
   } catch (error) {
@@ -143,8 +155,8 @@ export const getProductById = async (req, res) => {
     if (!product) return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Product"), {}, {}));
 
     const user = req.headers.user as any;
-    if (!await verifyStoreAccess(user, String(product.storeId))) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Product"), {}, {}));
+    if (!(await verifyStoreAccess(user, String(product.storeId)))) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(apiResponse(HTTP_STATUS.NOT_FOUND, responseMessage.getDataNotFound("Product"), {}, {}));
     }
 
     return res.status(HTTP_STATUS.OK).json(apiResponse(HTTP_STATUS.OK, responseMessage.getDataSuccess("Product"), product, {}));
@@ -155,13 +167,11 @@ export const getProductById = async (req, res) => {
 };
 
 const normalizeStringArray = (items: any = []) => {
-    if (!Array.isArray(items)) return [];
-    return [...new Set(items.map((item) => String(item || "").trim()).filter(Boolean))];
+  if (!Array.isArray(items)) return [];
+  return [...new Set(items.map((item) => String(item || "").trim()).filter(Boolean))];
 };
 
 const getVendorStoreIds = async (userId: string) => {
-    const stores = await getData(storeModel, { userId, isDeleted: { $ne: true } }, { _id: 1 }, {});
-    return { $in: stores.map((s) => s._id) };
+  const stores = await getData(storeModel, { userId, isDeleted: { $ne: true } }, { _id: 1 }, {});
+  return { $in: stores.map((s) => s._id) };
 };
-
-
